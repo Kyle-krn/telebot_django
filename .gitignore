@@ -1,0 +1,3 @@
+venv/
+main_app/settings.py
+vape_shop/__pycache__
