@@ -1,9 +1,213 @@
 {% extends 'main_app/base.html' %}
-
+{% load static %}
 {% block content %}
+
+<link rel="stylesheet" href="magnific-popup/magnific-popup.css">
+
+<!-- jQuery 1.7.2+ or Zepto.js 1.0+ -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<!-- Magnific Popup core JS file -->
+<script src="magnific-popup/jquery.magnific-popup.js"></script>
+
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ product_form.as_p }}
-    <input type="submit" value="Submit">
+
+        <div class="row align-items-center">
+          <div class="col-8">
+            <div class="fieldWrapper">
+                {{ product_form.title.errors }}
+                <label for="{{ product_form.title.id_for_label }}">Title:</label>
+                {{ product_form.title }}
+            </div>
+            <br>
+            <div class="fieldWrapper">
+                {{ product_form.description.errors }}
+                <label for="{{ product_form.description.id_for_label }}">description:</label>
+                {{ product_form.description }}
+            </div>
+            <br>
+          </div>
+          <div class="col-4 ">
+                <img id="myImg" src="{{product.photo.url}}" alt="{{product.title}}" style="width:100%;max-width:500px">
+          </div>
+        </div>
+    
+    {{ form.non_field_errors }}
+
+
+  <div class="row">
+    <div class="col-sm">
+        <div class="fieldWrapper">
+            {{ product_form.price.errors }}
+            <label for="{{ product_form.price.id_for_label }}">price:</label>
+            {{ product_form.price }}
+        </div>
+    </div>
+    <div class="col-sm">
+      <div class="fieldWrapper">
+    {{ product_form.count.errors }}
+    <label for="{{ product_form.count.id_for_label }}">count:</label>
+    {{ product_form.count }}
+    </div>
+    </div>
+    <div class="col-sm">
+        <div class="fieldWrapper">
+            {{ product_form.subcategory.errors }}
+            <label for="{{ product_form.subcategory.id_for_label }}">subcategory:</label>
+            <!-- {{ product_form.subcategory }} -->
+        
+            <select class="form-select" name="subcategory" required id='id_subcategory' >
+                {% for c in category %}
+                <optgroup label="{{c}}">
+                    {% for sc in c.subcategory_set.all %}
+                    {% if sc == product.subcategory %}
+                    <option selected value="{{sc.pk}}">{{sc.name}}</option>
+                    {% else %}
+                    <option value="{{sc.pk}}">{{sc.name}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </optgroup>
+                {% endfor %}
+              </select>
+        </div>
+    </div>
+  </div>
+<br>
+
+<div class="fieldWrapper">
+    {{ product_form.photo.errors }}
+    <label for="{{ product_form.photo.id_for_label }}">Your photo:</label>
+    {{ product_form.photo }}
+</div>
+<br>
+    <input type="submit" class='btn btn-success' value="Изменить">
 </form>
+
+<br>
+
+<style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+
+    
+    
+    #myImg {
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    #myImg:hover {opacity: 0.7;}
+    
+    /* Модальный (фон) */
+    .modal {
+      display: none; /* Скрыто по умолчанию */
+      position: fixed; /* Оставаться на месте */
+      z-index: 1; /* Сидеть на вершине */
+      padding-top: 100px; /* Расположение коробки */
+      left: 0;
+      top: 0;
+      width: 100%; /* Полная ширина */
+      height: 100%; /* Полная высота */
+      overflow: auto; /* Включите прокрутку, если это необходимо */
+      background-color: rgb(0,0,0); /* Цвет запасной вариант  */
+      background-color: rgba(0,0,0,0.9); /*Черный с непрозрачностью */
+    }
+    
+    /*Модальное содержание (изображение) */
+    .modal-content {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 1200px;
+    }
+    
+    /* Заголовок модального изображения */
+    #caption {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 700px;
+      text-align: center;
+      color: #ccc;
+      padding: 10px 0;
+      height: 150px;
+    }
+    
+    /* Добавить анимацию */
+    .modal-content, #caption {  
+      -webkit-animation-name: zoom;
+      -webkit-animation-duration: 0.6s;
+      animation-name: zoom;
+      animation-duration: 0.6s;
+    }
+    
+    @-webkit-keyframes zoom {
+      from {-webkit-transform:scale(0)} 
+      to {-webkit-transform:scale(1)}
+    }
+    
+    @keyframes zoom {
+      from {transform:scale(0)} 
+      to {transform:scale(1)}
+    }
+    
+    /* Кнопка закрытия */
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 35px;
+      color: #f1f1f1;
+      font-size: 40px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    
+    .close:hover,
+    .close:focus {
+      color: #bbb;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    /* 100% Ширина изображения на меньших экранах */
+    @media only screen and (max-width: 700px){
+      .modal-content {
+        width: 100%;
+      }
+    }
+    </style>
+   
+    
+    <!-- Модальное окно -->
+    <div id="myModal" class="modal">
+      <span class="close">&times;</span>
+      <img class="modal-content" id="img01">
+      <div id="caption"></div>
+    </div>
+    
+    <script>
+    // Get the modal
+    var modal = document.getElementById("myModal");
+    
+    // Get the image and insert it inside the modal - use its "alt" text as a caption
+    var img = document.getElementById("myImg");
+    var modalImg = document.getElementById("img01");
+    var captionText = document.getElementById("caption");
+    img.onclick = function(){
+      modal.style.display = "block";
+      modalImg.src = this.src;
+      captionText.innerHTML = this.alt;
+    }
+    
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+    
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() { 
+      modal.style.display = "none";
+    }
+    </script>
+
 {% endblock %}
+

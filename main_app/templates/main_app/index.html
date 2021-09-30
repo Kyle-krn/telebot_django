@@ -1,9 +1,33 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    {{ product_form }}
-    <input type="submit" value="Submit">
-</form>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Название</th>
+        <th scope="col">Описание</th>
+        <th scope="col">Цена</th>
+        <th scope="col">Категория</th>
+        <th scope="col">Подкатегория</th>
+        <th scope="col">Остаток</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in product %}
+      <tr>
+        <th scope="row">{{p.pk}}</th>
+        <td>{{p.title}}</td>
+        <td>{{p.description}}</td>
+        <td>{{p.price}}</td>
+        <td>{{p.subcategory.category}}</td>
+        <td>{{p.subcategory}}</td>
+        <td>{{p.count}}</td>
+        <td><a class="btn btn-primary" href="{% url 'productdetail' pk=p.pk %}" role="button">Link</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+
 {% endblock %}
