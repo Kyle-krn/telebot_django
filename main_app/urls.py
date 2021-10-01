@@ -7,6 +7,7 @@ from vape_shop import settings
 urlpatterns = [
     path('', index, name='all_product'),
     path('product/<int:pk>', product_view, name='productdetail'),
+    path('category/<int:pk>', category_view, name='category_detail'),
     path('add_category/', create_category, name='add_category'),
     ]
 

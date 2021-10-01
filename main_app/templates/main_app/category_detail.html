@@ -1,0 +1,44 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link type="text/css" href="{% static 'css/img.css' %}" rel="stylesheet" />
+
+
+    <div class="row align-items-end">
+        
+      <div class="col">
+        <div class='text-center'>
+        <img id="myImg" src="{{category.photo.url}}" alt="{{category.name}}" style="width:100%;max-width:300px">
+    </div>
+        <!-- Модальное окно -->
+        <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+        </div>
+        <script src="{% static 'js/modal.js' %}"></script>
+      </div>
+    </div>
+
+      <br>
+
+      
+<div class='row'>
+    <div class='col'>
+    </div>
+    <div class='col'>
+        {{category_form.photo}}
+        <br>
+        <div class="input-group mb-3">
+            {{category_form.name}}
+            <button type="submit" class="btn btn-success">Success</button>
+          </div>
+    </div>
+    <div class='col'>
+    </div>
+</div>
+
+
+{% endblock %}

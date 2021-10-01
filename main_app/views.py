@@ -41,7 +41,6 @@ def product_view(request, pk):
 def create_category(request):
     if request.method == 'POST' and 'create_category' in request.POST:
         category_form = CategoryForm(request.POST, files=request.FILES)
-        print(category_form.is_valid())
         if category_form.is_valid():
             category_form.save()
             messages.info(request, 'Новая категория успешно создана!')
@@ -50,8 +49,23 @@ def create_category(request):
             messages.info(request, 'Ошибка!')
             return HttpResponseRedirect('/add_category/')
 
+    elif request.method == "POST" and 'create_sc' in request.POST:
+        sc_form = SubcategoryForm(request.POST, files=request.FILES)
+        if sc_form.is_valid():
+            f = sc_form.save(commit=False)    
+            f.category = Category.objects.get(pk=int(request.POST['category_id']))
+            f.save()
+            messages.info(request, 'Новая категория успешно создана!')
+            return HttpResponseRedirect('/add_category/')
+
     category_form = CategoryForm()
     sc_form = SubcategoryForm()
     category = Category.objects.all()
 
     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'category': category})
+
+
+def category_view(request, pk):
+    category = Category.objects.get(pk=pk)
+    category_form = CategoryForm(initial={'name': category.name})
+    return render(request, 'main_app/category_detail.html', {'category': category, 'category_form': category_form})
