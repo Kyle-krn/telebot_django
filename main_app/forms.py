@@ -2,11 +2,11 @@ from django import forms
 from .models import *
 
 
-class ProductForm(forms.ModelForm):
+class Product_reqForm(forms.ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
     price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    count = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    count = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': True}))
     photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
     class Meta:
@@ -14,11 +14,11 @@ class ProductForm(forms.ModelForm):
       #   fields = '__all__'
         fields = ['title', 'photo', 'description', 'price', 'count', 'subcategory']
 
-class Product_reqForm(forms.ModelForm):
+class ProductForm(forms.ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
     price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    count = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    count = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': True}))
     photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
     
     class Meta:
