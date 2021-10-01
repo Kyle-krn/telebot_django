@@ -1,5 +1,10 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-
+<form action="" method='POST'>
+    {{form.as_p}}
+    <div class='text-end'>
+    <button type="submit" class="btn btn-success">Добавить </button>
+</div>
+</form>
 {% endblock %}

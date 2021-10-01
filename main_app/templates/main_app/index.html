@@ -37,7 +37,7 @@ config='height=300,width=300')">Щелкните, чтобы открыть 'joe
         <td>{{p.subcategory}}</td>
         <td>{{p.count}}</td>
         <td><a class="btn btn-primary btn-warning" href="{% url 'productdetail' pk=p.pk %}" role="button">1</a>
-          <a class="btn btn-primary btn-success" href="{% url 'productdetail' pk=p.pk %}" target="_blank" role="button">2</a>
+          <a class="btn btn-primary btn-success" href="{% url 'reception' pk=p.pk %}" target="_blank" role="button">2</a>
         </td>
       </tr>
     {% endfor %}

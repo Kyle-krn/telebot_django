@@ -49,6 +49,12 @@ def create_product(request):
     return render(request, 'main_app/product.html', {'product_form': product_form, 'category': category})
 
 
+def reception_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    form = ReceptionForm()
+    return render(request, 'main_app/reception.html', {'form': form})
+
+
 def create_category(request):
     if request.method == 'POST' and 'create_category' in request.POST:
         category_form = CategoryForm(request.POST, files=request.FILES)

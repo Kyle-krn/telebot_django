@@ -32,15 +32,15 @@
           <div class="text-end">
             {% url 'add_category' as ac %}
             {% if request.path == ac %}
-            <a class="btn btn-outline-light me-2 disabled href="{% url 'add_category' %}" role="button">Новая категория/подкатегория</a>
+            <a class="btn btn-outline-light me-2 disabled href="{% url 'add_category' %}" role="button">+ Категория</a>
             {% else %}
-            <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">Новая категория/подкатегория</a>
+            <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">+ Категория</a>
             {% endif %}
             {% url 'add_product' as ap %}
             {% if request.path == ap %}
-            <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">Новая товар</a>
+            <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">+ Товар</a>
             {% else %}
-            <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">Новая товар</a>
+            <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">+ Товар</a>
             {% endif %}
           </div>
         </div>
