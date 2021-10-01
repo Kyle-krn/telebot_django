@@ -36,12 +36,15 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField()
+    slug = models.SlugField(max_length=150, unique=True, db_index=True)
     # Закупочная стоймость
-
     subcategory = models.ForeignKey(
     SubCategory, on_delete=models.CASCADE)
 
-    # slug = models.SlugField(max_length=70, unique=True)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"product||{self.subcategory.name}||{self.name}")
+        super(SubCategory, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title

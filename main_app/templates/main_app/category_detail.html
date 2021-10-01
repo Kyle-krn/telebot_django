@@ -5,40 +5,64 @@
 
 <link type="text/css" href="{% static 'css/img.css' %}" rel="stylesheet" />
 
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <form action="" method="get">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
+    <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
+    </form>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</ul>
+{% endif %}
 
-    <div class="row align-items-end">
-        
-      <div class="col">
+<div class="row align-items-end">
+
+    <div class="col">
         <div class='text-center'>
-        <img id="myImg" src="{{category.photo.url}}" alt="{{category.name}}" style="width:100%;max-width:300px">
-    </div>
-        <!-- Модальное окно -->
-        <div id="myModal" class="modal">
-        <span class="close">&times;</span>
-        <img class="modal-content" id="img01">
-        <div id="caption"></div>
+            <img id="myImg" src="{{category.photo.url}}" alt="{{category.name}}" style="width:100%;max-width:300px">
         </div>
-        <script src="{% static 'js/modal.js' %}"></script>
-      </div>
+        <!-- Модальное окно -->
+
     </div>
+</div>
 
-      <br>
+<br>
 
-      
+
 <div class='row'>
     <div class='col'>
     </div>
     <div class='col'>
-        {{category_form.photo}}
-        <br>
-        <div class="input-group mb-3">
-            {{category_form.name}}
-            <button type="submit" class="btn btn-success">Success</button>
-          </div>
-    </div>
-    <div class='col'>
+
+
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{category_form.photo}}
+            <br>
+            <div class="input-group mb-3">
+                {{category_form.name}}
+                <button type="submit" class="btn btn-success">Success</button>
+        </form>
     </div>
 </div>
+<div class='col'>
+</div>
+</div>
+<br><br><br>
 
+<div class='text-center'>
+<form action="" method="GET">
+    <button name='delete' type="submit" class="btn btn-danger btn-lg">Удалить категорию</button>
+</form>
+</div>
+<div id="myModal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="img01">
+    <div id="caption"></div>
+</div>
+<script src="{% static 'js/modal.js' %}"></script>
 
 {% endblock %}

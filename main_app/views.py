@@ -14,11 +14,11 @@ def index(request):
 
 
 def product_view(request, pk):
-    product = Product.objects.get(pk=pk)
+    product = get_object_or_404(Product, pk=pk)
     category = Category.objects.all()
     if request.method == "POST" and 'update' in request.POST:
-        instance = get_object_or_404(Product, pk=pk)
-        product_form = ProductForm(request.POST, files=request.FILES, instance=instance)
+        # instance = get_object_or_404(Product, pk=pk)
+        product_form = ProductForm(request.POST, files=request.FILES, instance=product)
         if product_form.is_valid():
             product_form.save()
             return HttpResponseRedirect('/')
@@ -36,6 +36,17 @@ def product_view(request, pk):
                                         'count': product.count,
                                         'subcategory': product.subcategory_id})
     return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category})
+
+def create_product(request):
+    if request.method == "POST":
+        product_form = Product_reqForm(request.POST, files=request.FILES)
+        if product_form.is_valid():
+            product_form.save()
+            return HttpResponseRedirect('/')
+            
+    product_form = Product_reqForm()
+    category = Category.objects.all()
+    return render(request, 'main_app/product.html', {'product_form': product_form, 'category': category})
 
 
 def create_category(request):
@@ -66,6 +77,41 @@ def create_category(request):
 
 
 def category_view(request, pk):
-    category = Category.objects.get(pk=pk)
-    category_form = CategoryForm(initial={'name': category.name})
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == "POST":
+        category_form = Category_reqForm(request.POST, files=request.FILES, instance=category)
+        if category_form.is_valid():
+            category_form.save()
+        return HttpResponseRedirect('/add_category')
+    
+    if request.method == 'GET' and 'delete' in request.GET:
+        messages.info(request, 'Вы уверены?')
+
+    elif request.method == 'GET' and 'confirm_delete' in request.GET:
+        messages.info(request, 'Категория успешно удалена')
+        category.delete()
+        return HttpResponseRedirect('/add_category/')
+
+
+    category_form = Category_reqForm(initial={'name': category.name})
     return render(request, 'main_app/category_detail.html', {'category': category, 'category_form': category_form})
+
+
+def subcategory_view(request, pk):
+    subcategory = get_object_or_404(SubCategory, id=pk)
+    if request.method == "POST":
+        category_form = Subcategory_reqForm(request.POST, files=request.FILES, instance=subcategory)
+        if category_form.is_valid():
+            category_form.save()
+        return HttpResponseRedirect('/add_category')
+    
+    if request.method == 'GET' and 'delete' in request.GET:
+        messages.info(request, 'Вы уверены?')
+
+    elif request.method == 'GET' and 'confirm_delete' in request.GET:
+        messages.info(request, 'Категория успешно удалена')
+        subcategory.delete()
+        return HttpResponseRedirect('/add_category/')
+
+    category_form = Subcategory_reqForm(initial={'name': subcategory.name})
+    return render(request, 'main_app/category_detail.html', {'category': subcategory, 'category_form': category_form})

@@ -68,8 +68,8 @@
                             <td>{{sc.name}}</td>
                             <td>
                                 <div class="text-end">
-                                    <button class="btn btn-primary btn-sm" type="Submit" id="button-addon2"
-                                        name="create_category">Подробнее</button>
+                                    <a class="btn btn-primary btn-sm" href="{% url 'subcategory_detail' pk=sc.pk %}"
+                                role="button">Изменить</a>
                                 </div>
                             </td>
                         </tr>
@@ -124,6 +124,7 @@
 
 
 
+    {{request.urls}}
 
 
 

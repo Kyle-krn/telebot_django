@@ -106,7 +106,11 @@
 <br>
 <div class='text-end'>
     <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
+    {% url 'add_product' as ap %}
+    {% if request.path == ap %}
+    {% else %}
     <input type="submit" class='btn btn-danger btn-lg' name='delete' value="Удалить">
+    {% endif %}
 </div>
 </form>
 

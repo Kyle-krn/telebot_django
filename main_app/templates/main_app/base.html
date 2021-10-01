@@ -36,7 +36,12 @@
             {% else %}
             <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">Новая категория/подкатегория</a>
             {% endif %}
-            <button type="button" class="btn btn-warning">Новый товар</button>
+            {% url 'add_product' as ap %}
+            {% if request.path == ap %}
+            <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">Новая товар</a>
+            {% else %}
+            <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">Новая товар</a>
+            {% endif %}
           </div>
         </div>
       </div>
