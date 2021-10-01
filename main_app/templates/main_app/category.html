@@ -1,0 +1,129 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block content %}
+
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %}
+</ul>
+{% endif %}
+
+
+<div class="text-center">
+    <h1>Категории</h1>
+</div>
+<br>
+<form action="{% url 'add_category' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ category_form.name }}
+    <br>
+
+    <div class="row">
+        <div class="col-8">
+
+        </div>
+        <div class="col-3">
+            {{ category_form.photo }}
+        </div>
+        <div class="col">
+            <div class="text-end">
+                <button class="btn btn-success" type="Submit" id="button-addon2" name="create_category">Создать</button>
+            </div>
+        </div>
+    </div>
+</form>
+<br>
+
+
+<div class="accordion" id="accordionExample">
+    {% for c in category %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{c.pk}}"
+                aria-expanded="true" aria-controls="collapse-{{c.pk}}">
+                {{c}}
+            </button>
+        </h2>
+        <div id="collapse-{{c.pk}}" class="accordion-collapse collapse" aria-labelledby="headingOne"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Имя подкатегории</th>
+                            <th scope="col"></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sc in c.subcategory_set.all %}
+                        <tr>
+                            <th scope="row">{{sc.pk}}</th>
+                            <td>{{sc.name}}</td>
+                            <td>
+                                <div class="text-end">
+                                    <button class="btn btn-primary btn-sm" type="Submit" id="button-addon2"
+                                        name="create_category">Подробнее</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-9">
+                        </div>
+                        <div class="col-3">
+                            <div class="mb-3">
+                                <!-- Поле ввода файла -->
+                                <div class='text-end'>
+                                    <!-- <input class="form-control-sm" type="file" id="formFile"> -->
+                                    <form action="" method='post' enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{sc_form.photo}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-7">
+                            1 of 2
+                        </div>
+                        <div class="col-5">
+                            <div class="input-group mb-3">
+                                {{sc_form.name}}
+                                <button class="btn btn-outline-success" type="submit"
+                                   name="create_sc" id="button-addon2">Создать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    {% endblock %}

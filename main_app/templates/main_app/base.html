@@ -21,20 +21,22 @@
           </a>
   
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            {% url 'all_product' as ap %}
+            {% if request.path == ap %}
+            <li><a href="{% url 'all_product' %}" class="nav-link px-2 disabled">Список товаров</a></li>
+            {% else %}
             <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
-            <!-- <li><a href="#" class="nav-link px-2 text-white">Features</a></li>
-            <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li>
-            <li><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
-            <li><a href="#" class="nav-link px-2 text-white">About</a></li> -->
+            {% endif %}
           </ul>
-  
-          <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
-            <input type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
-          </form>
-  
+          
           <div class="text-end">
-            <button type="button" class="btn btn-outline-light me-2">Login</button>
-            <button type="button" class="btn btn-warning">Sign-up</button>
+            {% url 'add_category' as ac %}
+            {% if request.path == ac %}
+            <a class="btn btn-outline-light me-2 disabled href="{% url 'add_category' %}" role="button">Новая категория/подкатегория</a>
+            {% else %}
+            <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">Новая категория/подкатегория</a>
+            {% endif %}
+            <button type="button" class="btn btn-warning">Новый товар</button>
           </div>
         </div>
       </div>

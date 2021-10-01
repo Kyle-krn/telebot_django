@@ -1,3 +1,5 @@
 django
 pyTelegramBotAPI
 pillow
+awessome-slugify
+wheel

@@ -1,26 +1,6 @@
 from django import forms
 from .models import *
 
-MEDIA_CHOICES = (
- ('Audio', (
-   (1, 'Vinyl'),
-   (2, 'CD'),
-  )
- ),
- ('Video', (
-   ('3', 'VHS Tape'),
-   ('4', 'DVD'),
-  )
- ),
-)
-
-GEEKS_CHOICES =(
-    ("1", "One"),
-    ("2", "Two"),
-    ("3", "Three"),
-    ("4", "Four"),
-    ("5", "Five"),
-)
 
 class ProductForm(forms.ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -35,3 +15,18 @@ class ProductForm(forms.ModelForm):
         fields = '__all__'
         # fields = ['title', 'photo', 'description', 'price', 'count', 'subcategory']
 
+class CategoryForm(forms.ModelForm):
+      name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
+      photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+      class Meta:
+            model = Category
+            fields = ['name', 'photo']
+
+class SubcategoryForm(forms.ModelForm):
+      name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
+      photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+      class Meta:
+            model = SubCategory
+            fields = ['name', 'photo']

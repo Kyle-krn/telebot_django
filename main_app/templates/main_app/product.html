@@ -3,12 +3,28 @@
 {% block content %}
 
 <link rel="stylesheet" href="magnific-popup/magnific-popup.css">
+<link type="text/css" href="{% static 'css/img.css' %}" rel="stylesheet" />
 
 <!-- jQuery 1.7.2+ or Zepto.js 1.0+ -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
+
 <!-- Magnific Popup core JS file -->
 <script src="magnific-popup/jquery.magnific-popup.js"></script>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <form action="" method="get">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
+    <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
+    </form>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</ul>
+{% endif %}
+
 
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -30,6 +46,13 @@
           </div>
           <div class="col-4 ">
                 <img id="myImg" src="{{product.photo.url}}" alt="{{product.title}}" style="width:100%;max-width:500px">
+                    <!-- Модальное окно -->
+                <div id="myModal" class="modal">
+                <span class="close">&times;</span>
+                <img class="modal-content" id="img01">
+                <div id="caption"></div>
+                </div>
+      <script src="{% static 'js/modal.js' %}"></script>
           </div>
         </div>
     
@@ -73,7 +96,7 @@
         </div>
     </div>
   </div>
-<br>
+<br>  
 
 <div class="fieldWrapper">
     {{ product_form.photo.errors }}
@@ -81,133 +104,14 @@
     {{ product_form.photo }}
 </div>
 <br>
-    <input type="submit" class='btn btn-success' value="Изменить">
+<div class='text-end'>
+    <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
+    <input type="submit" class='btn btn-danger btn-lg' name='delete' value="Удалить">
+</div>
 </form>
 
 <br>
 
-<style>
-    body {font-family: Arial, Helvetica, sans-serif;}
-
-    
-    
-    #myImg {
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    
-    #myImg:hover {opacity: 0.7;}
-    
-    /* Модальный (фон) */
-    .modal {
-      display: none; /* Скрыто по умолчанию */
-      position: fixed; /* Оставаться на месте */
-      z-index: 1; /* Сидеть на вершине */
-      padding-top: 100px; /* Расположение коробки */
-      left: 0;
-      top: 0;
-      width: 100%; /* Полная ширина */
-      height: 100%; /* Полная высота */
-      overflow: auto; /* Включите прокрутку, если это необходимо */
-      background-color: rgb(0,0,0); /* Цвет запасной вариант  */
-      background-color: rgba(0,0,0,0.9); /*Черный с непрозрачностью */
-    }
-    
-    /*Модальное содержание (изображение) */
-    .modal-content {
-      margin: auto;
-      display: block;
-      width: 80%;
-      max-width: 1200px;
-    }
-    
-    /* Заголовок модального изображения */
-    #caption {
-      margin: auto;
-      display: block;
-      width: 80%;
-      max-width: 700px;
-      text-align: center;
-      color: #ccc;
-      padding: 10px 0;
-      height: 150px;
-    }
-    
-    /* Добавить анимацию */
-    .modal-content, #caption {  
-      -webkit-animation-name: zoom;
-      -webkit-animation-duration: 0.6s;
-      animation-name: zoom;
-      animation-duration: 0.6s;
-    }
-    
-    @-webkit-keyframes zoom {
-      from {-webkit-transform:scale(0)} 
-      to {-webkit-transform:scale(1)}
-    }
-    
-    @keyframes zoom {
-      from {transform:scale(0)} 
-      to {transform:scale(1)}
-    }
-    
-    /* Кнопка закрытия */
-    .close {
-      position: absolute;
-      top: 15px;
-      right: 35px;
-      color: #f1f1f1;
-      font-size: 40px;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-    
-    .close:hover,
-    .close:focus {
-      color: #bbb;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    
-    /* 100% Ширина изображения на меньших экранах */
-    @media only screen and (max-width: 700px){
-      .modal-content {
-        width: 100%;
-      }
-    }
-    </style>
-   
-    
-    <!-- Модальное окно -->
-    <div id="myModal" class="modal">
-      <span class="close">&times;</span>
-      <img class="modal-content" id="img01">
-      <div id="caption"></div>
-    </div>
-    
-    <script>
-    // Get the modal
-    var modal = document.getElementById("myModal");
-    
-    // Get the image and insert it inside the modal - use its "alt" text as a caption
-    var img = document.getElementById("myImg");
-    var modalImg = document.getElementById("img01");
-    var captionText = document.getElementById("caption");
-    img.onclick = function(){
-      modal.style.display = "block";
-      modalImg.src = this.src;
-      captionText.innerHTML = this.alt;
-    }
-    
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-    
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() { 
-      modal.style.display = "none";
-    }
-    </script>
 
 {% endblock %}
 

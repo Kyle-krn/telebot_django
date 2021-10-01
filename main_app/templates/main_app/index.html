@@ -11,6 +11,7 @@
         <th scope="col">Категория</th>
         <th scope="col">Подкатегория</th>
         <th scope="col">Остаток</th>
+        <th scope="col">#</th>
       </tr>
     </thead>
     <tbody>
@@ -23,7 +24,7 @@
         <td>{{p.subcategory.category}}</td>
         <td>{{p.subcategory}}</td>
         <td>{{p.count}}</td>
-        <td><a class="btn btn-primary" href="{% url 'productdetail' pk=p.pk %}" role="button">Link</a></td>
+        <td><a class="btn btn-primary" href="{% url 'productdetail' pk=p.pk %}" role="button">Подробнее</a></td>
       </tr>
     {% endfor %}
     </tbody>
