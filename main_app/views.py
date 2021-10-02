@@ -1,11 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from .forms import *
 from .models import *
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.contrib import messages
-import json
-
-
+from itertools import chain
+from django.db.models import Q
 
 def index(request):
     product = Product.objects.all()
@@ -29,12 +28,30 @@ def product_view(request, pk):
         # Сделать удаление товара здесь
         return HttpResponseRedirect('/')
 
+    if request.method == 'POST' and 'reception' in request.POST:
+        form = ReceptionForm(request.POST)
+        if form.is_valid():
+            product.count += form.cleaned_data['count']
+            product.save()
+            f = form.save(commit=False)
+            f.product = product
+            f.save()
+            return HttpResponseRedirect('/')
+
+
+    reception_form = ReceptionForm()
+    trade_queryset = ReceptionSoldProduct.objects.filter(product__pk=pk).order_by('-date')
+    if 'only_reception' in request.GET:
+        trade_queryset = ReceptionSoldProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=True)).order_by('-date')
+    elif 'only_sold' in request.GET:
+        trade_queryset = ReceptionSoldProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=False)).order_by('-date')
+
     product_form = Product_reqForm(initial={'title': product.title,
                                         'description': product.description,
                                         'price': product.price,
                                         'count': product.count,
                                         'subcategory': product.subcategory_id})
-    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category})
+    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': trade_queryset})
 
 
 def create_product(request):
@@ -46,13 +63,15 @@ def create_product(request):
 
     product_form = ProductForm(initial={'count': 0})
     category = Category.objects.all()
-    return render(request, 'main_app/product.html', {'product_form': product_form, 'category': category})
+    return render(request, 'main_app/add_product.html', {'product_form': product_form, 'category': category})
 
 
 def reception_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    form = ReceptionForm()
-    return render(request, 'main_app/reception.html', {'form': form})
+
+    
+    reception_form = ReceptionForm()
+    return render(request, 'main_app/reception.html', {'reception_form': reception_form})
 
 
 def create_category(request):

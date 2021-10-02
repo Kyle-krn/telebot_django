@@ -16,8 +16,8 @@
 <ul class="messages">
     {% for message in messages %}
     <form action="" method="get">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
-    <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
+            <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
     </form>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -25,97 +25,159 @@
 </ul>
 {% endif %}
 
+<div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="true" aria-controls="collapseOne">
+                Изменить товар
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-<form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="fieldWrapper">
+                                {{ product_form.title.errors }}
+                                <label for="{{ product_form.title.id_for_label }}">Title:</label>
+                                {{ product_form.title }}
+                            </div>
+                            <br>
+                            <div class="fieldWrapper">
+                                {{ product_form.description.errors }}
+                                <label for="{{ product_form.description.id_for_label }}">description:</label>
+                                {{ product_form.description }}
+                            </div>
+                            <br>
+                        </div>
+                        <div class="col-4 ">
+                            <img id="myImg" src="{{product.photo.url}}" alt="{{product.title}}"
+                                style="width:100%;max-width:500px">
+                            <!-- Модальное окно -->
+                            <div id="myModal" class="modal">
+                                <span class="close">&times;</span>
+                                <img class="modal-content" id="img01">
+                                <div id="caption"></div>
+                            </div>
+                            <script src="{% static 'js/modal.js' %}"></script>
+                        </div>
+                    </div>
 
-        <div class="row align-items-center">
-          <div class="col-8">
-            <div class="fieldWrapper">
-                {{ product_form.title.errors }}
-                <label for="{{ product_form.title.id_for_label }}">Title:</label>
-                {{ product_form.title }}
+                    {{ form.non_field_errors }}
+
+
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="fieldWrapper">
+                                {{ product_form.price.errors }}
+                                <label for="{{ product_form.price.id_for_label }}">price:</label>
+                                {{ product_form.price }}
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="fieldWrapper">
+                                {{ product_form.count.errors }}
+                                <label for="{{ product_form.count.id_for_label }}">count:</label>
+                                {{ product_form.count }}
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="fieldWrapper">
+                                {{ product_form.subcategory.errors }}
+                                <label for="{{ product_form.subcategory.id_for_label }}">subcategory:</label>
+                                <!-- {{ product_form.subcategory }} -->
+
+                                <select class="form-select" name="subcategory" required id='id_subcategory'>
+                                    {% for c in category %}
+                                    <optgroup label="{{c}}">
+                                        {% for sc in c.subcategory_set.all %}
+                                        {% if sc == product.subcategory %}
+                                        <option selected value="{{sc.pk}}">{{sc.name}}</option>
+                                        {% else %}
+                                        <option value="{{sc.pk}}">{{sc.name}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="fieldWrapper">
+                        {{ product_form.photo.errors }}
+                        <label for="{{ product_form.photo.id_for_label }}">Your photo:</label>
+                        {{ product_form.photo }}
+                    </div>
+                    <br>
+                    <div class='text-end'>
+                        <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
+                        {% url 'add_product' as ap %}
+                        {% if request.path == ap %}
+                        {% else %}
+                        <input type="submit" class='btn btn-danger btn-lg' name='delete' value="Удалить">
+                        {% endif %}
+                    </div>
+                </form>
+
+                <br>
             </div>
-            <br>
-            <div class="fieldWrapper">
-                {{ product_form.description.errors }}
-                <label for="{{ product_form.description.id_for_label }}">description:</label>
-                {{ product_form.description }}
-            </div>
-            <br>
-          </div>
-          <div class="col-4 ">
-                <img id="myImg" src="{{product.photo.url}}" alt="{{product.title}}" style="width:100%;max-width:500px">
-                    <!-- Модальное окно -->
-                <div id="myModal" class="modal">
-                <span class="close">&times;</span>
-                <img class="modal-content" id="img01">
-                <div id="caption"></div>
-                </div>
-      <script src="{% static 'js/modal.js' %}"></script>
-          </div>
-        </div>
-    
-    {{ form.non_field_errors }}
-
-
-  <div class="row">
-    <div class="col-sm">
-        <div class="fieldWrapper">
-            {{ product_form.price.errors }}
-            <label for="{{ product_form.price.id_for_label }}">price:</label>
-            {{ product_form.price }}
         </div>
     </div>
-    <div class="col-sm">
-      <div class="fieldWrapper">
-    {{ product_form.count.errors }}
-    <label for="{{ product_form.count.id_for_label }}">count:</label>
-    {{ product_form.count }}
-    </div>
-    </div>
-    <div class="col-sm">
-        <div class="fieldWrapper">
-            {{ product_form.subcategory.errors }}
-            <label for="{{ product_form.subcategory.id_for_label }}">subcategory:</label>
-            <!-- {{ product_form.subcategory }} -->
-        
-            <select class="form-select" name="subcategory" required id='id_subcategory' >
-                {% for c in category %}
-                <optgroup label="{{c}}">
-                    {% for sc in c.subcategory_set.all %}
-                    {% if sc == product.subcategory %}
-                    <option selected value="{{sc.pk}}">{{sc.name}}</option>
-                    {% else %}
-                    <option value="{{sc.pk}}">{{sc.name}}</option>
-                    {% endif %}
-                    {% endfor %}
-                </optgroup>
-                {% endfor %}
-              </select>
-        </div>
-    </div>
-  </div>
-<br>  
-
-<div class="fieldWrapper">
-    {{ product_form.photo.errors }}
-    <label for="{{ product_form.photo.id_for_label }}">Your photo:</label>
-    {{ product_form.photo }}
 </div>
 <br>
-<div class='text-end'>
-    <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
-    {% url 'add_product' as ap %}
-    {% if request.path == ap %}
-    {% else %}
-    <input type="submit" class='btn btn-danger btn-lg' name='delete' value="Удалить">
-    {% endif %}
-</div>
+
+<form action="" method='POST'>
+    {% csrf_token %}
+    {{reception_form.as_p}}
+    <div class='text-end'>
+        <button type="submit" class="btn btn-success" name="reception">Добавить </button>
+    </div>
 </form>
 
-<br>
+<br><br>
+<form action="" method='get'>
+    <div class='text-end'>
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Показать:</button>
+    <ul class="dropdown-menu">
+        <li><div class='text-center'><button type="submit" name="" class="btn btn-light">Все</button></div></li>
+        <li><div class='text-center'><button type="submit" name="only_reception"  class="btn btn-light">Только приемка</button></div></li>
+        <li><div class='text-center'><button type="submit" name="only_sold"  class="btn btn-light">Только проданные</button></div></li>
+      </ul>
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Цена за 1 шт.</th>
+            <th scope="col">Цена за все</th>
+            <th scope="col">Кол-во</th>
+            <th scope="col">Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tq in trade_queryset %}
+        
+            {% if not tq.user %}
+            <tr>
+            {% else %}
+            <tr class='table-danger'>
+            {% endif %}
+            <th scope="row"></th>
+            <td>{{tq.price}} р.</td>
+            <td>{% widthratio tq.price 1 tq.count %} р.</td>
+            <td>{{tq.count}}</td>
+            <td>{{tq.date}}</td>
+        </tr>
+        {% endfor %}
 
 
-{% endblock %}
 
+        {% endblock %}
