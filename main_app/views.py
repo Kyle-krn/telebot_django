@@ -9,7 +9,29 @@ from django.db.models import Q
 def index(request):
     product = Product.objects.all()
     category = Category.objects.all()
-    return render(request, 'main_app/index.html', {'product': product})
+    if 'search' in request.GET:
+        params = {k:v for k,v in request.GET.items() if len(v) != 0}
+        print(params)
+        if 'title' in params:
+            product = product.filter(title__icontains=params['title'])
+        if 'category' in params:
+            product = product.filter(subcategory__category__pk=int(params['category']))
+        if 'subcategory' in params:
+            product = product.filter(subcategory__pk=int(params['subcategory']))
+        if 'from_price' in params:
+            product = product.filter(price__gte=int(params['from_price']))
+        if 'to_price' in params:
+            product = product.filter(price__lte=int(params['to_price']))
+        if 'from_count' in params:
+            product = product.filter(count__gte=int(params['from_count']))
+        if 'to_count' in params:
+            product = product.filter(count__lte=int(params['to_count']))
+
+        if 'order_by' in params:
+            product = product.order_by(params['order_by'])
+        
+        
+    return render(request, 'main_app/index.html', {'product': product, 'category': category})
 
 
 def product_view(request, pk):

@@ -7,7 +7,7 @@ class Product_reqForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
     price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
     count = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number', 'readonly': True}))
-    photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'type': 'number'}))
+    photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Product
