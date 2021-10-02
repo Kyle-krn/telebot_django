@@ -11,7 +11,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = f"cat||{self.name}"  
+            self.slug = f"c||{self.name}"  
         super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -29,7 +29,8 @@ class SubCategory(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"subcat||{self.category.name}||{self.name}")
+            self.slug = f"sc||{self.category}||{self.name}"  
+            # self.slug = slugify(f"subcat||{self.category.name}||{self.name}")
         super(SubCategory, self).save(*args, **kwargs)
 
 
@@ -46,7 +47,8 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"product||{self.subcategory.name}||{self.title}")
+            self.slug = f'p||{self.title}'
+            # self.slug = slugify(f"product||{self.subcategory.name}||{self.title}")
         super(Product, self).save(*args, **kwargs)
 
     def __str__(self):
