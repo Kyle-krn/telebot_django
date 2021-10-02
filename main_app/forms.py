@@ -64,6 +64,7 @@ class Subcategory_reqForm(forms.ModelForm):
 class ReceptionForm(forms.ModelForm):
       price = forms.IntegerField(label='Закупочная цена', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
       count = forms.IntegerField(label='Кол-во товара', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
+      note = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для заметки'}))
 
       class Meta:
             model = ReceptionProduct

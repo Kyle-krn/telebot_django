@@ -11,7 +11,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"cat||{self.name}")  # Заюзать обычный слагифай from slugify import slugify
+            self.slug = f"cat||{self.name}"  
         super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -59,6 +59,10 @@ class ReceptionProduct(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
+    liquidated = models.BooleanField(default=False)
+
+    def get_my_model_name(self):
+        return self._meta.model_name
 
     def __str__(self):
         return f"{self.product} -- {self.count}"
@@ -70,6 +74,9 @@ class SoldProduct(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
+
+    def get_my_model_name(self):
+        return self._meta.model_name
 
     def __str__(self):
         return f"{self.product} -- {self.count}"

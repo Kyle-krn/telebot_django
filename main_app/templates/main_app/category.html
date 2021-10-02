@@ -22,10 +22,8 @@
     <br>
 
     <div class="row">
-        <div class="col-8">
 
-        </div>
-        <div class="col-3">
+        <div class="col-8">
             {{ category_form.photo }}
         </div>
         <div class="col">
@@ -69,7 +67,7 @@
                             <td>
                                 <div class="text-end">
                                     <a class="btn btn-primary btn-sm" href="{% url 'subcategory_detail' pk=sc.pk %}"
-                                role="button">Изменить</a>
+                                        role="button">Изменить</a>
                                 </div>
                             </td>
                         </tr>
@@ -79,43 +77,49 @@
 
                 <div class="container">
                     <div class="row">
-                        <div class="col-9">
-                        </div>
-                        <div class="col-3">
+                        <div class="col">
                             <div class="mb-3">
                                 <!-- Поле ввода файла -->
                                 <div class='text-end'>
                                     <!-- <input class="form-control-sm" type="file" id="formFile"> -->
                                     <form action="" method='post' enctype="multipart/form-data">
                                         {% csrf_token %}
-                                        {{sc_form.photo}}
+                                        {{sc_form.name}}
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-7">
-                            <a class="btn btn-warning" href="{% url 'category_detail' pk=c.pk %}"
-                                role="button">Изменить</a>
-                        </div>
-                        <div class="col-5">
-                            <div class="input-group mb-3">
-                                <input type="hidden" name="category_id" value="{{c.pk}}">
-                                {{sc_form.name}}
-                                <button class="btn btn-outline-success" type="submit" name="create_sc"
-                                    id="button-addon2">Создать</button>
-                                </form>
-                            </div>
+                        <div class="col">
+                            <!-- <div class="input-group mb-3"> -->
+                            <input type="hidden" name="category_id" value="{{c.pk}}">
+                            {{sc_form.photo}}
+
+
                         </div>
                     </div>
-
-
                 </div>
+                <br>
+                <div class='row'>
+                    <div class="col">
+                        <a class="btn btn-warning btn-sm" href="{% url 'category_detail' pk=c.pk %}"
+                            role="button">Изменить</a>
+                    </div>
+
+                    <div class='col'>
+                        <div class='text-end'>
+                            <button class="btn btn-outline-success" type="submit" name="create_sc">Создать</button>
+                        </div>
+                    </div>
+                </div>
+                </form>
+
             </div>
         </div>
-        {% endfor %}
     </div>
+    {% endfor %}
+</div>
 
 
 
@@ -124,9 +128,9 @@
 
 
 
-    {{request.urls}}
+{{request.urls}}
 
 
 
 
-    {% endblock %}
+{% endblock %}

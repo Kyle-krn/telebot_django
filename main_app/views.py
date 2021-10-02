@@ -51,33 +51,55 @@ def product_view(request, pk):
         product.delete()
         return HttpResponseRedirect('/')
 
-    if request.method == 'POST' and 'reception' in request.POST:
-        form = ReceptionForm(request.POST)
-        print(form.is_valid())
-        if form.is_valid():
-            product.count += form.cleaned_data['count']
-            product.save()
-            f = form.save(commit=False)
-            f.product = product
-            f.save()
-            return HttpResponseRedirect('/')
+    if request.method == 'POST':
+        if 'reception' in request.POST:
+            form = ReceptionForm(request.POST)
+            print(form.is_valid())
+            if form.is_valid():
+                product.count += form.cleaned_data['count']
+                product.save()
+                f = form.save(commit=False)
+                f.product = product
+                f.save()
+                return HttpResponseRedirect('/')
 
+        elif 'liquidated' in request.POST:
+            count = int(request.POST['liquidated_count'])
+            note = request.POST['liquidated_note']
+            ReceptionProduct.objects.create(price=0, count=count, note=note, product=product, liquidated=True)
+            product.count -= count
+            product.save()
+            return HttpResponseRedirect('/')
 
     reception_form = ReceptionForm()
     reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
     sold_queryset = SoldProduct.objects.filter(product__pk=pk)
-    print(sold_queryset)
-    # if 'only_reception' in request.GET:
-    #     trade_queryset = ReceptionProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=True)).order_by('-date')
-    # elif 'only_sold' in request.GET:
-    #     trade_queryset = ReceptionProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=False)).order_by('-date')
+
+    # print(request.GET['birthday'])12
+
+    params = {k:v for k,v in request.GET.items() if len(v) != 0}
+
+    if 'only' in params:
+        print('here')
+        if params['only'] == 'reception':
+            result_list = reception_queryset.filter(liquidated=False)
+        elif params['only'] == 'sold':
+            result_list = sold_queryset
+        elif params['only'] == 'liquidated':
+            result_list = reception_queryset.filter(liquidated=True)
+    else:
+        result_list = sorted(
+                chain(reception_queryset, sold_queryset),
+                key=lambda instance: instance.date, reverse=True)
+
 
     product_form = Product_reqForm(initial={'title': product.title,
                                         'description': product.description,
                                         'price': product.price,
                                         'count': product.count,
                                         'subcategory': product.subcategory_id})
-    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': reception_queryset})
+                                        
+    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': result_list})
 
 
 def create_product(request):

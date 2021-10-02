@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 
-<link rel="stylesheet" href="magnific-popup/magnific-popup.css">
+<!-- <link rel="stylesheet" href="magnific-popup/magnific-popup.css"> -->
 <link type="text/css" href="{% static 'css/img.css' %}" rel="stylesheet" />
 
 <!-- jQuery 1.7.2+ or Zepto.js 1.0+ -->
@@ -133,6 +133,8 @@
 </div>
 <br>
 
+
+
 <form action="" method='POST'>
     {% csrf_token %}
     {{reception_form.as_p}}
@@ -140,18 +142,47 @@
         <button type="submit" class="btn btn-success" name="reception">Добавить </button>
     </div>
 </form>
-
-<br><br>
-<form action="" method='get'>
-    <div class='text-end'>
-    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Показать:</button>
-    <ul class="dropdown-menu">
-        <li><div class='text-center'><button type="submit" name="" class="btn btn-light">Все</button></div></li>
-        <li><div class='text-center'><button type="submit" name="only_reception"  class="btn btn-light">Только приемка</button></div></li>
-        <li><div class='text-center'><button type="submit" name="only_sold"  class="btn btn-light">Только проданные</button></div></li>
-      </ul>
+<br>
+<div class=text-end>
+    <div class="btn-group" role="group">
+        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            Списать товар
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+            <form action="" method='post'>
+            {% csrf_token %}
+            <li><input class="form-control" name='liquidated_count' type="number" placeholder="Введите кол-во"
+                    aria-label="default input example">
+            </li>
+            <br>
+            <li><textarea class="form-control" name='liquidated_note' id="exampleFormControlTextarea1"
+                    placeholder="Поле для заметок" rows="3"></textarea></li>
+            <br>
+            <div class='text-center'>
+                <li><button type="submit" class="btn btn-warning" name='liquidated'>Списать</button></li>
+                </form>
+            </div>
+        </ul>
     </div>
+</div>
+<br><br>
+
+<form action="" method='get'>
+<div class="input-group mb-3">
+    <select name='only' class="form-select" aria-label="Default select example">
+        <option value='' selected>Показать:</option>
+        <option value="reception">Только приемка</option>
+        <option value="sold">Только проданные</option>
+        <option value="liquidated">Только списанные</option>
+      </select>
+      <button type="submit" class="btn btn-primary">Primary</button>
+  </div>
 </form>
+
+
+
+
 <table class="table">
     <thead>
         <tr>
@@ -160,21 +191,47 @@
             <th scope="col">Цена за все</th>
             <th scope="col">Кол-во</th>
             <th scope="col">Дата</th>
+            <th scope="col">Заметка</th>
         </tr>
     </thead>
     <tbody>
         {% for tq in trade_queryset %}
-        
-            <tr>
 
-            <th scope="row"></th>
+        {% if tq.get_my_model_name == 'soldproduct' %}
+        <tr class="table-light">
+            <th scope="">Продано</th>
+            {% else %}
+            {% if tq.liquidated %}
+        <tr class="table-danger">
+            <th scope="row">Списано</th>
+            {% else %}
+        <tr class="table-dark">
+            <th scope="row">Закуплено</th>
+            {% endif %}
+            {% endif %}
             <td>{{tq.price}} р.</td>
             <td>{% widthratio tq.price 1 tq.count %} р.</td>
             <td>{{tq.count}}</td>
             <td>{{tq.date}}</td>
+            {% if tq.note %}
+            <td><button onclick="alert('{{tq.note}}')">Заметка</button>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
         </tr>
         {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+<form action="" method='get'>
+    <label for="birthday">Birthday:</label>
+    <input type="date" id="birthday" name="birthday">
+    <button type='submit'></button>
+</form>
 
 
 
-        {% endblock %}
+
+{% endblock %}
