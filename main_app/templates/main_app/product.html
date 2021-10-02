@@ -36,7 +36,7 @@
         <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
             data-bs-parent="#accordionExample">
             <div class="accordion-body">
-                
+
                 <form action="" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
 
@@ -165,11 +165,8 @@
     <tbody>
         {% for tq in trade_queryset %}
         
-            {% if not tq.user %}
             <tr>
-            {% else %}
-            <tr class='table-danger'>
-            {% endif %}
+
             <th scope="row"></th>
             <td>{{tq.price}} р.</td>
             <td>{% widthratio tq.price 1 tq.count %} р.</td>

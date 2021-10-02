@@ -6,6 +6,7 @@ from django.contrib import messages
 from itertools import chain
 from django.db.models import Q
 
+
 def index(request):
     product = Product.objects.all()
     category = Category.objects.all()
@@ -47,11 +48,12 @@ def product_view(request, pk):
         messages.info(request, 'Вы уверены?')
 
     if request.method == 'GET' and 'confirm_delete' in request.GET:
-        # Сделать удаление товара здесь
+        product.delete()
         return HttpResponseRedirect('/')
 
     if request.method == 'POST' and 'reception' in request.POST:
         form = ReceptionForm(request.POST)
+        print(form.is_valid())
         if form.is_valid():
             product.count += form.cleaned_data['count']
             product.save()
@@ -62,18 +64,20 @@ def product_view(request, pk):
 
 
     reception_form = ReceptionForm()
-    trade_queryset = ReceptionSoldProduct.objects.filter(product__pk=pk).order_by('-date')
-    if 'only_reception' in request.GET:
-        trade_queryset = ReceptionSoldProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=True)).order_by('-date')
-    elif 'only_sold' in request.GET:
-        trade_queryset = ReceptionSoldProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=False)).order_by('-date')
+    reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
+    sold_queryset = SoldProduct.objects.filter(product__pk=pk)
+    print(sold_queryset)
+    # if 'only_reception' in request.GET:
+    #     trade_queryset = ReceptionProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=True)).order_by('-date')
+    # elif 'only_sold' in request.GET:
+    #     trade_queryset = ReceptionProduct.objects.filter(Q(product__pk=pk)&Q(user__isnull=False)).order_by('-date')
 
     product_form = Product_reqForm(initial={'title': product.title,
                                         'description': product.description,
                                         'price': product.price,
                                         'count': product.count,
                                         'subcategory': product.subcategory_id})
-    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': trade_queryset})
+    return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': reception_queryset})
 
 
 def create_product(request):
