@@ -1,4 +1,4 @@
 venv/
-main_app/settings.py
+vape_shop/settings.py
 vape_shop/__pycache__
 media/

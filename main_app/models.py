@@ -40,11 +40,12 @@ class Product(models.Model):
     photo = models.ImageField(upload_to='product_img/')
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    count = models.IntegerField()
+    count = models.IntegerField(default=0)
     slug = models.SlugField(max_length=150, unique=True, db_index=True)
     # Закупочная стоймость
     subcategory = models.ForeignKey(
     SubCategory, on_delete=models.CASCADE)
+    weight = models.IntegerField()
 
     def save(self, *args, **kwargs):
         if not self.slug:

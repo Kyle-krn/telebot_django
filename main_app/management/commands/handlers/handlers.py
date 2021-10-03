@@ -151,7 +151,6 @@ def add_product_in_cart(call):
 
 
 
-
 @bot.message_handler(commands=['start', 'help'])
 def command_start(message):
     data = message.chat
@@ -162,7 +161,7 @@ def command_start(message):
                                            'last_name': data.last_name,
                                            'username': data.username
                                        })
-
+    bot.send_message(chat_id = data.id, text='Категорически приветсвтую', reply_markup=main_keyboard())
 
 # @bot.message_handler(func=lambda message: True, content_types=['text'])
 # def get_answer(message):

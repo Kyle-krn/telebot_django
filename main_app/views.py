@@ -96,7 +96,7 @@ def product_view(request, pk):
     product_form = Product_reqForm(initial={'title': product.title,
                                         'description': product.description,
                                         'price': product.price,
-                                        'count': product.count,
+                                        'weight': product.weight,
                                         'subcategory': product.subcategory_id})
                                         
     return render(request, 'main_app/product.html', {'product_form': product_form, 'product': product, 'category': category, 'reception_form': reception_form, 'trade_queryset': result_list})
