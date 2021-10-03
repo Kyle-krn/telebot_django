@@ -18,7 +18,12 @@
 <br>
 <form action="{% url 'add_category' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ category_form.name }}
+    <div class="input-group mb-3">
+        {{ category_form.max_count_product }}
+        <span class="input-group-text">@</span>
+        {{ category_form.name }}
+      </div>
+
     <br>
 
     <div class="row">

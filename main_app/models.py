@@ -8,6 +8,7 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='category_img/')
     slug = models.SlugField(max_length=70, unique=True)
+    max_count_product = models.IntegerField()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -47,7 +48,7 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = f'p||{self.title}'
+            self.slug = f'p||{self.id}{self.title.split(" ")[0]}'
             # self.slug = slugify(f"product||{self.subcategory.name}||{self.title}")
         super(Product, self).save(*args, **kwargs)
 
@@ -82,3 +83,32 @@ class SoldProduct(models.Model):
 
     def __str__(self):
         return f"{self.product} -- {self.count}"
+
+
+class TelegramUser(models.Model):
+    chat_id = models.IntegerField(unique=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    fio = models.CharField(max_length=255, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    post_index = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.chat_id} -- {self.username}"
+
+
+class TelegramProductCartCounter(models.Model):
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # price = models.DecimalField(max_digits=10, decimal_places=2)    # Удалить прайс, он есть в продукте
+    count = models.IntegerField(default=1)
+    counter = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user.username} -- {self.count}"
+
+
+
+

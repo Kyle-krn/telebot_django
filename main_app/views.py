@@ -166,7 +166,7 @@ def category_view(request, pk):
         return HttpResponseRedirect('/add_category/')
 
 
-    category_form = Category_reqForm(initial={'name': category.name})
+    category_form = Category_reqForm(initial={'name': category.name, 'max_count_product': category.max_count_product})
     return render(request, 'main_app/category_detail.html', {'category': category, 'category_form': category_form})
 
 

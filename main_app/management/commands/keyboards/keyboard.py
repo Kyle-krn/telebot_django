@@ -6,3 +6,5 @@ def main_keyboard():
     product = types.KeyboardButton('💰 Каталог')
     keyboard.add(product)
     return keyboard
+
+    

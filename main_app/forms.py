@@ -30,18 +30,20 @@ class Product_reqForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
+      max_count_product = forms.IntegerField( widget=forms.TextInput(attrs={'placeholder': 'Кол-во макс. товара', 'type': 'number'}))
 
       class Meta:
             model = Category
-            fields = ['name', 'photo']
+            fields = ['name', 'photo', 'max_count_product']
 
 class Category_reqForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
+      max_count_product = forms.IntegerField( widget=forms.TextInput(attrs={'placeholder': 'Кол-во макс. товара', 'type': 'number'}))
 
       class Meta:
             model = Category
-            fields = ['name', 'photo']
+            fields = ['name', 'photo', 'max_count_product']
 
 class SubcategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
