@@ -96,5 +96,14 @@ class TelegramProductCartCounter(models.Model):
         return f"{self.user.username} -- {self.count}"
 
 
+class PayProduct(models.Model):
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    product_pay = models.IntegerField()
+    pay_comment = models.CharField(max_length=255)
+    delivery_pay = models.IntegerField()
+    datetime = models.DateTimeField(auto_now_add=True)
+
+
+
 
 

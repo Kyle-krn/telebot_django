@@ -76,3 +76,9 @@ def search_category_keyboard(categories):
     for item in categories:
         keyboard.add(types.InlineKeyboardButton(text=item.name, callback_data=f'search~{item.slug}'))
     return keyboard
+
+
+def check_pay_keyboard():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Проверить оплату', callback_data='check_pay'))
+    return keyboard

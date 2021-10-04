@@ -32,47 +32,62 @@ def check_time_delivery(post_index, weight):
     return req["delivery"]["max"]
 
 
+
 @bot.message_handler(regexp='^(Корзина)$')
 @bot.callback_query_handler(func=lambda call: call.data == 'back_cart')
 def cart_handlers(message):
     '''Главная страница корзины'''
     text = ''
+
     try:
         user_id = message.chat.id
     except:
         bot.delete_message(message.message.chat.id, message.message.message_id)
         user_id = message.message.chat.id
+
     user = TelegramUser.objects.get(chat_id=user_id)
-    cart = TelegramProductCartCounter.objects.filter(
-        Q(user=user) & Q(counter=False))
+    cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
+    if PayProduct.objects.filter(user=user).delete()[0]:    # Добавляем забронированные товары обратно
+        for item in cart:
+            item.product.count += item.count
+            item.product.save()
+
+    
+    for item in cart:
+        if item.count > item.product.count:
+            item.count = item.product.count
+            item.save()
+        if item.product.count <= 0:
+            item.delete()
+
+    cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
 
     if not cart:    # Если корзина пустая
         text = '***Нет товаров в корзине***'
         bot.send_message(chat_id=user_id, text=text, parse_mode='markdown')
         return
+
+    if not user.post_index:     # Если нет данных о доставке
+        text += '***Вы не заполнили данные о доставке***\nЧто бы продолжить, заполните данные\n\n'
+        keyboard = cart_keyboard()
     else:
+        weight = sum([x.count * x.product.weight for x in cart])
+        try:    # Пытаемся расчитать стоймость доставки
+            delivery_pay = check_price_delivery(
+                post_index=user.post_index, weight=weight)
+            delivery_time = check_time_delivery(
+                post_index=user.post_index, weight=weight)
+        except:
+            bot.send_message(
+                message.chat.id, 'При расчете стоймости доставки произошла ошибка')
+            return
+        product_pay = sum([x.count * x.product.price for x in cart])
 
-        if not user.post_index:     # Если нет данных о доставке
-            text += '***Вы не заполнили данные о доставке***\nЧто бы продолжить, заполните данные\n\n'
-            keyboard = cart_keyboard()
-        else:
-            weight = sum([x.count * x.product.weight for x in cart])
-            try:    # Пытаемся расчитать стоймость доставки
-                delivery_pay = check_price_delivery(
-                    post_index=user.post_index, weight=weight)
-                delivery_time = check_time_delivery(
-                    post_index=user.post_index, weight=weight)
-            except:
-                bot.send_message(
-                    message.chat.id, 'При расчете стоймости доставки произошла ошибка')
-                return
-            product_pay = sum([x.count * x.product.price for x in cart])
+        text += f'Стоймость доставки - {delivery_pay} руб.\nСтоймость товара - {product_pay} руб.\nОбщая стоймость - {float(delivery_pay)+float(product_pay)} руб.\nВремя доставки примерно {delivery_time} дней(дня)\n\n'
+        keyboard = cart_keyboard(pay=delivery_pay)
 
-            text += f'Стоймость доставки - {delivery_pay} руб.\nСтоймость товара - {product_pay} руб.\nОбщая стоймость - {float(delivery_pay)+float(product_pay)} руб.\nВремя доставки примерно {delivery_time} дней(дня)\n\n'
-            keyboard = cart_keyboard(pay=delivery_pay)
-
-        for item in cart:
-            text += f'Товар - {item.product.title}\nКол-во {item.count} \n\n'
+    for item in cart:
+        text += f'Товар - {item.product.title}\nКол-во {item.count} \n\n'
 
     bot.send_message(chat_id=user_id, text=text,
                      reply_markup=keyboard, parse_mode='markdown')
@@ -108,6 +123,7 @@ def del_product_in_cart_handlers(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'del_all')
 def del_all_product_in_cart_handlers(call):
+    print(call.data)
     '''Удалить из корзины все'''
     if call.data.split('~')[-1] == 'yes':
         cart = TelegramProductCartCounter.objects.filter(
@@ -124,8 +140,3 @@ def del_all_product_in_cart_handlers(call):
 
 
 #########################################################################################################################
-
-@bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'pay')
-def pay_handlers(call):
-    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                          text='Вы уверены что хотите удалить все из корзины?', reply_markup=yes_no_keyboard('del_all'))

@@ -26,12 +26,18 @@ def update_lists():
 @bot.message_handler(regexp='^(💰 Каталог)$')
 @bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'back_cat')
 def catalog(message):
+    
     '''Каталог'''
     try:
         user_id = message.chat.id
     except AttributeError:
         user_id = message.message.chat.id
         bot.delete_message(user_id, message.message.message_id)
+    cart = TelegramProductCartCounter.objects.filter(Q(user__chat_id=user_id) & Q(counter=False))
+    if PayProduct.objects.filter(user__chat_id=user_id).delete()[0]:    # Добавляем забронированные товары обратно
+        for item in cart:
+            item.product.count += item.count
+            item.product.save()
 
     TelegramProductCartCounter.objects.filter(
         Q(user__chat_id=user_id) & Q(counter=True)).delete()
@@ -137,7 +143,7 @@ def product(call):
                 bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
                                         text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт')
                 counter[0].count=product.subcategory.category.max_count_product
-                
+
         counter[0].save()
     # bot.delete_message(call.message.chat.id, call.message.message_id)
     keyboard=buy_keyboard(subcat_slug=product.subcategory.slug,
@@ -167,11 +173,11 @@ def add_product_in_cart(call):
     if product_in_cart:     # Ищем такой же товар в корзине что бы пополнить его count, а не создавать новую запись, если юзер добавляет такой же товар
         # Если превышает максимальное кол-во  для катеогрии
         if (product_in_cart[0].count + cart_product.count) > cart_product.product.subcategory.category.max_count_product:
-            product_in_cart[0].count=cart_product.product.subcategory.category.max_count_product
+            product_in_cart[0].count=cart_product.product.subcategory.category.max_count_product    # В корзине кол-во товара максимальное доступное для категории
         else:
-            product_in_cart[0].count += cart_product.count
+            product_in_cart[0].count += cart_product.count # Иначе просто добавляем
 
-        if product_in_cart[0].count > product_in_cart[0].product.count:
+        if product_in_cart[0].count > product_in_cart[0].product.count: # Если в корзине больше чем есть товара
             product_in_cart[0].count=product_in_cart[0].product.count
 
         product_in_cart[0].save()
