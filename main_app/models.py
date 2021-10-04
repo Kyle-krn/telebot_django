@@ -7,13 +7,8 @@ from slugify import slugify
 class Category(models.Model):
     name = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='category_img/')
-    slug = models.SlugField(max_length=70, unique=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
     max_count_product = models.IntegerField()
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = f"c||{self.name}"  
-        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -23,16 +18,11 @@ class SubCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=150, db_index=True)
     photo = models.ImageField(upload_to='subcategory_img/')
-    slug = models.SlugField(max_length=150, unique=True, db_index=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = f"sc||{self.category}||{self.name}"  
-            # self.slug = slugify(f"subcat||{self.category.name}||{self.name}")
-        super(SubCategory, self).save(*args, **kwargs)
 
 
 class Product(models.Model):
@@ -41,17 +31,12 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField(default=0)
-    slug = models.SlugField(max_length=150, unique=True, db_index=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
     # Закупочная стоймость
     subcategory = models.ForeignKey(
     SubCategory, on_delete=models.CASCADE)
     weight = models.IntegerField()
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = f'p||{self.id}{self.title.split(" ")[0]}'
-            # self.slug = slugify(f"product||{self.subcategory.name}||{self.title}")
-        super(Product, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title

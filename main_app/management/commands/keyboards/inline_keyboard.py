@@ -36,3 +36,25 @@ def buy_keyboard(subcat_slug,slug, count):
     keyboard.add(buy)
     keyboard.add(back_button)
     return keyboard
+
+def cart_keyboard(pay=False):
+    keyboard = types.InlineKeyboardMarkup()
+    if pay:
+        keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data='pay'))
+    button = types.InlineKeyboardButton(text='Изменить корзину', callback_data='change_cart')
+    keyboard.add(button)
+    return keyboard
+
+def change_cart_keyboard(cart):
+    keyboard = types.InlineKeyboardMarkup()
+    for item in cart:
+        keyboard.add(types.InlineKeyboardButton(text=f'{item.product.title}', callback_data=f'del~{item.product.slug}'))
+    keyboard.add(types.InlineKeyboardButton(text=f'Удалить все', callback_data=f'del_all~'))
+    keyboard.add(types.InlineKeyboardButton(text=f'Назад', callback_data=f'back_cart'))
+    return keyboard
+
+def yes_no_keyboard(callback):
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Да', callback_data=f'{callback}~yes'))
+    keyboard.add(types.InlineKeyboardButton(text='Нет', callback_data=f'{callback}~no'))
+    return keyboard

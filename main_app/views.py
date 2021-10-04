@@ -106,7 +106,9 @@ def create_product(request):
     if request.method == "POST":
         product_form = ProductForm(request.POST, files=request.FILES)
         if product_form.is_valid():
-            product_form.save()
+            product = product_form.save()
+            product.slug = f'p||{product.pk}'
+            product.save()
             return HttpResponseRedirect('/')
 
     product_form = ProductForm(initial={'count': 0})
@@ -116,8 +118,6 @@ def create_product(request):
 
 def reception_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
-
-    
     reception_form = ReceptionForm()
     return render(request, 'main_app/reception.html', {'reception_form': reception_form})
 
@@ -126,7 +126,9 @@ def create_category(request):
     if request.method == 'POST' and 'create_category' in request.POST:
         category_form = CategoryForm(request.POST, files=request.FILES)
         if category_form.is_valid():
-            category_form.save()
+            model = category_form.save()
+            model.slug = f'c||{model.pk}'
+            model.save()
             messages.info(request, 'Новая категория успешно создана!')
             return HttpResponseRedirect('/add_category/')
         else:
@@ -138,6 +140,8 @@ def create_category(request):
         if sc_form.is_valid():
             f = sc_form.save(commit=False)    
             f.category = Category.objects.get(pk=int(request.POST['category_id']))
+            f.save()
+            f.slug = f'sc||{f.pk}'
             f.save()
             messages.info(request, 'Новая категория успешно создана!')
             return HttpResponseRedirect('/add_category/')
