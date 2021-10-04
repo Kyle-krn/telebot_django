@@ -58,3 +58,13 @@ def yes_no_keyboard(callback):
     keyboard.add(types.InlineKeyboardButton(text='Да', callback_data=f'{callback}~yes'))
     keyboard.add(types.InlineKeyboardButton(text='Нет', callback_data=f'{callback}~no'))
     return keyboard
+
+def cancel_next_step_keyboard():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Отменить', callback_data=f'stop_next_step'))
+    return keyboard
+
+def edit_delivery_data_keyboard():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Ввести новые данные', callback_data='new_delivery_data'))
+    return keyboard
