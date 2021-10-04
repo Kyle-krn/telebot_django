@@ -22,6 +22,7 @@ def update_lists():
     product_list = [x.slug for x in Product.objects.all()]
 
 
+
 @bot.message_handler(regexp='^(💰 Каталог)$')
 @bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'back_cat')
 def catalog(message):
@@ -120,16 +121,23 @@ def product(call):
     else:
         count=call.data.split('~')[2]
         counter[0].count += int(count)
-        if counter[0].count <= 0:   # Если юзер хочет установить кол-во 0 или меньше
-            # Не работает, хз почему
+
+        if counter[0].count > product.count:
             bot.answer_callback_query(
-                callback_query_id=call.id, text='Минимум 1 штука для покупки!', show_alert=False)
-            counter[0].count=1
-        # Если юзер хочет установить кол-во больше чем есть на складе
-        elif counter[0].count >= product.subcategory.category.max_count_product:
-            bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-                                      text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт')  # Не работает, хз почему
-            counter[0].count=product.subcategory.category.max_count_product
+            callback_query_id=call.id, text='Минимум 1 штука для покупки!', show_alert=False)
+            counter[0].count= product.count
+        else:
+    
+            if counter[0].count <= 0:   # Если юзер хочет установить кол-во 0 или меньше
+                bot.answer_callback_query(
+                    callback_query_id=call.id, text='Минимум 1 штука для покупки!', show_alert=False)
+                counter[0].count=1
+            # Если юзер хочет установить кол-во больше чем есть на складе
+            elif counter[0].count >= product.subcategory.category.max_count_product:
+                bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+                                        text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт')
+                counter[0].count=product.subcategory.category.max_count_product
+                
         counter[0].save()
     # bot.delete_message(call.message.chat.id, call.message.message_id)
     keyboard=buy_keyboard(subcat_slug=product.subcategory.slug,

@@ -6,6 +6,11 @@ from dadata import Dadata
 
 dadata = Dadata(DADATA_TOKEN)
 
+# ////
+
+# req = requests.get('https://tariff.pochta.ru/v1/calculate/tariff', data).json()
+# req['pay']/100
+
 @bot.callback_query_handler(func=lambda call: call.data == 'stop_next_step')
 def stop_next_step_handlers(call):
     user = TelegramUser.objects.get(chat_id=call.message.chat.id)
@@ -78,6 +83,10 @@ def input_address(message):
 
 def input_fio(message):
     fio = message.text
+    if not fio:
+        message = bot.send_message(message.chat.id, f"Введите адрес вашу фамилию, имя и отчество: ", reply_markup=cancel_next_step_keyboard())
+        bot.register_next_step_handler(message, input_fio)
+        return
     user = TelegramUser.objects.get(chat_id=message.chat.id)
     user.fio = fio
     user.save()

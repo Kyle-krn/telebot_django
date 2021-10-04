@@ -11,13 +11,14 @@ def category_keyboard(categories, back=False):
     return keyboard
 
 
-def product_keyboard(sub_slug,products):
+def product_keyboard(sub_slug,products, back=True):
     # Изменить модель и сделать одну клавиатуру
     """Генерит клавиатуру для товаров """
     keyboard = types.InlineKeyboardMarkup()
     for product in products:
         keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.slug))
-    keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'back_sub~{sub_slug}'))
+    if back:
+        keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'back_sub~{sub_slug}'))
     return keyboard
 
 
@@ -27,8 +28,8 @@ def buy_keyboard(subcat_slug,slug, count):
     down_1 = types.InlineKeyboardButton(text=f'🔻', callback_data=f'buy~{slug}~-1')
     count = types.InlineKeyboardButton(text=f'{count} шт', callback_data=f'buy~{slug}~0')
     up_1 = types.InlineKeyboardButton(text=f'🔺', callback_data=f'buy~{slug}~1')
-    down_10 = types.InlineKeyboardButton(text=f'10 🔻', callback_data=f'buy~{slug}~-10')
-    up_10 = types.InlineKeyboardButton(text=f'10 🔺', callback_data=f'buy~{slug}~10')
+    down_10 = types.InlineKeyboardButton(text=f'5 🔻', callback_data=f'buy~{slug}~-5')
+    up_10 = types.InlineKeyboardButton(text=f'5 🔺', callback_data=f'buy~{slug}~5')
     buy = types.InlineKeyboardButton(text=f'Купить', callback_data=f'add_to_cart')  # Изменить callback
     back_button = types.InlineKeyboardButton(text='<< Назад', callback_data=f'back_prod~{subcat_slug}')
     keyboard.add(down_1, count, up_1)
@@ -37,10 +38,10 @@ def buy_keyboard(subcat_slug,slug, count):
     keyboard.add(back_button)
     return keyboard
 
-def cart_keyboard(pay=False):
+def cart_keyboard(pay=None):
     keyboard = types.InlineKeyboardMarkup()
     if pay:
-        keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data='pay'))
+        keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data=f'pay~{pay}'))
     button = types.InlineKeyboardButton(text='Изменить корзину', callback_data='change_cart')
     keyboard.add(button)
     return keyboard
@@ -67,4 +68,11 @@ def cancel_next_step_keyboard():
 def edit_delivery_data_keyboard():
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text='Ввести новые данные', callback_data='new_delivery_data'))
+    return keyboard
+
+
+def search_category_keyboard(categories):
+    keyboard = types.InlineKeyboardMarkup()
+    for item in categories:
+        keyboard.add(types.InlineKeyboardButton(text=item.name, callback_data=f'search~{item.slug}'))
     return keyboard
