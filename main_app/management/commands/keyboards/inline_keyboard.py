@@ -17,8 +17,8 @@ def product_keyboard(sub_slug,products, back=True):
     keyboard = types.InlineKeyboardMarkup()
     for product in products:
         keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.slug))
-    if back:
-        keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'back_sub~{sub_slug}'))
+
+    keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'{sub_slug}'))
     return keyboard
 
 
@@ -31,7 +31,7 @@ def buy_keyboard(subcat_slug,slug, count):
     down_10 = types.InlineKeyboardButton(text=f'5 🔻', callback_data=f'buy~{slug}~-5')
     up_10 = types.InlineKeyboardButton(text=f'5 🔺', callback_data=f'buy~{slug}~5')
     buy = types.InlineKeyboardButton(text=f'Купить', callback_data=f'add_to_cart')  # Изменить callback
-    back_button = types.InlineKeyboardButton(text='<< Назад', callback_data=f'back_prod~{subcat_slug}')
+    back_button = types.InlineKeyboardButton(text='<< Назад', callback_data=f'{subcat_slug}')
     keyboard.add(down_1, count, up_1)
     keyboard.add(down_10, up_10)
     keyboard.add(buy)

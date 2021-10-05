@@ -7,10 +7,10 @@ def main_keyboard():
     button1 = types.KeyboardButton('Корзина')
     button2 = types.KeyboardButton('Данные о доставке')
     button3 = types.KeyboardButton('Поиск товаров')
-    keyboard.add(button)
-    keyboard.add(button1)
-    keyboard.add(button2)
-    keyboard.add(button3)
+    button4 = types.KeyboardButton('Мои товары')
+    keyboard.add(button, button1)
+    keyboard.add(button2, button3)
+    keyboard.add(button4)
     return keyboard
 
     

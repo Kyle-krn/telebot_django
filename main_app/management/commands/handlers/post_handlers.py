@@ -6,10 +6,6 @@ from dadata import Dadata
 
 dadata = Dadata(DADATA_TOKEN)
 
-# ////
-
-# req = requests.get('https://tariff.pochta.ru/v1/calculate/tariff', data).json()
-# req['pay']/100
 
 @bot.callback_query_handler(func=lambda call: call.data == 'stop_next_step')
 def stop_next_step_handlers(call):

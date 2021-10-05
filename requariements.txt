@@ -3,4 +3,5 @@ pyTelegramBotAPI
 pillow
 python-slugify
 dadata
+requests
 wheel

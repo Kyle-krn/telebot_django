@@ -57,20 +57,6 @@ class ReceptionProduct(models.Model):
         return f"{self.product} -- {self.count}"
 
 
-class SoldProduct(models.Model):
-    user = models.IntegerField(blank=True, null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    count = models.IntegerField()
-    date = models.DateTimeField(auto_now_add=True)
-
-    def get_my_model_name(self):
-        return self._meta.model_name
-
-    def __str__(self):
-        return f"{self.product} -- {self.count}"
-
-
 class TelegramUser(models.Model):
     chat_id = models.IntegerField(unique=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
@@ -83,6 +69,24 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return f"{self.chat_id} -- {self.username}"
+
+
+
+class SoldProduct(models.Model):
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    delivery_pay = models.IntegerField()
+    count = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+    track_code = models.IntegerField(blank=True, null=True)
+    check_admin = models.BooleanField(default=False)
+
+    def get_my_model_name(self):
+        return self._meta.model_name
+
+    def __str__(self):
+        return f"{self.product} -- {self.count}"
 
 
 class TelegramProductCartCounter(models.Model):
