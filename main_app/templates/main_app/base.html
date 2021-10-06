@@ -24,6 +24,13 @@
             {% else %}
             <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
             {% endif %}
+            <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Новые заказы</a></li>
+            <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Обработанные заказы</a></li>
+            <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">QIWI</a></li>
+
+
+          
+
           </ul>
           
           <div class="text-end">

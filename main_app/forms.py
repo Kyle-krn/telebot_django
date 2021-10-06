@@ -26,7 +26,6 @@ class Product_reqForm(forms.ModelForm):
 
 
 
-
 class CategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
@@ -71,3 +70,12 @@ class ReceptionForm(forms.ModelForm):
       class Meta:
             model = ReceptionProduct
             fields = ['price', 'count', 'note']
+
+
+class QiwiTokenForm(forms.ModelForm):
+      number = forms.IntegerField(label='Номер телефона', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
+      token = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для токена'}))
+
+      class Meta:
+            model = QiwiToken
+            fields = ['number', 'token']

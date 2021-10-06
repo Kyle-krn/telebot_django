@@ -8,6 +8,7 @@ from django.db.models import Q
 
 
 def index(request):
+    '''Вывод всех товаров на главной странице'''
     product = Product.objects.all()
     category = Category.objects.all()
     if 'search' in request.GET:
@@ -30,12 +31,11 @@ def index(request):
 
         if 'order_by' in params:
             product = product.order_by(params['order_by'])
-        
-        
     return render(request, 'main_app/index.html', {'product': product, 'category': category})
 
 
 def product_view(request, pk):
+    '''Страница изменения продукта/добавления кол-ва в товар и списание'''
     product = get_object_or_404(Product, pk=pk)
     category = Category.objects.all()
     if request.method == "POST" and 'update' in request.POST:
@@ -75,8 +75,6 @@ def product_view(request, pk):
     reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
     sold_queryset = SoldProduct.objects.filter(product__pk=pk)
 
-    # print(request.GET['birthday'])12
-
     params = {k:v for k,v in request.GET.items() if len(v) != 0}
 
     if 'only' in params:
@@ -103,6 +101,7 @@ def product_view(request, pk):
 
 
 def create_product(request):
+    '''Страница создания товара'''
     if request.method == "POST":
         product_form = ProductForm(request.POST, files=request.FILES)
         if product_form.is_valid():
@@ -192,3 +191,51 @@ def subcategory_view(request, pk):
 
     category_form = Subcategory_reqForm(initial={'name': subcategory.name})
     return render(request, 'main_app/category_detail.html', {'category': subcategory, 'category_form': category_form})
+
+
+def new_order(request):
+    if request.method == 'POST':
+        order_id = int(request.POST['order_id'])
+        try:
+            track_code = int(request.POST['track_number'])
+        except:
+            messages.info(request, 'Трек номер состоит только из цифр!')
+            return HttpResponseRedirect('/new_order/')
+        order = OrderingProduct.objects.get(pk=order_id)
+        order.track_code = track_code
+        order.check_admin = True
+        order.save()
+    queryset = OrderingProduct.objects.filter(check_admin=False)
+    return render(request, 'main_app/order.html', context={'queryset': queryset})
+
+def old_order(request):
+    if request.method == 'POST':
+        order_id = int(request.POST['order_id'])
+        try:
+            track_code = int(request.POST['track_number'])
+        except:
+            messages.info(request, 'Трек номер состоит только из цифр!')
+            return HttpResponseRedirect('/new_order/')
+        order = OrderingProduct.objects.get(pk=order_id)
+        order.track_code = track_code
+        order.check_admin = True
+        order.save()
+        
+    queryset = OrderingProduct.objects.filter(check_admin=True)
+    return render(request, 'main_app/order.html', context={'queryset': queryset})
+
+
+def control_qiwi(request):
+    if request.method == 'POST' and 'new_token' in request.POST:
+        form = QiwiTokenForm(request.POST)
+        if form.is_valid():
+            form.save()
+    elif request.method == 'POST' and 'activate' in request.POST:
+        QiwiToken.objects.update(active=False)
+        qiwi_id = int(request.POST['radio'])
+        QiwiToken.objects.filter(pk=qiwi_id).update(active=True)
+
+    pay_product = PayProduct.objects.all()
+    queryset = QiwiToken.objects.all()
+    form = QiwiTokenForm()
+    return render(request, 'main_app/qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})

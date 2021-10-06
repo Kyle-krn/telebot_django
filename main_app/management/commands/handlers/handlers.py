@@ -79,10 +79,11 @@ def subcategory(call):
 
 @ bot.callback_query_handler(func=lambda call: call.data in product_list)
 @ bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'buy')
+@ bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'search_p')
 def product(call):
     '''Вывод продукта'''
     update_lists()
-    if call.data.split('~')[0] == 'buy':
+    if call.data.split('~')[0] == 'buy' or call.data.split('~')[0] == 'search_p':
         slug=call.data.split('~')[1]
     else:
         slug=call.data
@@ -122,6 +123,10 @@ def product(call):
                             slug=slug,
                             count=counter[0].count)
     photo = open(product.photo.path, 'rb')
+    if call.data.split('~')[0] == 'search_p':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_photo(chat_id=call.message.chat.id, photo=photo, caption=f'Название - {product.title}\nЦена - {product.price}\nОписание - {product.description}\nОстаток - {product.count}', reply_markup=keyboard)
+        
     bot.edit_message_media(chat_id=call.message.chat.id, 
                            media=types.InputMediaPhoto(media=photo, 
                                                        caption=f'Название - {product.title}\nЦена - {product.price}\nОписание - {product.description}\nОстаток - {product.count}'),   

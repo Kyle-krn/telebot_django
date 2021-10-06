@@ -11,6 +11,9 @@ urlpatterns = [
     path('subcategory/<int:pk>', subcategory_view, name='subcategory_detail'),
     path('add_category/', create_category, name='add_category'),
     path('add_product/', create_product, name='add_product'),
+    path('new_order/', new_order, name='new_order'),
+    path('old_order/', old_order, name='old_order'),
+    path('qiwi/', control_qiwi, name='qiwi'),
     path('reception/<int:pk>', reception_product, name='reception'),
     ]
 

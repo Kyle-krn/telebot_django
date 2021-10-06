@@ -11,12 +11,15 @@ def category_keyboard(categories, back=False):
     return keyboard
 
 
-def product_keyboard(sub_slug,products, back=True):
+def product_keyboard(sub_slug, products, search=False, back=True):
     # Изменить модель и сделать одну клавиатуру
     """Генерит клавиатуру для товаров """
     keyboard = types.InlineKeyboardMarkup()
     for product in products:
-        keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.slug))
+        if not search:
+            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.slug))
+        else:
+            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=f"search_p~{product.slug}"))
 
     keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'{sub_slug}'))
     return keyboard
@@ -81,4 +84,12 @@ def search_category_keyboard(categories):
 def check_pay_keyboard():
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text='Проверить оплату', callback_data='check_pay'))
+    keyboard.add(types.InlineKeyboardButton(text='Отменить оплату', callback_data='cancel_pay'))
+    return keyboard
+
+def purchase_keyboard(soldproduct):
+    keyboard = types.InlineKeyboardMarkup()
+    for item in soldproduct:
+        pay = sum([x.price*x.count for x in item.sold_product.all()]) + item.delivery_pay
+        keyboard.add(types.InlineKeyboardButton(text=f"От {item.datetime.strftime('%m/%d/%Y')} на сумму {pay} руб.", callback_data=f'sp~{item.pk}'))
     return keyboard

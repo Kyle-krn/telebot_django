@@ -20,7 +20,7 @@ class ReceptionProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'count', 'price', 'date')
 
 class SoldProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'count', 'price', 'date')
+    list_display = ('id', 'product', 'count', 'date')
 
 
 

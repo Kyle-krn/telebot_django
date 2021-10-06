@@ -66,6 +66,7 @@ class TelegramUser(models.Model):
     address = models.TextField(blank=True, null=True)
     number = models.IntegerField(blank=True, null=True)
     post_index = models.IntegerField(blank=True, null=True)
+    search_data = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.chat_id} -- {self.username}"
@@ -73,20 +74,37 @@ class TelegramUser(models.Model):
 
 
 class SoldProduct(models.Model):
-    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    # user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    delivery_pay = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)    
     count = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
-    track_code = models.IntegerField(blank=True, null=True)
-    check_admin = models.BooleanField(default=False)
+
 
     def get_my_model_name(self):
         return self._meta.model_name
 
     def __str__(self):
         return f"{self.product} -- {self.count}"
+
+class OrderingProduct(models.Model):
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    delivery_pay = models.IntegerField()
+    sold_product = models.ManyToManyField(SoldProduct)  # Закончил здесь
+    track_code = models.IntegerField(blank=True, null=True)
+    check_admin = models.BooleanField(default=False)
+    datetime = models.DateTimeField(auto_now_add=True)
+    
+    fio = models.CharField(max_length=255, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    post_index = models.IntegerField(blank=True, null=True)
+
+    def get_order_price(self):
+        return sum([x.count * x.price for x in self.sold_product.all()]) + self.delivery_pay
+
+    def get_datetime(self):
+        return self.datetime.strftime('%m/%d/%Y')
 
 
 class TelegramProductCartCounter(models.Model):
@@ -108,6 +126,7 @@ class PayProduct(models.Model):
     datetime = models.DateTimeField(auto_now_add=True)
 
 
-
-
-
+class QiwiToken(models.Model):
+    number = models.IntegerField(blank=True, null=True)
+    token = models.CharField(max_length=255)
+    active = models.BooleanField(default=False)
