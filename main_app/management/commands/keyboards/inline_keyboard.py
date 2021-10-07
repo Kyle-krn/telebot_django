@@ -1,5 +1,7 @@
 from telebot import types
 
+from main_app.models import QiwiToken
+
 
 def category_keyboard(categories, back=False):
     """Генерит клавиатуры категорий/подкатегорий"""
@@ -44,7 +46,8 @@ def buy_keyboard(subcat_slug,slug, count):
 def cart_keyboard(pay=None):
     keyboard = types.InlineKeyboardMarkup()
     if pay:
-        keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data=f'pay~{pay}'))
+        if QiwiToken.objects.filter(active=True):
+            keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data=f'pay~{pay}'))
     button = types.InlineKeyboardButton(text='Изменить корзину', callback_data='change_cart')
     keyboard.add(button)
     return keyboard

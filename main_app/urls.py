@@ -14,10 +14,12 @@ urlpatterns = [
     path('new_order/', new_order, name='new_order'),
     path('old_order/', old_order, name='old_order'),
     path('qiwi/', control_qiwi, name='qiwi'),
+    path('user_stat/', user_stat, name='user_stat'),
     path('reception/<int:pk>', reception_product, name='reception'),
+    path('login/', LoginUser.as_view(), name='login'),
+    path('logout/', logout_user, name='logout'),
     ]
 
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

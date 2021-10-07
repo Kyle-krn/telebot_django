@@ -5,3 +5,5 @@ python-slugify
 dadata
 requests
 wheel
+psycopg2
+gunicorn

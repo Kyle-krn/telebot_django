@@ -8,13 +8,13 @@
         <div class="col-8">
             <div class="fieldWrapper">
                 {{ product_form.title.errors }}
-                <label for="{{ product_form.title.id_for_label }}">Title:</label>
+                <label for="{{ product_form.title.id_for_label }}">Название товара:</label>
                 {{ product_form.title }}
             </div>
             <br>
             <div class="fieldWrapper">
                 {{ product_form.description.errors }}
-                <label for="{{ product_form.description.id_for_label }}">description:</label>
+                <label for="{{ product_form.description.id_for_label }}">Описание:</label>
                 {{ product_form.description }}
             </div>
             <br>
@@ -38,7 +38,7 @@
         <div class="col-sm">
             <div class="fieldWrapper">
                 {{ product_form.price.errors }}
-                <label for="{{ product_form.price.id_for_label }}">price:</label>
+                <label for="{{ product_form.price.id_for_label }}">Цена:</label>
                 {{ product_form.price }}
             </div>
         </div>
@@ -52,7 +52,7 @@
         <div class="col-sm">
             <div class="fieldWrapper">
                 {{ product_form.subcategory.errors }}
-                <label for="{{ product_form.subcategory.id_for_label }}">subcategory:</label>
+                <label for="{{ product_form.subcategory.id_for_label }}">Категория:</label>
                 <!-- {{ product_form.subcategory }} -->
 
                 <select class="form-select" name="subcategory" required id='id_subcategory'>
@@ -75,7 +75,7 @@
 
     <div class="fieldWrapper">
         {{ product_form.photo.errors }}
-        <label for="{{ product_form.photo.id_for_label }}">Your photo:</label>
+        <label for="{{ product_form.photo.id_for_label }}">Фото:</label>
         {{ product_form.photo }}
     </div>
     <br>

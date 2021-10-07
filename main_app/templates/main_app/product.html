@@ -46,13 +46,13 @@
                         <div class="col-8">
                             <div class="fieldWrapper">
                                 {{ product_form.title.errors }}
-                                <label for="{{ product_form.title.id_for_label }}">Title:</label>
+                                <label for="{{ product_form.title.id_for_label }}">Название:</label>
                                 {{ product_form.title }}
                             </div>
                             <br>
                             <div class="fieldWrapper">
                                 {{ product_form.description.errors }}
-                                <label for="{{ product_form.description.id_for_label }}">description:</label>
+                                <label for="{{ product_form.description.id_for_label }}">Описание:</label>
                                 {{ product_form.description }}
                             </div>
                             <br>
@@ -77,7 +77,7 @@
                         <div class="col-sm">
                             <div class="fieldWrapper">
                                 {{ product_form.price.errors }}
-                                <label for="{{ product_form.price.id_for_label }}">price:</label>
+                                <label for="{{ product_form.price.id_for_label }}">Цена:</label>
                                 {{ product_form.price }}
                             </div>
                         </div>
@@ -91,7 +91,7 @@
                         <div class="col-sm">
                             <div class="fieldWrapper">
                                 {{ product_form.subcategory.errors }}
-                                <label for="{{ product_form.subcategory.id_for_label }}">subcategory:</label>
+                                <label for="{{ product_form.subcategory.id_for_label }}">Категория:</label>
                                 <!-- {{ product_form.subcategory }} -->
 
                                 <select class="form-select" name="subcategory" required id='id_subcategory'>
@@ -114,7 +114,7 @@
 
                     <div class="fieldWrapper">
                         {{ product_form.photo.errors }}
-                        <label for="{{ product_form.photo.id_for_label }}">Your photo:</label>
+                        <label for="{{ product_form.photo.id_for_label }}">Фото:</label>
                         {{ product_form.photo }}
                     </div>
                     <br>
@@ -154,9 +154,13 @@
         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
             <form action="" method='post'>
             {% csrf_token %}
-            <li><input class="form-control" name='liquidated_count' type="number" placeholder="Введите кол-во"
-                    aria-label="default input example">
+            <li><input class="form-control" name='liquidated_count' type="number" min=1 placeholder="Введите кол-во"
+                    aria-label="default input example" required>
             </li>
+            <br>
+            <li><input class="form-control" name='liquidated_price' type="number" min=0 placeholder="Введите цену за 1 шт."
+                aria-label="default input example" required>
+        </li>
             <br>
             <li><textarea class="form-control" name='liquidated_note' id="exampleFormControlTextarea1"
                     placeholder="Поле для заметок" rows="3"></textarea></li>
@@ -170,6 +174,28 @@
 </div>
 <br><br>
 
+<div class='text-center'>
+    <div class="container">
+        <h2>Общая выручка:</h2>
+        <h3>{{all_stat}} руб.</h3>
+        <br>
+        <div class="row">
+          <div class="col-sm">
+            <h2>Продано всего:</h2>
+            <h3>{{sold_stat.1}} ед. на {{sold_stat.0}} руб.</h3>
+          </div>
+          <div class="col-sm">
+            <h2>Закуплено всего:</h2>
+            <h3>{{reception_stat.1}} ед. на {{reception_stat.0}} руб.</h3>
+          </div>
+          <div class="col-sm">
+            <h2>Списано всего:</h2>
+            <h3>{{liquidated_stat.1}} ед. на {{liquidated_stat.0}} руб.</h3>
+          </div>
+        </div>
+      </div>
+</div>
+<br><br>
 <form action="" method='get'>
 <div class="input-group mb-3">
     <select name='only' class="form-select" aria-label="Default select example">

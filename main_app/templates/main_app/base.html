@@ -27,6 +27,7 @@
             <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Новые заказы</a></li>
             <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Обработанные заказы</a></li>
             <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">QIWI</a></li>
+            <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Юзеры</a></li>
 
 
           
@@ -46,6 +47,7 @@
             {% else %}
             <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">+ Товар</a>
             {% endif %}
+            <a class="btn btn-danger" href="{% url 'logout' %}" role="button">Выход</a>
           </div>
         </div>
       </div>

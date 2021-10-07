@@ -1,0 +1,45 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block content %}
+<div class='text-center'>
+    <h2>Всего ботом воспользовались {{users.count}} человек(а)</h2>
+    <br><br>
+        <div class="container">
+            <h3>Общая выручка:</h3>
+            <h4>{{all_stat}} руб.</h4>
+            <br>
+            <div class="row">
+              <div class="col-sm">
+                <h3>Продано всего:</h3>
+                <h4>{{sold_stat.1}} ед. на {{sold_stat.0}} руб.</h4>
+              </div>
+              <div class="col-sm">
+                <h3>Закуплено всего:</h3>
+                <h4>{{reception_stat.1}} ед. на {{reception_stat.0}} руб.</h4>
+              </div>
+              <div class="col-sm">
+                <h3>Списано всего:</h3>
+                <h4>{{liquidated_stat.1}} ед. на {{liquidated_stat.0}} руб.</h4>
+              </div>
+            </div>
+          </div>
+
+<br><br>
+
+<form action="" method="get">
+    <label for="start">Start date:</label>
+
+<input type="date" id="start" name="start"
+       value=""
+       min="" >
+    <label for="start">End date:</label>
+
+<input type="date" id="end" name="end"
+       value=""
+       min="" >
+    
+    <button type='submit'>GO</button>
+</form>
+</div>
+
+    {% endblock %}

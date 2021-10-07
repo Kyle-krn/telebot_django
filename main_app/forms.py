@@ -1,5 +1,7 @@
 from django import forms
 from .models import *
+from django.contrib.auth.forms import AuthenticationForm
+
 
 class ProductForm(forms.ModelForm):
       title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -73,9 +75,14 @@ class ReceptionForm(forms.ModelForm):
 
 
 class QiwiTokenForm(forms.ModelForm):
-      number = forms.IntegerField(label='Номер телефона', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
-      token = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для токена'}))
+      number = forms.IntegerField(label='Номер телефона', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'text', 'pattern': '[0-9]{11}'}))
+      token = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для токена', 'type': 'text', 'minlength': 32, 'maxlength': 32}))
 
       class Meta:
             model = QiwiToken
             fields = ['number', 'token']
+
+
+class LoginUserForm(AuthenticationForm):
+    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))

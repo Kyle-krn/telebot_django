@@ -128,5 +128,7 @@ class PayProduct(models.Model):
 
 class QiwiToken(models.Model):
     number = models.IntegerField(blank=True, null=True)
+    balance = models.IntegerField(blank=True, null=True)
     token = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
+    blocked = models.BooleanField(default=False)
