@@ -28,7 +28,10 @@
                         Имя - {{qs.fio}} <br>
                         адрес - {{qs.address}} <br>
                         Индекс - {{qs.post_index}} <br>
-                        Телефон - {{qs.number}}
+                        Телефон - {{qs.number}} <br>
+                        {% if qs.user.username %}
+                        Телеграм - @{{qs.user.username}}
+                        {% endif %}
                     </div>
                     <div class="col-sm">
                         Доставка - {{qs.delivery_pay}} руб.<br>

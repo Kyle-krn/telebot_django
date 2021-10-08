@@ -155,7 +155,7 @@ def add_product_in_cart(call):
         cart_product.counter=False
         cart_product.save()
     bot.send_message(call.message.chat.id,
-                     f'{cart_product.product.title} {cart_product.count} добавлено в корзину', reply_markup=main_keyboard())
+                     f'Товар - {cart_product.product.title}, в кол-ве {cart_product.count} шт. добавлено в корзину', reply_markup=main_keyboard())
 
 
 

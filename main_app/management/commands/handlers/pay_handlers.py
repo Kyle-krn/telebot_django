@@ -28,11 +28,11 @@ def pay_handlers(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     qiwi = QiwiToken.objects.get(active=True)   # Получаем активный токен
     try:
-        balance = get_qiwi_balance(str(qiwi.number), str(qiwi.token))
+        balance = get_qiwi_balance(str(qiwi.number), str(qiwi.token))   # Пробуем получить баланс кошелька
         qiwi.balance = balance
         qiwi.save() 
         # Сделать отправку уведомления о том что токен не работает
-    except:
+    except:     # Если не получается, отмечаем его как заблокированный
         qiwi.blocked = True
         qiwi.active = False
         qiwi.save()
@@ -118,6 +118,7 @@ def check_pay_handlers(call):
         return
 
     timenow = datetime.datetime.now(datetime.timezone.utc)
+    
     
     time_passed = abs(int((pay_data.datetime - timenow).total_seconds() / 60))
     text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n {pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
