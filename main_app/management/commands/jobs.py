@@ -7,6 +7,7 @@ class Command(BaseCommand):
     help = 'Чистит базу'
 
     def handle(self, *args, **kwargs):
-        while True:
-            print('hi')
-            time.sleep(10)
+        text_file = open("sample.log", "a")
+        text_file.write("Hi...")
+        text_file.write("\n")
+        text_file.close()
