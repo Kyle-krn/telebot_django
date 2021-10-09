@@ -64,7 +64,7 @@ class TelegramUser(models.Model):
     username = models.CharField(max_length=255, blank=True, null=True)
     fio = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    number = models.IntegerField(blank=True, null=True)
+    number = models.BigIntegerField(blank=True, null=True)
     post_index = models.IntegerField(blank=True, null=True)
     search_data = models.CharField(max_length=255, blank=True, null=True)
 
@@ -91,14 +91,14 @@ class OrderingProduct(models.Model):
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     delivery_pay = models.IntegerField()
     sold_product = models.ManyToManyField(SoldProduct)  # Закончил здесь
-    track_code = models.IntegerField(blank=True, null=True)
+    track_code = models.BigIntegerField(blank=True, null=True)
     check_admin = models.BooleanField(default=False)
     datetime = models.DateTimeField(auto_now_add=True)
     
     fio = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    number = models.IntegerField(blank=True, null=True)
-    post_index = models.IntegerField(blank=True, null=True)
+    number = models.BigIntegerField(blank=True, null=True)
+    post_index = models.BigIntegerField(blank=True, null=True)
 
     def get_order_price(self):
         return sum([x.count * x.price for x in self.sold_product.all()]) + self.delivery_pay
@@ -127,7 +127,7 @@ class PayProduct(models.Model):
 
 
 class QiwiToken(models.Model):
-    number = models.IntegerField(blank=True, null=True)
+    number = models.BigIntegerField(blank=True, null=True)
     balance = models.IntegerField(blank=True, null=True)
     token = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
