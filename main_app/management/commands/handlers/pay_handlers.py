@@ -98,7 +98,7 @@ def check_pay_handlers(call):
         pay_data = PayProduct.objects.get(user__chat_id=call.message.chat.id)
     except PayProduct.DoesNotExist: 
         text = f'Ваша заявка была удалена по истичении времени\nЕсли вы оплатили, а ваша заяка удалилась, пожалуйста обратитесь к администратору - @здесь оставить контакт для связи'
-        bot.send_message(chat_id=call.message.chat.id, text=text, reply_markup=check_pay_keyboard())
+        bot.send_message(chat_id=call.message.chat.id, text=text)
         bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         return
 

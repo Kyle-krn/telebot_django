@@ -12,5 +12,5 @@ class Command(BaseCommand):
         queryset = PayProduct.objects.all()
         for item in queryset:
             time_passed = abs(int((item.datetime - timenow).total_seconds() / 60))
-            if time_passed > 2:
+            if time_passed >= 15:
                 item.delete()
