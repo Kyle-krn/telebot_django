@@ -3,6 +3,11 @@ import random
 import string
 from main_app.models import QiwiToken
 from vape_shop.settings import QIWI_TOKEN
+import smtplib                                      # Импортируем библиотеку по работе с SMTP
+
+from email.mime.multipart import MIMEMultipart      # Многокомпонентный объект
+from email.mime.text import MIMEText                # Текст/HTML
+from email.mime.image import MIMEImage              # Изображения
 
 def check_price_delivery(post_index, weight):
     '''Расчет стоймости доставки'''
@@ -69,3 +74,31 @@ def generate_alphanum_random_string(length):
     letters_and_digits = string.ascii_letters + string.digits
     rand_string = ''.join(random.sample(letters_and_digits, length))
     return rand_string
+
+
+def send_email(text):
+    addr_from = r"bot3888callback@gmail.com"                 # Адресат
+    # addr_to   = "bt@3888.ru"                   # Получатель
+    addr_to = "egorjkee96@gmail.com"
+    password  = "Bot3888callback*&!/."                                  # Пароль
+    # password  = "iphone95"                                  # Пароль
+    msg = MIMEMultipart()                               # Создаем сообщение
+    msg['From']    = addr_from                          # Адресат
+    msg['To']      = addr_to                            # Получатель
+    msg['Subject'] = 'Тема сообщения'
+    body = text
+
+    msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
+    ctype = 'application/octet-stream'  # Будем использовать общий тип
+    maintype, subtype = ctype.split('/', 1)  # Получаем тип и подтип
+
+    # file.add_header('Content-Disposition', 'attachment', filename=filename) # Добавляем заголовки
+
+
+    server = smtplib.SMTP(host='smtp.gmail.com: 587')         # Создаем объект SMTP
+    server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
+    server.starttls()                                   # Начинаем шифрованный обмен по TLS
+    server.login(addr_from, password)                 # Получаем доступ
+    server.send_message(msg)                            # Отправляем сообщение
+    server.quit()
+

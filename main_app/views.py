@@ -13,7 +13,7 @@ from django.contrib.auth import logout
 
 
 class LoginUser(LoginView):
-    """В приложении не используется, можно использовать для стандартной аутентификации"""
+    '''Аутенификация пользователя'''
     form_class = LoginUserForm
     template_name = 'main_app/login.html'
 
@@ -27,6 +27,7 @@ class LoginUser(LoginView):
 
 
 def logout_user(request):
+    '''Выход'''
     logout(request)
     return redirect('login')
 
@@ -45,14 +46,6 @@ def index(request):
             product = product.filter(subcategory__category__pk=int(params['category']))
         if 'subcategory' in params:
             product = product.filter(subcategory__pk=int(params['subcategory']))
-        if 'from_price' in params:
-            product = product.filter(price__gte=int(params['from_price']))
-        if 'to_price' in params:
-            product = product.filter(price__lte=int(params['to_price']))
-        if 'from_count' in params:
-            product = product.filter(count__gte=int(params['from_count']))
-        if 'to_count' in params:
-            product = product.filter(count__lte=int(params['to_count']))
         if 'order_by' in params:
             product = product.order_by(params['order_by'])
     return render(request, 'main_app/index.html', {'product': product, 'category': category})
