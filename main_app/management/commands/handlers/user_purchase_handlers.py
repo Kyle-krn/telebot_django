@@ -6,7 +6,7 @@ from dadata import Dadata
 from django.db.models import Q
 
 
-@bot.message_handler(regexp='^(Мои товары)$')
+@bot.message_handler(regexp='^(📂 Мои товары)$')
 def my_purchase_handlers(message):
     order_product_queryset = OrderingProduct.objects.filter(user__chat_id=message.chat.id)
     if not order_product_queryset:

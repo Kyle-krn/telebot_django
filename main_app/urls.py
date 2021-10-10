@@ -5,12 +5,13 @@ from vape_shop import settings
 
 
 urlpatterns = [
-    path('', index, name='all_product'),
+    path('', IndexView.as_view(), name='all_product'),
     path('product/<int:pk>', product_view, name='productdetail'),
     path('category/<int:pk>', category_view, name='category_detail'),
     path('subcategory/<int:pk>', subcategory_view, name='subcategory_detail'),
     path('add_category/', create_category, name='add_category'),
-    path('add_product/', create_product, name='add_product'),
+    path('add_product/', CreateProductView.as_view(), name='add_product'),
+    # path('l/', CreateProductView.as_view(), name='add_product'),
     path('new_order/', new_order, name='new_order'),
     path('old_order/', old_order, name='old_order'),
     path('qiwi/', control_qiwi, name='qiwi'),

@@ -41,7 +41,7 @@ def catalog(message):
             item.product.save()
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=user_id) & Q(counter=True)).delete()  # Удаляем каунтер продукта
     categories = Category.objects.filter(subcategory__product__count__gte=1).distinct() # Только категории в которых есть товар
-    bot.send_photo(chat_id=user_id, photo=cat_photo, caption=f'Выберите категорию', reply_markup=category_keyboard(categories))
+    bot.send_photo(chat_id=user_id, photo=cat_photo, caption=f'Выберите категорию:', reply_markup=category_keyboard(categories), parse_mode='markdown')
 
 
 @bot.callback_query_handler(func=lambda call: call.data in category_list)
@@ -55,7 +55,7 @@ def category(call):
     subcategory = category.subcategory_set.filter(product__count__gte=1).distinct() # Только подкатегории где есть товар
     photo = open(category.photo.path, 'rb')
     bot.edit_message_media(chat_id=call.message.chat.id, media=types.InputMediaPhoto(
-        media=photo, caption=f'{category.name}\n\nВыберите подкатегорию:'), message_id=call.message.message_id, reply_markup=category_keyboard(subcategory, back=True))
+        media=photo, caption=f'***Категория - {category.name}***\n\nВыберите подкатегорию:', parse_mode='markdown'), message_id=call.message.message_id, reply_markup=category_keyboard(subcategory, back=True))
 
 
 @bot.callback_query_handler(func=lambda call: call.data in subcategory_list)
@@ -72,7 +72,7 @@ def subcategory(call):
     category_slug = subcategory.category.slug
     photo = open(subcategory.photo.path, 'rb')
     bot.edit_message_media(chat_id=call.message.chat.id, media=types.InputMediaPhoto(media=photo, 
-                                                         caption=f'{subcategory.category.name}\n{subcategory.name}\n\nВыберите товар:'),   
+                                                         caption=f'***Категория - {subcategory.category.name}\nПодкатеогрия - {subcategory.name}***\n\nВыберите товар:', parse_mode='markdown'),   
                            message_id=call.message.message_id, 
                            reply_markup=product_keyboard(category_slug, products))
 
@@ -91,9 +91,9 @@ def product(call):
         product=Product.objects.get(slug=slug)
         if product.count <= 0:  # Если юзер на странице товара, но он закончился
             bot.delete_message(call.message.chat.id, call.message.message_id)
-            return bot.send_message(chat_id=call.message.chat.id, text='К сожалению данный товар только что закончился')
+            return bot.send_message(chat_id=call.message.chat.id, text='К сожалению данный товар только что закончился.')
     except:
-        return bot.send_message(call.message.chat.id, 'Упс, что то пошло не так')
+        return bot.send_message(call.message.chat.id, 'Упс, что то пошло не так.')
 
     user=TelegramUser.objects.get(chat_id=call.message.chat.id)
     counter=TelegramProductCartCounter.objects.get_or_create(user=user, counter=True, defaults={   
@@ -108,7 +108,7 @@ def product(call):
 
         if counter[0].count > product.count:    # Если в каунтере больше кол-во чем в товаре
             bot.answer_callback_query(
-            callback_query_id=call.id, text='Максимум {product.count} ед. товара', show_alert=False)
+            callback_query_id=call.id, text=f'Максимум {product.count} ед. товара', show_alert=False)
             counter[0].count = product.count
         else:
             if counter[0].count <= 0:   # Если юзер хочет установить кол-во 0 или меньше
@@ -116,20 +116,23 @@ def product(call):
                     callback_query_id=call.id, text='Минимум 1 штука для покупки!', show_alert=False)
                 counter[0].count=1
             elif counter[0].count >= product.subcategory.category.max_count_product:    # Если в канутере больше чем в макс. разрешенном для категории кол-ва
-                bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт')
+                bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт.')
                 counter[0].count=product.subcategory.category.max_count_product
         counter[0].save()   # Сохраняем каунтер после всех веток 
     keyboard=buy_keyboard(subcat_slug=product.subcategory.slug,
                             slug=slug,
                             count=counter[0].count)
     photo = open(product.photo.path, 'rb')
+
+    text = f'*Название -* {product.title}\n*Цена -* {product.price} руб.\n*Описание -* {product.description}\n*Остаток -* {product.count}шт.'
+
     if call.data.split('~')[0] == 'search_p':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.send_photo(chat_id=call.message.chat.id, photo=photo, caption=f'Название - {product.title}\nЦена - {product.price}\nОписание - {product.description}\nОстаток - {product.count}', reply_markup=keyboard)
+        bot.send_photo(chat_id=call.message.chat.id, photo=photo, caption=text, reply_markup=keyboard, parse_mode='markdown')
         
     bot.edit_message_media(chat_id=call.message.chat.id, 
                            media=types.InputMediaPhoto(media=photo, 
-                                                       caption=f'Название - {product.title}\nЦена - {product.price}\nОписание - {product.description}\nОстаток - {product.count}'),   
+                                                       caption=text, parse_mode='markdown'),   
                            message_id=call.message.message_id, 
                            reply_markup=keyboard)
     
@@ -155,7 +158,7 @@ def add_product_in_cart(call):
         cart_product.counter=False
         cart_product.save()
     bot.send_message(call.message.chat.id,
-                     f'Товар - {cart_product.product.title}, в кол-ве {cart_product.count} шт. добавлено в корзину', reply_markup=main_keyboard())
+                     f'{cart_product.product.title}, в кол-ве {cart_product.count} шт. добавлен в корзину.', reply_markup=main_keyboard())
 
 
 

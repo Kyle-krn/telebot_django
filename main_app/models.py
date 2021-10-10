@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 # from django.utils.text import slugify
 from slugify import slugify
+from django.urls import reverse
+
 
 
 class Category(models.Model):
@@ -32,11 +34,17 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField(default=0)
     slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
-    # Закупочная стоймость
     subcategory = models.ForeignKey(
     SubCategory, on_delete=models.CASCADE)
     weight = models.IntegerField()
 
+    def save(self, *args, **kwargs):
+        super(Product, self).save(*args, **kwargs)
+        self.slug = f'p||{self.pk}'
+        super(Product, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('productdetail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return self.title

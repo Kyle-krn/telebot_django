@@ -78,7 +78,6 @@ def generate_alphanum_random_string(length):
 
 def send_email(text):
     addr_from = r"bot3888callback@gmail.com"                 # Адресат
-    # addr_to   = "bt@3888.ru"                   # Получатель
     addr_to = "egorjkee96@gmail.com"
     password  = "Bot3888callback*&!/."                                  # Пароль
     # password  = "iphone95"                                  # Пароль

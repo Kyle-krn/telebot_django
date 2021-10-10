@@ -9,11 +9,12 @@ class ProductForm(forms.ModelForm):
       price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
       weight = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
-    
+      
       class Meta:
             model = Product
             fields = '__all__'
             fields = ['title', 'photo', 'description', 'price', 'subcategory', 'weight']
+
 
 class Product_reqForm(forms.ModelForm):
       title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))

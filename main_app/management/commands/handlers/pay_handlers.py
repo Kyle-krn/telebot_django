@@ -1,6 +1,7 @@
 from .handlers import bot
 from main_app.models import *
 from main_app.management.commands.keyboards import *
+from main_app.management.commands.utils import *
 from django.db.models import Q
 from main_app.management.commands.utils import *
 import datetime
@@ -26,8 +27,12 @@ def cancel_pay_handlers(call):
 def pay_handlers(call):
     '''Переход на кнопку - оплатить'''
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-    qiwi = QiwiToken.objects.get(active=True)   # Получаем активный токен
     try:
+        qiwi = QiwiToken.objects.get(active=True)   # Получаем активный токен
+    except QiwiToken.DoesNotExist:
+        return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна')
+        
+    try:       
         balance = get_qiwi_balance(str(qiwi.number), str(qiwi.token))   # Пробуем получить баланс кошелька
         qiwi.balance = balance
         qiwi.save() 
@@ -36,6 +41,7 @@ def pay_handlers(call):
         qiwi.blocked = True
         qiwi.active = False
         qiwi.save()
+        send_email('Что то случилось с кошельком')
         return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна')
     
     pay_word = generate_alphanum_random_string(6)   # Генерим платежный комент
@@ -74,6 +80,7 @@ def check_pay_next_handler(message):
             qiwi.blocked = True
             qiwi.active = False
             qiwi.save()
+            send_email('Что то случилось с кошельком')
             return bot.send_message(chat_id=message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна')
 
         bot.send_message(chat_id=message.chat.id, text='Ваш заказ принят!')
@@ -109,6 +116,7 @@ def check_pay_handlers(call):
             qiwi.blocked = True
             qiwi.active = False
             qiwi.save()
+            send_email('Что то случилось с кошельком')
             bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
             return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна ')
         bot.send_message(chat_id=call.message.chat.id, text='Ваш заказ принят!')
@@ -128,6 +136,8 @@ def check_pay_handlers(call):
 def sold_product(user, pay_data):
     '''Успешная оплата'''
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
+    product_pay = sum([x.count * x.product.price for x in cart])
+    send_email(f'У вас новый заказ на сумму {pay_data.product_pay+pay_data.delivery_pay} руб.')
     order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index)
     for item in cart:
         sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count)

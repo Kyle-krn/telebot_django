@@ -1,21 +1,21 @@
 {% extends 'main_app/base.html' %}
 {% block content %}
 {% load static %}
+
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-
     <div class="row align-items-center">
         <div class="col-8">
             <div class="fieldWrapper">
-                {{ product_form.title.errors }}
-                <label for="{{ product_form.title.id_for_label }}">Название товара:</label>
-                {{ product_form.title }}
+                {{ form.title.errors }}
+                <label for="{{ form.title.id_for_label }}">Название товара:</label>
+                {{ form.title }}
             </div>
             <br>
             <div class="fieldWrapper">
-                {{ product_form.description.errors }}
-                <label for="{{ product_form.description.id_for_label }}">Описание:</label>
-                {{ product_form.description }}
+                {{ form.description.errors }}
+                <label for="{{ form.description.id_for_label }}">Описание:</label>
+                {{ form.description }}
             </div>
             <br>
         </div>
@@ -37,22 +37,22 @@
     <div class="row">
         <div class="col-sm">
             <div class="fieldWrapper">
-                {{ product_form.price.errors }}
-                <label for="{{ product_form.price.id_for_label }}">Цена:</label>
-                {{ product_form.price }}
+                {{ form.price.errors }}
+                <label for="{{ form.price.id_for_label }}">Цена:</label>
+                {{ form.price }}
             </div>
         </div>
         <div class="col-sm">
             <div class="fieldWrapper">
-                {{ product_form.weight.errors }}
-                <label for="{{ product_form.weight.id_for_label }}">Вес:</label>
-                {{ product_form.weight }}
+                {{ form.weight.errors }}
+                <label for="{{ form.weight.id_for_label }}">Вес:</label>
+                {{ form.weight }}
             </div>
         </div>
         <div class="col-sm">
             <div class="fieldWrapper">
-                {{ product_form.subcategory.errors }}
-                <label for="{{ product_form.subcategory.id_for_label }}">Категория:</label>
+                {{ form.subcategory.errors }}
+                <label for="{{ form.subcategory.id_for_label }}">Категория:</label>
                 <!-- {{ product_form.subcategory }} -->
 
                 <select class="form-select" name="subcategory" required id='id_subcategory'>
@@ -74,9 +74,9 @@
     <br>
 
     <div class="fieldWrapper">
-        {{ product_form.photo.errors }}
-        <label for="{{ product_form.photo.id_for_label }}">Фото:</label>
-        {{ product_form.photo }}
+        {{ form.photo.errors }}
+        <label for="{{ form.photo.id_for_label }}">Фото:</label>
+        {{ form.photo }}
     </div>
     <br>
     <div class='text-end'>

@@ -19,14 +19,14 @@ def stop_next_step_handlers(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
 
 
-@bot.message_handler(regexp='^(Данные о доставке)$')
+@bot.message_handler(regexp='^(📦 Данные для доставки)$')
 def post_data(message):
     try:
         user = TelegramUser.objects.get(chat_id=message.chat.id)
     except TelegramUser.DoesNotExist:
         bot.send_message(chat_id=message.chat.id, text='Упс что то пошло не так')
         return
-
+        
     if not user.post_index:
         message = bot.send_message(message.chat.id, f"Укажите ваш индекс: ", reply_markup=cancel_next_step_keyboard())
         bot.register_next_step_handler(message, input_index)

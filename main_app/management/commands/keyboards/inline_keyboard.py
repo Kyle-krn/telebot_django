@@ -48,6 +48,8 @@ def cart_keyboard(pay=None):
     if pay:
         if QiwiToken.objects.filter(active=True):
             keyboard.add(types.InlineKeyboardButton(text='Оплатить', callback_data=f'pay~{pay}'))
+    else:
+        keyboard.add(types.InlineKeyboardButton(text='Заполнить данные для доставки', callback_data='new_delivery_data'))
     button = types.InlineKeyboardButton(text='Изменить корзину', callback_data='change_cart')
     keyboard.add(button)
     return keyboard

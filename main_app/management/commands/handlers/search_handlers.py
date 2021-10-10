@@ -4,7 +4,7 @@ from main_app.management.commands.keyboards import *
 from django.db.models import Q
 
 
-@bot.message_handler(regexp='^(Поиск товаров)$')
+@bot.message_handler(regexp='^(🔎 Поиск товаров)$')
 def search_cat_product_handlers(message):
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=message.chat.id) & Q(counter=True)).delete()
     categories = Category.objects.filter(

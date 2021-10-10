@@ -10,6 +10,12 @@ from main_app.management.commands.utils import get_qiwi_balance
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
+from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import CreateView, FormView
+
+
 
 
 class LoginUser(LoginView):
@@ -31,30 +37,39 @@ def logout_user(request):
     logout(request)
     return redirect('login')
 
-def index(request):
-    '''Вывод всех товаров на главной странице'''
-    if not request.user.is_authenticated:
-        return redirect('login')
-    product = Product.objects.all()
-    category = Category.objects.all()
-    if 'search' in request.GET:
-        params = {k:v for k,v in request.GET.items() if len(v) != 0}
-        print(params)
-        if 'title' in params:
-            product = product.filter(title__icontains=params['title'])
-        if 'category' in params:
-            product = product.filter(subcategory__category__pk=int(params['category']))
-        if 'subcategory' in params:
-            product = product.filter(subcategory__pk=int(params['subcategory']))
-        if 'order_by' in params:
-            product = product.order_by(params['order_by'])
-    return render(request, 'main_app/index.html', {'product': product, 'category': category})
+
+class IndexView(ListView):
+    context_object_name = 'product'
+    template_name = 'main_app/index.html'
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        if 'search' in self.request.GET:
+            params = {k:v for k,v in self.request.GET.items() if len(v) != 0}
+            if 'title' in params:
+                queryset = queryset.filter(title__icontains=params['title'])
+            if 'category' in params:
+                queryset = queryset.filter(subcategory__category__pk=int(params['category']))
+            if 'subcategory' in params:
+                queryset = queryset.filter(subcategory__pk=int(params['subcategory']))
+            if 'order_by' in params:
+                queryset = queryset.order_by(params['order_by'])
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = Category.objects.all()
+        return context
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        return super().get(request)
 
 
+@login_required
 def product_view(request, pk):
     '''Страница изменения продукта/добавления кол-ва в товар и списание'''
-    if not request.user.is_authenticated:
-        return redirect('login')
     product = get_object_or_404(Product, pk=pk)
     category = Category.objects.all()
     if request.method == "POST" and 'update' in request.POST:
@@ -97,13 +112,21 @@ def product_view(request, pk):
     sold_stat = (sum([x.count * x.price for x in sold_queryset]), sum([x.count for x in sold_queryset]))
     reception_stat = (sum([x.count * x.price for x in reception_queryset]), sum([x.count for x in reception_queryset]))
     liquidated_stat = sum([x.count * x.price for x in reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in reception_queryset.filter(liquidated=True)])
-    all_stat = sold_stat[0] - reception_stat[0] - liquidated_stat[0]
+    all_stat = sold_stat[0] - reception_stat[0]
     
 
     params = {k:v for k,v in request.GET.items() if len(v) != 0}
+    if 'start' in params and 'end' in params:
+        sold_queryset = sold_queryset.filter(date__range=[params['start'], params['end']])
+        reception_queryset = reception_queryset.filter(date__range=[params['start'], params['end']])
+    elif 'start' in params:
+        sold_queryset = sold_queryset.filter(date__gte=params['start'])
+        reception_queryset = reception_queryset.filter(date__gte=params['start'])
+    elif 'end' in params:
+        sold_queryset = sold_queryset.filter(date__lte=params['end'])
+        reception_queryset = reception_queryset.filter(date__lte=params['end'])      
 
     if 'only' in params:
-        print('here')
         if params['only'] == 'reception':
             result_list = reception_queryset.filter(liquidated=False)
         elif params['only'] == 'sold':
@@ -134,6 +157,18 @@ def product_view(request, pk):
                                                      })
 
 
+
+class CreateProductView(LoginRequiredMixin, CreateView):
+    template_name = 'main_app/add_product.html'
+    form_class = ProductForm   
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = Category.objects.all()
+        return context
+
+
+
 def create_product(request):
     '''Страница создания товара'''
     if not request.user.is_authenticated:
@@ -148,7 +183,7 @@ def create_product(request):
 
     product_form = ProductForm(initial={'count': 0})
     category = Category.objects.all()
-    return render(request, 'main_app/add_product.html', {'product_form': product_form, 'category': category})
+    return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
 
 
 def reception_product(request):
@@ -324,5 +359,4 @@ def user_stat(request):
     reception_stat = (sum([x.count * x.price for x in reception_queryset]), sum([x.count for x in reception_queryset]))
     liquidated_stat = sum([x.count * x.price for x in reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in reception_queryset.filter(liquidated=True)])
     all_stat = sold_stat[0] - reception_stat[0] - liquidated_stat[0]
-
     return render(request, 'main_app/user_stat.html', context={'users': users, 'sold_stat': sold_stat, 'reception_stat': reception_stat, 'liquidated_stat': liquidated_stat, 'all_stat': all_stat})
