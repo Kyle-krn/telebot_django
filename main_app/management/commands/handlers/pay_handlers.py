@@ -53,7 +53,7 @@ def pay_handlers(call):
     for item in cart: # бронируем товар в каталоге
         item.product.count -= item.count
         item.product.save()
-    text = f'Переведите на кошелек +{qiwi.number} {delivery_pay+product_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n {pay_word}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
+    text = f'Переведите на кошелек +{qiwi.number} {delivery_pay+product_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n{pay_word}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
     message = bot.send_message(chat_id=call.message.chat.id,
                           text=text, reply_markup=check_pay_keyboard())
     bot.register_next_step_handler(message, check_pay_next_handler)
