@@ -30,9 +30,18 @@ def catalog(message):
     update_lists()  
     try:
         user_id = message.chat.id
+        data = message.chat
     except AttributeError:  # Если юзер попадает на данный хендлер через кнопку назад
         user_id = message.message.chat.id
         bot.delete_message(user_id, message.message.message_id)
+        data = message.message.chat
+
+    TelegramUser.objects.get_or_create(chat_id=data.id,
+                                       defaults={
+                                           'first_name': data.first_name,
+                                           'last_name': data.last_name,
+                                           'username': data.username
+                                       })
 
     cart = TelegramProductCartCounter.objects.filter(Q(user__chat_id=user_id) & Q(counter=False))
     if PayProduct.objects.filter(user__chat_id=user_id).delete()[0]:    # Добавляем забронированные товары обратно

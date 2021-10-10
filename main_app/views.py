@@ -186,11 +186,28 @@ def create_product(request):
     return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
 
 
+
 def reception_product(request):
+    if request.method == "POST":
+        form = ReceptionForm(request.POST)
+        if form.is_valid():
+            product_pk = int(request.POST['product_pk'])
+            product = Product.objects.get(pk=product_pk)
+            product.count += form.cleaned_data['count']
+            product.save()
+            f = form.save(commit=False)
+            f.product = product
+            f.save()
+            messages.info(request, 'Успешно!')
+
+        # product_pk = int(request.POST['subcategory'][0])
+        # product = Product.objects.get(pk=request.POST['subc'])
+
     if not request.user.is_authenticated:
         return redirect('login')
+    subcategory = SubCategory.objects.all()
     reception_form = ReceptionForm()
-    return render(request, 'main_app/reception.html', {'reception_form': reception_form})
+    return render(request, 'main_app/reception.html', {'form': reception_form, 'subcategory': subcategory})
 
 
 def create_category(request):

@@ -9,6 +9,13 @@ from django.db.models import Q
 @bot.message_handler(regexp='^(📂 Мои товары)$')
 def my_purchase_handlers(message):
     order_product_queryset = OrderingProduct.objects.filter(user__chat_id=message.chat.id)
+    data = message.chat
+    TelegramUser.objects.get_or_create(chat_id=data.id,
+                                       defaults={
+                                           'first_name': data.first_name,
+                                           'last_name': data.last_name,
+                                           'username': data.username
+                                       })
     if not order_product_queryset:
         text = 'У вас еще нет покупок'
         return bot.send_message(chat_id=message.chat.id, text=text)

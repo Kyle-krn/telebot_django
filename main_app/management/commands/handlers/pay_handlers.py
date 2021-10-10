@@ -119,7 +119,11 @@ def check_pay_handlers(call):
             send_email('Что то случилось с кошельком')
             bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
             return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна ')
-        bot.send_message(chat_id=call.message.chat.id, text='Ваш заказ принят!')
+
+        balance = get_qiwi_balance(str(qiwi.number), str(qiwi.token))
+        qiwi.balance = balance
+        qiwi.save()
+        bot.send_message(chat_id=call.message.chat.id, text='Ваш заказ принят! В скором времени трек-номер заказа появится в Ваших покупках.')
         user = TelegramUser.objects.get(chat_id=call.message.chat.id)
         bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         sold_product(user, pay_data)

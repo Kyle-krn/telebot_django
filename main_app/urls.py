@@ -19,6 +19,7 @@ urlpatterns = [
     path('reception/<int:pk>', reception_product, name='reception'),
     path('login/', LoginUser.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),
+    path('reception/', reception_product, name='reception'),
     ]
 
 

@@ -11,13 +11,23 @@ import requests
 @bot.message_handler(regexp='^(🛒 Корзина)$')
 @bot.callback_query_handler(func=lambda call: call.data == 'back_cart')
 def cart_handlers(message):
+    
     '''Главная страница корзины'''
     text = ''
     try:
         user_id = message.chat.id
+        data = message.chat
     except AttributeError:  # Если юзер переходит по кнопке назад 
         bot.delete_message(message.message.chat.id, message.message.message_id)
         user_id = message.message.chat.id
+        data = message.message.chat
+        
+    TelegramUser.objects.get_or_create(chat_id=data.id,
+                                       defaults={
+                                           'first_name': data.first_name,
+                                           'last_name': data.last_name,
+                                           'username': data.username
+                                       })
 
     user = TelegramUser.objects.get(chat_id=user_id)
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))

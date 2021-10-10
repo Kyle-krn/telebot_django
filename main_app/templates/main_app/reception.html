@@ -1,11 +1,32 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+  <div class="alert alert-success" role="alert">{{ message }}</div>
+  {% endfor %}
+</ul>
+{% endif %}
+
 <form action="" method='POST'>
     {% csrf_token %}
     {{form.as_p}}
+    <label for="{{ form.subcategory.id_for_label }}">Товар:</label>
+    <select class="form-select" name="product_pk">
+        {% for sc in subcategory %}
+        <optgroup label="{{sc.name}}">
+            {% for p in sc.product_set.all %}
+            <option selected value="{{p.pk}}">{{p.title}}</option>
+            {% endfor %}
+        </optgroup>
+        {% endfor %}
+    </select>
+<br>
     <div class='text-end'>
         <button type="submit" class="btn btn-success">Добавить </button>
     </div>
 </form>
+
+
 {% endblock %}

@@ -7,6 +7,14 @@ from django.db.models import Q
 @bot.message_handler(regexp='^(🔎 Поиск товаров)$')
 def search_cat_product_handlers(message):
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=message.chat.id) & Q(counter=True)).delete()
+    data = message.chat
+    TelegramUser.objects.get_or_create(chat_id=data.id,
+                                       defaults={
+                                           'first_name': data.first_name,
+                                           'last_name': data.last_name,
+                                           'username': data.username
+                                       })
+
     categories = Category.objects.filter(
         subcategory__product__count__gte=1).distinct()
     keyboard = search_category_keyboard(categories)
