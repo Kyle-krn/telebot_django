@@ -32,11 +32,11 @@ def track_code_handlers(call):
         return bot.send_message(chat_id=call.message.chat.id, text='Что то пошло не так')
     text = ''
     for item in order_product.sold_product.all():
-        text += f'Товар - {item.product.title}\nКоличество - {item.count}\n\n'
+        text += f'***Товар -*** {item.product.title}\n***Количество -*** {item.count} шт.\n\n'
     
     if not order_product.track_code:
         text += 'У вашего заказа пока нет трек номера, но совсем скоро он здесь появится'
 
     else:
-        text += f'Трек номер вашего заказа - {order_product.track_code}'
-    bot.send_message(chat_id=call.message.chat.id, text=text)
+        text += f'***Трек номер вашего заказа -*** {order_product.track_code}'
+    bot.send_message(chat_id=call.message.chat.id, text=text, parse_mode='markdown')

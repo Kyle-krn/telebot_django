@@ -18,7 +18,7 @@ def search_cat_product_handlers(message):
     categories = Category.objects.filter(
         subcategory__product__count__gte=1).distinct()
     keyboard = search_category_keyboard(categories)
-    bot.send_message(chat_id=message.chat.id, text='Выберите категорию', reply_markup=keyboard)
+    bot.send_message(chat_id=message.chat.id, text='Выберите категорию:', reply_markup=keyboard)
     # message = bot.send_message(message.chat.id, f"Введите название товара: ", reply_markup=cancel_next_step_keyboard())
     # bot.register_next_step_handler(message, input_title_product)
 
@@ -29,7 +29,7 @@ def seatch_product_handlers(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     category_slug = call.data.split('~')[1]
     TelegramUser.objects.filter(chat_id=call.message.chat.id).update(search_data=category_slug)
-    message = bot.send_message(call.message.chat.id, f"Введите название товара: ", reply_markup=cancel_next_step_keyboard())
+    message = bot.send_message(call.message.chat.id, f"Введите название товара:", reply_markup=cancel_next_step_keyboard())
     bot.register_next_step_handler(message, input_title_product)
 
 def input_title_product(message):

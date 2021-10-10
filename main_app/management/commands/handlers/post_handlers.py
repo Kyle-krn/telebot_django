@@ -39,7 +39,7 @@ def post_data(message):
         message = bot.send_message(message.chat.id, f"Укажите ваш индекс: ", reply_markup=cancel_next_step_keyboard())
         bot.register_next_step_handler(message, input_index)
     else:
-        bot.send_message(chat_id=message.chat.id, text=f'Введенные данные:\n {user.post_index}\n\n{user.address}\n\n{user.fio}\n\n{user.number}', reply_markup=edit_delivery_data_keyboard())
+        bot.send_message(chat_id=message.chat.id, text=f'Введенные данные:\n***Индекс -*** {user.post_index}\n\n***Адрес -*** {user.address}\n\n***ФИО -*** {user.fio}\n\n***Номер телефона -*** {user.number}', reply_markup=edit_delivery_data_keyboard(), parse_mode='markdown')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'new_delivery_data')
