@@ -91,7 +91,7 @@ def check_pay_next_handler(message):
     timenow = datetime.datetime.now(datetime.timezone.utc)
     
     time_passed = abs(int((pay_data.datetime - timenow).total_seconds() / 60))
-    text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n {pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
+    text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n{pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
     message = bot.send_message(chat_id=message.chat.id, text=text, reply_markup=check_pay_keyboard())
     bot.register_next_step_handler(message, check_pay_next_handler)
 
@@ -104,7 +104,7 @@ def check_pay_handlers(call):
     try:
         pay_data = PayProduct.objects.get(user__chat_id=call.message.chat.id)
     except PayProduct.DoesNotExist: 
-        text = f'Ваша заявка была удалена по истичении времени\nЕсли вы оплатили, а ваша заяка удалилась, пожалуйста обратитесь к администратору - @здесь оставить контакт для связи'
+        text = f'Ваша заявка была удалена по истичению времени\nЕсли вы оплатили, а ваша заяка удалилась, пожалуйста обратитесь к администратору - @здесь оставить контакт для связи'
         bot.send_message(chat_id=call.message.chat.id, text=text)
         bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
         return
@@ -118,11 +118,12 @@ def check_pay_handlers(call):
             qiwi.save()
             send_email('Что то случилось с кошельком')
             bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
-            return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна ')
+            return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна.')
 
         balance = get_qiwi_balance(str(qiwi.number), str(qiwi.token))
         qiwi.balance = balance
         qiwi.save()
+
         bot.send_message(chat_id=call.message.chat.id, text='Ваш заказ принят! В скором времени трек-номер заказа появится в Ваших покупках.')
         user = TelegramUser.objects.get(chat_id=call.message.chat.id)
         bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
@@ -133,7 +134,7 @@ def check_pay_handlers(call):
     
     
     time_passed = abs(int((pay_data.datetime - timenow).total_seconds() / 60))
-    text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n {pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
+    text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n{pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты.'
     bot.send_message(chat_id=call.message.chat.id, text=text, reply_markup=check_pay_keyboard())
 
 
