@@ -76,6 +76,7 @@ def check_pay_next_handler(message):
     qiwi = QiwiToken.objects.get(active=True)
     
     if answer:
+    # if True:
         if answer == 'error':
             qiwi.blocked = True
             qiwi.active = False

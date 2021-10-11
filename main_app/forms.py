@@ -93,7 +93,16 @@ class QiwiTokenForm(forms.ModelForm):
             model = QiwiToken
             fields = ['number', 'token']
 
+class TrackCodeForm(forms.ModelForm):
+      # track_code = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form_control', 'type': 'text'}))
+
+      class Meta:
+            model = OrderingProduct
+            fields = ['track_code']
+
 
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+
+

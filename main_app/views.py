@@ -16,8 +16,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, FormView, UpdateView
 
 
-
-
 class LoginUser(LoginView):
     '''Аутенификация пользователя'''
     form_class = LoginUserForm
@@ -187,7 +185,7 @@ class CreateProductView(LoginRequiredMixin, CreateView):
 #     category = Category.objects.all()
 #     return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
 
-class ReceptionProductView(CreateView):
+class ReceptionProductView(LoginRequiredMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'main_app/reception.html'
     form_class = ReceptionForm
@@ -263,7 +261,8 @@ def create_category(request):
     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'category': category})
 
 
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+    '''Обновить категорию'''
     model = Category
     template_name = 'main_app/category_detail.html'
     form_class = Category_reqForm
@@ -280,69 +279,103 @@ class CategoryUpdateView(UpdateView):
 
 
 
-def category_view(request, pk):
-    if not request.user.is_authenticated:
-        return redirect('login')
+# def category_view(request, pk):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
 
-    category = get_object_or_404(Category, pk=pk)
-    if request.method == "POST":
-        category_form = Category_reqForm(request.POST, files=request.FILES, instance=category)
-        if category_form.is_valid():
-            category_form.save()
-        return redirect('add_category')
+#     category = get_object_or_404(Category, pk=pk)
+#     if request.method == "POST":
+#         category_form = Category_reqForm(request.POST, files=request.FILES, instance=category)
+#         if category_form.is_valid():
+#             category_form.save()
+#         return redirect('add_category')
+#     if request.method == 'GET' and 'delete' in request.GET:
+#         messages.info(request, 'Вы уверены?')
+#     elif request.method == 'GET' and 'confirm_delete' in request.GET:
+#         messages.info(request, 'Категория успешно удалена')
+#         category.delete()
+#         return redirect('add_category')
+#     category_form = Category_reqForm(initial={'name': category.name, 'max_count_product': category.max_count_product})
+#     return render(request, 'main_app/category_detail.html', {'category': category, 'form': category_form})
+
+
+class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
+    '''Обновить подкатегорию'''
+    model = SubCategory
+    template_name = 'main_app/category_detail.html'
+    form_class = Subcategory_reqForm
+    success_url = reverse_lazy('add_category')
+
+    def get(self, *args, **kwargs):
+        if 'delete' in self.request.GET:
+            messages.info(self.request, 'Вы уверены?')
+        if 'confirm_delete' in self.request.GET:
+            category = self.get_object()
+            category.delete()
+            return redirect('add_category')  
+        return super().get(self)
+
+
+# def subcategory_view(request, pk):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     subcategory = get_object_or_404(SubCategory, id=pk)
+#     if request.method == "POST":
+#         category_form = Subcategory_reqForm(request.POST, files=request.FILES, instance=subcategory)
+#         if category_form.is_valid():
+#             category_form.save()
+#         return redirect('add_category')
     
-    if request.method == 'GET' and 'delete' in request.GET:
-        messages.info(request, 'Вы уверены?')
+#     if request.method == 'GET' and 'delete' in request.GET:
+#         messages.info(request, 'Вы уверены?')
 
-    elif request.method == 'GET' and 'confirm_delete' in request.GET:
-        messages.info(request, 'Категория успешно удалена')
-        category.delete()
-        return redirect('add_category')
+#     elif request.method == 'GET' and 'confirm_delete' in request.GET:
+#         messages.info(request, 'Категория успешно удалена')
+#         subcategory.delete()
+#         return redirect('add_category')
 
+#     category_form = Subcategory_reqForm(initial={'name': subcategory.name})
+#     return render(request, 'main_app/category_detail.html', {'category': subcategory, 'category_form': category_form})
 
-    category_form = Category_reqForm(initial={'name': category.name, 'max_count_product': category.max_count_product})
-    return render(request, 'main_app/category_detail.html', {'category': category, 'form': category_form})
+class NewOrderView(ListView):
+    template_name = 'main_app/order.html'
+    form_class = TrackCodeForm
+    success_url = reverse_lazy('new_order')
+    context_object_name = 'queryset'
+    queryset = OrderingProduct.objects.filter(check_admin=False)
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Новые заказы'
+        return context
 
-def subcategory_view(request, pk):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    subcategory = get_object_or_404(SubCategory, id=pk)
-    if request.method == "POST":
-        category_form = Subcategory_reqForm(request.POST, files=request.FILES, instance=subcategory)
-        if category_form.is_valid():
-            category_form.save()
-        return redirect('add_category')
-    
-    if request.method == 'GET' and 'delete' in request.GET:
-        messages.info(request, 'Вы уверены?')
-
-    elif request.method == 'GET' and 'confirm_delete' in request.GET:
-        messages.info(request, 'Категория успешно удалена')
-        subcategory.delete()
-        return redirect('add_category')
-
-    category_form = Subcategory_reqForm(initial={'name': subcategory.name})
-    return render(request, 'main_app/category_detail.html', {'category': subcategory, 'category_form': category_form})
-
-
-def new_order(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method == 'POST':
+    def post(self, request):
         order_id = int(request.POST['order_id'])
-        try:
-            track_code = int(request.POST['track_number'])
-        except:
-            messages.info(request, 'Трек номер состоит только из цифр!')
-            return HttpResponseRedirect('/new_order/')
+        track_code = int(request.POST['track_number'])
         order = OrderingProduct.objects.get(pk=order_id)
         order.track_code = track_code
         order.check_admin = True
         order.save()
-    title = 'Новые заказы'
-    queryset = OrderingProduct.objects.filter(check_admin=False)
-    return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
+        return redirect('new_order')
+
+
+# def new_order(request):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     if request.method == 'POST':
+#         order_id = int(request.POST['order_id'])
+#         try:
+#             track_code = int(request.POST['track_number'])
+#         except:
+#             messages.info(request, 'Трек номер состоит только из цифр!')
+#             return HttpResponseRedirect('/new_order/')
+#         order = OrderingProduct.objects.get(pk=order_id)
+#         order.track_code = track_code
+#         order.check_admin = True
+#         order.save()
+#     title = 'Новые заказы'
+#     queryset = OrderingProduct.objects.filter(check_admin=False)
+#     return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
 
 
 def old_order(request):
