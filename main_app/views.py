@@ -13,7 +13,7 @@ from django.contrib.auth import logout
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView, FormView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 
 
 
@@ -39,6 +39,7 @@ def logout_user(request):
 
 
 class IndexView(ListView):
+    '''Вывод всех товаров'''
     context_object_name = 'product'
     template_name = 'main_app/index.html'
 
@@ -159,6 +160,7 @@ def product_view(request, pk):
 
 
 class CreateProductView(LoginRequiredMixin, CreateView):
+    '''Создание нового товара'''
     template_name = 'main_app/add_product.html'
     form_class = ProductForm   
 
@@ -185,25 +187,47 @@ class CreateProductView(LoginRequiredMixin, CreateView):
 #     category = Category.objects.all()
 #     return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
 
+class ReceptionProductView(CreateView):
+    '''Представление добавления кол-ва товара (приемка)'''
+    template_name = 'main_app/reception.html'
+    form_class = ReceptionForm
+    success_url = reverse_lazy('reception')
+
+    def form_valid(self, form):
+        product = Product.objects.get(pk=int(self.request.POST['product_pk']))
+        product.count += form.cleaned_data['count']
+        product.save()
+        f = form.save(commit=False)
+        f.product = product
+        f.save()
+        messages.info(self.request, 'Успешно!')
+        return super().form_valid(form)
 
 
-def reception_product(request):
-    if request.method == "POST":
-        form = ReceptionForm(request.POST)
-        if form.is_valid():
-            product_pk = int(request.POST['product_pk'])
-            product = Product.objects.get(pk=product_pk)
-            product.count += form.cleaned_data['count']
-            product.save()
-            f = form.save(commit=False)
-            f.product = product
-            f.save()
-            messages.info(request, 'Успешно!')
-    if not request.user.is_authenticated:
-        return redirect('login')
-    subcategory = SubCategory.objects.all()
-    reception_form = ReceptionForm()
-    return render(request, 'main_app/reception.html', {'form': reception_form, 'subcategory': subcategory})
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subcategory'] = SubCategory.objects.all()
+        return context
+
+
+# def reception_product(request):
+#     if request.method == "POST":
+#         form = ReceptionForm(request.POST)
+#         if form.is_valid():
+#             product_pk = int(request.POST['product_pk'])
+#             product = Product.objects.get(pk=product_pk)
+#             product.count += form.cleaned_data['count']
+#             product.save()
+#             f = form.save(commit=False)
+#             f.product = product
+#             f.save()
+#             messages.info(request, 'Успешно!')
+
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     subcategory = SubCategory.objects.all()
+#     reception_form = ReceptionForm()
+#     return render(request, 'main_app/reception.html', {'form': reception_form, 'subcategory': subcategory})
 
 
 def create_category(request):
@@ -239,9 +263,27 @@ def create_category(request):
     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'category': category})
 
 
+class CategoryUpdateView(UpdateView):
+    model = Category
+    template_name = 'main_app/category_detail.html'
+    form_class = Category_reqForm
+    success_url = reverse_lazy('add_category')
+
+    def get(self, *args, **kwargs):
+        if 'delete' in self.request.GET:
+            messages.info(self.request, 'Вы уверены?')
+        if 'confirm_delete' in self.request.GET:
+            category = self.get_object()
+            category.delete()
+            return redirect('add_category')  
+        return super().get(self)
+
+
+
 def category_view(request, pk):
     if not request.user.is_authenticated:
         return redirect('login')
+
     category = get_object_or_404(Category, pk=pk)
     if request.method == "POST":
         category_form = Category_reqForm(request.POST, files=request.FILES, instance=category)
@@ -259,7 +301,7 @@ def category_view(request, pk):
 
 
     category_form = Category_reqForm(initial={'name': category.name, 'max_count_product': category.max_count_product})
-    return render(request, 'main_app/category_detail.html', {'category': category, 'category_form': category_form})
+    return render(request, 'main_app/category_detail.html', {'category': category, 'form': category_form})
 
 
 def subcategory_view(request, pk):

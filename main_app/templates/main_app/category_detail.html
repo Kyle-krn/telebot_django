@@ -39,11 +39,11 @@
 
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {{category_form.photo}}
+            {{form.photo}}
             <br>
             <div class="input-group mb-3">
-                {{category_form.max_count_product}}
-                {{category_form.name}}
+                {{form.max_count_product}}
+                {{form.name}}
                 <button type="submit" class="btn btn-success">Success</button>
         </form>
     </div>
