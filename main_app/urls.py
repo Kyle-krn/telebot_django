@@ -3,13 +3,13 @@ from .views import *
 from django.conf.urls.static import static
 from vape_shop import settings
 from .models import *
-
+from .forms import *
 
 urlpatterns = [
     path('', IndexView.as_view(), name='all_product'),                              # Все товары
     path('product/<int:pk>', product_view, name='productdetail'),                   # Товар - подробнее
     path('category/<int:pk>', CategoryUpdateView.as_view(), name='category_detail'),               # Катеогрии - подробнее
-    path('subcategory/<int:pk>', SubCategoryUpdateView.as_view(), name='subcategory_detail'),      # Подкатеогии - подробнее
+    path('subcategory/<int:pk>', CategoryUpdateView.as_view(model=SubCategory, form_class=Subcategory_reqForm), name='subcategory_detail'),      # Подкатеогии - подробнее
     path('add_category/', create_category, name='add_category'),                    # Новая катеогрия
     path('add_product/', CreateProductView.as_view(), name='add_product'),          # Новый товар
     path('new_order/', OrderView.as_view(), name='new_order'),                                # Необработанные заказы

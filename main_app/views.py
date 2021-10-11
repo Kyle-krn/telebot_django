@@ -241,26 +241,8 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
         return super().get(self)
 
 
-
-class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
-    '''Обновить подкатегорию'''
-    model = SubCategory
-    template_name = 'main_app/category_detail.html'
-    form_class = Subcategory_reqForm
-    success_url = reverse_lazy('add_category')
-
-    def get(self, *args, **kwargs):
-        if 'delete' in self.request.GET:
-            messages.info(self.request, 'Вы уверены?')
-        if 'confirm_delete' in self.request.GET:
-            category = self.get_object()
-            category.delete()
-            return redirect('add_category')  
-        return super().get(self)
-
-
-
 class OrderView(ListView):
+    '''Представление новых/обработанных заказов'''
     template_name = 'main_app/order.html'
     form_class = TrackCodeForm
     success_url = reverse_lazy('new_order')
@@ -291,24 +273,24 @@ class OrderView(ListView):
 
 
 
-def old_order(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method == 'POST':
-        order_id = int(request.POST['order_id'])
-        try:
-            track_code = int(request.POST['track_number'])
-        except:
-            messages.info(request, 'Трек номер состоит только из цифр!')
-            return HttpResponseRedirect('/new_order/')
-        order = OrderingProduct.objects.get(pk=order_id)
-        order.track_code = track_code
-        order.check_admin = True
-        order.save()
+# def old_order(request):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     if request.method == 'POST':
+#         order_id = int(request.POST['order_id'])
+#         try:
+#             track_code = int(request.POST['track_number'])
+#         except:
+#             messages.info(request, 'Трек номер состоит только из цифр!')
+#             return HttpResponseRedirect('/new_order/')
+#         order = OrderingProduct.objects.get(pk=order_id)
+#         order.track_code = track_code
+#         order.check_admin = True
+#         order.save()
     
-    title = 'Обработанные заказы'
-    queryset = OrderingProduct.objects.filter(check_admin=True)
-    return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
+#     title = 'Обработанные заказы'
+#     queryset = OrderingProduct.objects.filter(check_admin=True)
+#     return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
 
 
 def control_qiwi(request):
