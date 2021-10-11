@@ -168,23 +168,6 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         return context
 
 
-
-# def create_product(request):
-#     '''Страница создания товара'''
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     if request.method == "POST":
-#         product_form = ProductForm(request.POST, files=request.FILES)
-#         if product_form.is_valid():
-#             product = product_form.save()
-#             product.slug = f'p||{product.pk}'
-#             product.save()
-#             return redirect('productdetail', pk=product.pk)
-
-#     product_form = ProductForm(initial={'count': 0})
-#     category = Category.objects.all()
-#     return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
-
 class ReceptionProductView(LoginRequiredMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'main_app/reception.html'
@@ -206,26 +189,6 @@ class ReceptionProductView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['subcategory'] = SubCategory.objects.all()
         return context
-
-
-# def reception_product(request):
-#     if request.method == "POST":
-#         form = ReceptionForm(request.POST)
-#         if form.is_valid():
-#             product_pk = int(request.POST['product_pk'])
-#             product = Product.objects.get(pk=product_pk)
-#             product.count += form.cleaned_data['count']
-#             product.save()
-#             f = form.save(commit=False)
-#             f.product = product
-#             f.save()
-#             messages.info(request, 'Успешно!')
-
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     subcategory = SubCategory.objects.all()
-#     reception_form = ReceptionForm()
-#     return render(request, 'main_app/reception.html', {'form': reception_form, 'subcategory': subcategory})
 
 
 def create_category(request):
@@ -279,26 +242,6 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
 
 
 
-# def category_view(request, pk):
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-
-#     category = get_object_or_404(Category, pk=pk)
-#     if request.method == "POST":
-#         category_form = Category_reqForm(request.POST, files=request.FILES, instance=category)
-#         if category_form.is_valid():
-#             category_form.save()
-#         return redirect('add_category')
-#     if request.method == 'GET' and 'delete' in request.GET:
-#         messages.info(request, 'Вы уверены?')
-#     elif request.method == 'GET' and 'confirm_delete' in request.GET:
-#         messages.info(request, 'Категория успешно удалена')
-#         category.delete()
-#         return redirect('add_category')
-#     category_form = Category_reqForm(initial={'name': category.name, 'max_count_product': category.max_count_product})
-#     return render(request, 'main_app/category_detail.html', {'category': category, 'form': category_form})
-
-
 class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
     '''Обновить подкатегорию'''
     model = SubCategory
@@ -316,28 +259,8 @@ class SubCategoryUpdateView(LoginRequiredMixin, UpdateView):
         return super().get(self)
 
 
-# def subcategory_view(request, pk):
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     subcategory = get_object_or_404(SubCategory, id=pk)
-#     if request.method == "POST":
-#         category_form = Subcategory_reqForm(request.POST, files=request.FILES, instance=subcategory)
-#         if category_form.is_valid():
-#             category_form.save()
-#         return redirect('add_category')
-    
-#     if request.method == 'GET' and 'delete' in request.GET:
-#         messages.info(request, 'Вы уверены?')
 
-#     elif request.method == 'GET' and 'confirm_delete' in request.GET:
-#         messages.info(request, 'Категория успешно удалена')
-#         subcategory.delete()
-#         return redirect('add_category')
-
-#     category_form = Subcategory_reqForm(initial={'name': subcategory.name})
-#     return render(request, 'main_app/category_detail.html', {'category': subcategory, 'category_form': category_form})
-
-class NewOrderView(ListView):
+class OrderView(ListView):
     template_name = 'main_app/order.html'
     form_class = TrackCodeForm
     success_url = reverse_lazy('new_order')
@@ -346,7 +269,10 @@ class NewOrderView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Новые заказы'
+        if self.request.resolver_match.url_name == 'new_order':
+            context['title'] = 'Новые заказы'
+        else:
+            context['title'] = 'Обработанные заказы'
         return context
 
     def post(self, request):
@@ -354,28 +280,15 @@ class NewOrderView(ListView):
         track_code = int(request.POST['track_number'])
         order = OrderingProduct.objects.get(pk=order_id)
         order.track_code = track_code
+        if order.check_admin:   # Если check_admin уже True, значит пользователь на вкладке старых заказов
+            order.save()
+            return redirect('old_order')
         order.check_admin = True
         order.save()
         return redirect('new_order')
 
 
-# def new_order(request):
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     if request.method == 'POST':
-#         order_id = int(request.POST['order_id'])
-#         try:
-#             track_code = int(request.POST['track_number'])
-#         except:
-#             messages.info(request, 'Трек номер состоит только из цифр!')
-#             return HttpResponseRedirect('/new_order/')
-#         order = OrderingProduct.objects.get(pk=order_id)
-#         order.track_code = track_code
-#         order.check_admin = True
-#         order.save()
-#     title = 'Новые заказы'
-#     queryset = OrderingProduct.objects.filter(check_admin=False)
-#     return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
+
 
 
 def old_order(request):

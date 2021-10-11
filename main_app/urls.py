@@ -2,20 +2,18 @@ from django.urls import path, re_path
 from .views import *
 from django.conf.urls.static import static
 from vape_shop import settings
+from .models import *
 
 
 urlpatterns = [
     path('', IndexView.as_view(), name='all_product'),                              # Все товары
     path('product/<int:pk>', product_view, name='productdetail'),                   # Товар - подробнее
-    # path('category/<int:pk>', category_view, name='category_detail'),               # Катеогрии - подробнее
     path('category/<int:pk>', CategoryUpdateView.as_view(), name='category_detail'),               # Катеогрии - подробнее
-    # path('subcategory/<int:pk>', subcategory_view, name='subcategory_detail'),      # Подкатеогии - подробнее
     path('subcategory/<int:pk>', SubCategoryUpdateView.as_view(), name='subcategory_detail'),      # Подкатеогии - подробнее
     path('add_category/', create_category, name='add_category'),                    # Новая катеогрия
     path('add_product/', CreateProductView.as_view(), name='add_product'),          # Новый товар
-    # path('new_order/', new_order, name='new_order'),                                # Необработанные заказы
-    path('new_order/', NewOrderView.as_view(), name='new_order'),                                # Необработанные заказы
-    path('old_order/', old_order, name='old_order'),                                # Обработанные заказы
+    path('new_order/', OrderView.as_view(), name='new_order'),                                # Необработанные заказы
+    path('old_order/', OrderView.as_view(queryset=OrderingProduct.objects.filter(check_admin=True)), name='old_order'),                                # Обработанные заказы
     path('qiwi/', control_qiwi, name='qiwi'),                                       # Добавить, удалить токен для QIWI
     path('user_stat/', user_stat, name='user_stat'),                                # Общая статистика
     # path('reception/<int:pk>', reception_product, name='reception'),              
