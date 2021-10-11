@@ -169,21 +169,21 @@ class CreateProductView(LoginRequiredMixin, CreateView):
 
 
 
-def create_product(request):
-    '''Страница создания товара'''
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method == "POST":
-        product_form = ProductForm(request.POST, files=request.FILES)
-        if product_form.is_valid():
-            product = product_form.save()
-            product.slug = f'p||{product.pk}'
-            product.save()
-            return redirect('productdetail', pk=product.pk)
+# def create_product(request):
+#     '''Страница создания товара'''
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     if request.method == "POST":
+#         product_form = ProductForm(request.POST, files=request.FILES)
+#         if product_form.is_valid():
+#             product = product_form.save()
+#             product.slug = f'p||{product.pk}'
+#             product.save()
+#             return redirect('productdetail', pk=product.pk)
 
-    product_form = ProductForm(initial={'count': 0})
-    category = Category.objects.all()
-    return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
+#     product_form = ProductForm(initial={'count': 0})
+#     category = Category.objects.all()
+#     return render(request, 'main_app/add_product.html', {'form': product_form, 'category': category})
 
 
 
@@ -199,10 +199,6 @@ def reception_product(request):
             f.product = product
             f.save()
             messages.info(request, 'Успешно!')
-
-        # product_pk = int(request.POST['subcategory'][0])
-        # product = Product.objects.get(pk=request.POST['subc'])
-
     if not request.user.is_authenticated:
         return redirect('login')
     subcategory = SubCategory.objects.all()
@@ -305,6 +301,7 @@ def new_order(request):
     title = 'Новые заказы'
     queryset = OrderingProduct.objects.filter(check_admin=False)
     return render(request, 'main_app/order.html', context={'queryset': queryset, 'title': title})
+
 
 def old_order(request):
     if not request.user.is_authenticated:
