@@ -236,46 +236,65 @@ def product_view(request, pk):
                                                      'all_stat': all_stat,
                                                      })
 
-# class CategoriesView(View):
-#     template_name = 'main_app/category.html'
+
+class CategoriesView(LoginRequiredMixin, View):
+    template_name = 'main_app/category.html'
+    queryset = Category.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['title'] = 'Категории'
+        context['queryset'] = self.queryset
+        context['category_form'] = CategoryForm()
+        context['sc_form'] = SubcategoryForm()
+        return context
+
+    def post(self, request):
+        if 'create_category' in request.POST:   # Создать категорию
+            category_form = CategoryForm(request.POST, files=request.FILES)
+            if category_form.is_valid():
+                category_form.save()
+                messages.info(request, 'Новая категория успешно создана!')
+                return redirect('add_category')
+        elif 'create_sc' in request.POST:   # Создать подкатеогрию
+            sc_form = SubcategoryForm(request.POST, files=request.FILES)
+            if sc_form.is_valid():
+                f = sc_form.save(commit=False)    
+                f.category = Category.objects.get(pk=int(request.POST['category_id']))
+                f.save()
+                messages.info(request, 'Новая подкатегория успешно создана!')
+                return redirect('add_category')
+
+    def get(self, request):
+        return render(request, self.template_name, context=self.get_context_data())
+
+
+# def create_category(request):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     if request.method == 'POST' and 'create_category' in request.POST:
+#         category_form = CategoryForm(request.POST, files=request.FILES)
+#         if category_form.is_valid():
+#             category_form.save()
+#             messages.info(request, 'Новая категория успешно создана!')
+#             return redirect('add_category')
+#         else:
+#             messages.info(request, 'Ошибка!')
+#             return redirect('add_category')
+
+#     elif request.method == "POST" and 'create_sc' in request.POST:
+#         sc_form = SubcategoryForm(request.POST, files=request.FILES)
+#         if sc_form.is_valid():
+#             f = sc_form.save(commit=False)    
+#             f.category = Category.objects.get(pk=int(request.POST['category_id']))
+#             f.save()
+#             messages.info(request, 'Новая категория успешно создана!')
+#             return redirect('add_category')
+
 #     category_form = CategoryForm()
-
-
-#     # def post(self, request):
-#     def get(self, request):
-        
-
-
-def create_category(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method == 'POST' and 'create_category' in request.POST:
-        category_form = CategoryForm(request.POST, files=request.FILES)
-        if category_form.is_valid():
-            category_form.save()
-            # model.slug = f'c||{model.pk}'
-            # model.save()
-            messages.info(request, 'Новая категория успешно создана!')
-            return redirect('add_category')
-        else:
-            messages.info(request, 'Ошибка!')
-            return redirect('add_category')
-
-    elif request.method == "POST" and 'create_sc' in request.POST:
-        sc_form = SubcategoryForm(request.POST, files=request.FILES)
-        if sc_form.is_valid():
-            f = sc_form.save(commit=False)    
-            f.category = Category.objects.get(pk=int(request.POST['category_id']))
-            f.save()
-            # f.slug = f'sc||{f.pk}'
-            # f.save()
-            messages.info(request, 'Новая категория успешно создана!')
-            return redirect('add_category')
-
-    category_form = CategoryForm()
-    sc_form = SubcategoryForm()
-    category = Category.objects.all()
-    return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'category': category})
+#     sc_form = SubcategoryForm()
+#     category = Category.objects.all()
+#     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'queryset': category})
 
 
 
@@ -307,7 +326,7 @@ def control_qiwi(request):
     return render(request, 'main_app/qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})
 
 
-class StatisticView(View):
+class StatisticView(LoginRequiredMixin, View):
     '''Представления общей статистики по товарам'''
     template_name = 'main_app/user_stat.html'
     sold_queryset = SoldProduct.objects.all()
