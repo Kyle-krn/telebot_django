@@ -15,9 +15,7 @@ urlpatterns = [
     path('new_order/', OrderView.as_view(), name='new_order'),                                # Необработанные заказы
     path('old_order/', OrderView.as_view(queryset=OrderingProduct.objects.filter(check_admin=True)), name='old_order'),                                # Обработанные заказы
     path('qiwi/', control_qiwi, name='qiwi'),                                       # Добавить, удалить токен для QIWI
-    # path('user_stat/', user_stat, name='user_stat'),                                # Общая статистика
     path('user_stat/', StatisticView.as_view(), name='user_stat'),                                # Общая статистика
-    # path('reception/<int:pk>', reception_product, name='reception'),              
     path('login/', LoginUser.as_view(), name='login'),                              # Логин
     path('logout/', logout_user, name='logout'),                                    # Разлогиниться
     path('reception/', ReceptionProductView.as_view(), name='reception'),                        # Приемка товара

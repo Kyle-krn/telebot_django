@@ -141,12 +141,9 @@ class OrderView(ListView):
         track_code = int(request.POST['track_number'])
         order = OrderingProduct.objects.get(pk=order_id)
         order.track_code = track_code
-        if self.request.resolver_match.url_name == 'old_order':
-            order.save()
-            return redirect('old_order')
         order.check_admin = True
         order.save()
-        return redirect('new_order')
+        return redirect('new_order') if self.request.resolver_match.url_name == 'new_order' else redirect('old_order')
 
 
 
@@ -239,6 +236,15 @@ def product_view(request, pk):
                                                      'all_stat': all_stat,
                                                      })
 
+# class CategoriesView(View):
+#     template_name = 'main_app/category.html'
+#     category_form = CategoryForm()
+
+
+#     # def post(self, request):
+#     def get(self, request):
+        
+
 
 def create_category(request):
     if not request.user.is_authenticated:
@@ -246,9 +252,9 @@ def create_category(request):
     if request.method == 'POST' and 'create_category' in request.POST:
         category_form = CategoryForm(request.POST, files=request.FILES)
         if category_form.is_valid():
-            model = category_form.save()
-            model.slug = f'c||{model.pk}'
-            model.save()
+            category_form.save()
+            # model.slug = f'c||{model.pk}'
+            # model.save()
             messages.info(request, 'Новая категория успешно создана!')
             return redirect('add_category')
         else:
@@ -261,16 +267,17 @@ def create_category(request):
             f = sc_form.save(commit=False)    
             f.category = Category.objects.get(pk=int(request.POST['category_id']))
             f.save()
-            f.slug = f'sc||{f.pk}'
-            f.save()
+            # f.slug = f'sc||{f.pk}'
+            # f.save()
             messages.info(request, 'Новая категория успешно создана!')
             return redirect('add_category')
 
     category_form = CategoryForm()
     sc_form = SubcategoryForm()
     category = Category.objects.all()
-
     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'category': category})
+
+
 
 
 def control_qiwi(request):

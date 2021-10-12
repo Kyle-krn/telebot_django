@@ -12,6 +12,11 @@ class Category(models.Model):
     slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
     max_count_product = models.IntegerField()
 
+    def save(self, *args, **kwargs):
+        super(Category, self).save(*args, **kwargs)
+        self.slug = f'c||{self.pk}'
+        super(Category, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -22,6 +27,12 @@ class SubCategory(models.Model):
     name = models.CharField(max_length=150, db_index=True)
     photo = models.ImageField(upload_to='subcategory_img/')
     slug = models.CharField(max_length=255, unique=True, blank=True, null=True)
+
+
+    def save(self, *args, **kwargs):
+        super(SubCategory, self).save(*args, **kwargs)
+        self.slug = f'sc||{self.pk}'
+        super(SubCategory, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
