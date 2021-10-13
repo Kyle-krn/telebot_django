@@ -108,11 +108,13 @@ class SoldProduct(models.Model):
         return f"{self.product} -- {self.count}"
 
 
+
+
 class OrderingProduct(models.Model):
     '''Модель заказа'''
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     delivery_pay = models.IntegerField()
-    sold_product = models.ManyToManyField(SoldProduct)  # Закончил здесь
+    sold_product = models.ManyToManyField(SoldProduct)  # <==== тут
     track_code = models.BigIntegerField(blank=True, null=True)
     check_admin = models.BooleanField(default=False)
     datetime = models.DateTimeField(auto_now_add=True)
@@ -140,7 +142,7 @@ class TelegramProductCartCounter(models.Model):
 
 
 class PayProduct(models.Model):
-    '''Модель бронирования товара на оплату'''
+    '''Модель бронирования товара на оплату -  используется для оплаты через qiwi'''
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     product_pay = models.IntegerField()
     pay_comment = models.CharField(max_length=255)
@@ -149,9 +151,37 @@ class PayProduct(models.Model):
 
 
 class QiwiToken(models.Model):
-    '''Модель для QIWI'''
+    '''Модель для QIWI токена'''
     number = models.BigIntegerField(blank=True, null=True)
     balance = models.IntegerField(blank=True, null=True)
     token = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
     blocked = models.BooleanField(default=False)
+
+
+
+
+
+
+
+
+
+###########################################################################
+class ProductInCard(models.Model):
+    '''Модель продуктов для оплаты через менеджера '''
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)    
+    count = models.IntegerField()
+
+
+class OrderInCard(models.Model):
+    '''Модель заказа для оплаты через менеджера'''
+    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
+    delivery_pay = models.IntegerField()
+    order_product = models.ManyToManyField(ProductInCard)  # <==== тут
+    track_code = models.BigIntegerField(blank=True, null=True)
+    payment_bool = models.BooleanField(default=False)
+    datetime = models.DateTimeField(auto_now_add=True)
+    fio = models.CharField(max_length=255, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    number = models.BigIntegerField(blank=True, null=True)
+    post_index = models.BigIntegerField(blank=True, null=True)

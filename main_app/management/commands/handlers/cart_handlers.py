@@ -4,7 +4,6 @@ from .handlers import bot
 from django.db.models import Q
 from main_app.management.commands.keyboards import *
 from main_app.management.commands.utils import *
-import requests
 
 
 
@@ -21,7 +20,6 @@ def cart_handlers(message):
         bot.delete_message(message.message.chat.id, message.message.message_id)
         user_id = message.message.chat.id
         data = message.message.chat
-        
     TelegramUser.objects.get_or_create(chat_id=data.id,
                                        defaults={
                                            'first_name': data.first_name,
@@ -55,15 +53,12 @@ def cart_handlers(message):
     else:
         weight = sum([x.count * x.product.weight for x in cart])
         try:    # Пытаемся расчитать стоймость доставки
-            delivery_pay = check_price_delivery(
-                post_index=user.post_index, weight=weight)
-            delivery_time = check_time_delivery(
-                post_index=user.post_index, weight=weight)
+            delivery_pay = check_price_delivery(post_index=user.post_index, weight=weight)
+            delivery_time = check_time_delivery(post_index=user.post_index, weight=weight)
         except:
             return bot.send_message(message.chat.id, 'При расчете стоймости доставки произошла ошибка')
             
         product_pay = sum([x.count * x.product.price for x in cart])    # Общая сумма корзины
-
         text += f'***Стоймость доставки -*** {delivery_pay} руб.\n***Стоймость товара -*** {product_pay} руб.\n***Общая стоймость -*** {float(delivery_pay)+float(product_pay)} руб.\n***Время доставки примерно*** {delivery_time} дней(дня)\n\n'
         keyboard = cart_keyboard(pay=delivery_pay)
 

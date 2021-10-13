@@ -142,7 +142,6 @@ def check_pay_handlers(call):
 def sold_product(user, pay_data):
     '''Успешная оплата'''
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
-    product_pay = sum([x.count * x.product.price for x in cart])
     send_email(f'У вас новый заказ на сумму {pay_data.product_pay+pay_data.delivery_pay} руб.')
     order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index)
     for item in cart:
