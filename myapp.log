@@ -15,3 +15,4 @@
 2021-10-10 17:27:25,079 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message to edit not found
 2021-10-10 17:34:26,495 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
 2021-10-10 17:51:45,774 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message to edit not found
+2021-10-14 19:24:45,437 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message to edit not found

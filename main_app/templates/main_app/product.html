@@ -12,7 +12,8 @@
 <!-- Magnific Popup core JS file -->
 <script src="magnific-popup/jquery.magnific-popup.js"></script>
 
-{% if messages %}
+<div class='container'>
+    {% if messages %}
 <ul class="messages">
     {% for message in messages %}
     <form action="" method="get">
@@ -20,7 +21,6 @@
             <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
     </form>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
     {% endfor %}
 </ul>
 {% endif %}
@@ -140,6 +140,8 @@
 
 
 
+
+
 <form action="" method='POST'>
     {% csrf_token %}
     {{reception_form.as_p}}
@@ -148,12 +150,14 @@
     </div>
 </form>
 <br>
+
 <div class=text-end>
     <div class="btn-group" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
             aria-expanded="false">
             Списать товар
         </button>
+
         <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
             <form action="" method='post'>
                 {% csrf_token %}
@@ -171,9 +175,9 @@
                 <div class='text-center'>
                     <li><button type="submit" class="btn btn-warning" name='liquidated'>Списать</button></li>
             </form>
+
     </div>
     </ul>
-</div>
 </div>
 <br><br>
 
@@ -219,6 +223,8 @@
 </form>
 </div>
 
+</div>
+
 
 
 <table class="table">
@@ -250,7 +256,7 @@
             <td>{{tq.price}} р.</td>
             <td>{% widthratio tq.price 1 tq.count %} р.</td>
             <td>{{tq.count}}</td>
-            <td>{{tq.date}}</td>
+            <td>{{tq.get_datetime}}</td>
             {% if tq.note %}
             <td><button onclick="alert('{{tq.note}}')">Заметка</button>
             </td>

@@ -1,69 +1,91 @@
-
 <!doctype html>
 <html lang="ru">
-  <head>
-    <!-- Обязательные метатеги -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<head>
+  <!-- Обязательные метатеги -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{title}}</title>
-  </head>
-  <body>
-    {% block header %}
-    <header class="p-3 bg-dark text-white">
-      <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-  
-          <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-            {% url 'all_product' as ap %}
-            {% if request.path == ap %}
-            <li><a href="{% url 'all_product' %}" class="nav-link px-2 disabled">Список товаров</a></li>
-            {% else %}
-            <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
-            {% endif %}
-            <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Новые заказы</a></li>
-            <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Обработанные заказы</a></li>
-            <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">QIWI</a></li>
-            <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
-            <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <title>{{title}}</title>
+</head>
+
+<body>
+
+  {% block header %}
+  <header class="p-3 bg-dark text-white">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          {% url 'all_product' as ap %}
+          {% if request.path == ap %}
+          <li><a href="{% url 'all_product' %}" class="nav-link px-2 disabled">Список товаров</a></li>
+          {% else %}
+          <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
+          {% endif %}
+          <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Неоплаченные заказы</a></li>
+          <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Оплаченные заказы</a></li>
+          <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">QIWI</a></li>
+          <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
+          <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
 
 
-          
 
-          </ul>
-          
-          <div class="text-end">
-            {% url 'add_category' as ac %}
-            {% if request.path == ac %}
-            <a class="btn btn-outline-light me-2 disabled href="{% url 'add_category' %}" role="button">+ Категория</a>
-            {% else %}
-            <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">+ Категория</a>
-            {% endif %}
-            {% url 'add_product' as ap %}
-            {% if request.path == ap %}
-            <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">+ Товар</a>
-            {% else %}
-            <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">+ Товар</a>
-            {% endif %}
-            <a class="btn btn-danger" href="{% url 'logout' %}" role="button">Выход</a>
-          </div>
+
+        </ul>
+
+        <div class="text-end">
+          {% url 'add_category' as ac %}
+          {% if request.path == ac %}
+          <a class="btn btn-outline-light me-2 disabled href=" {% url 'add_category' %}" role="button">+ Категория</a>
+          {% else %}
+          <a class="btn btn-outline-light me-2 " href="{% url 'add_category' %}" role="button">+ Категория</a>
+          {% endif %}
+          {% url 'add_product' as ap %}
+          {% if request.path == ap %}
+          <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">+ Товар</a>
+          {% else %}
+          <a class="btn btn-warning" href="{% url 'add_product' %}" role="button">+ Товар</a>
+          {% endif %}
+          <a class="btn btn-danger" href="{% url 'logout' %}" role="button">Выход</a>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
+  {% endblock %}
+
+  {% block message %}
+
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endblock %}
+  
+
+  
+
+  <main class="flex-shrink-0">
+
+    <br>
+    {% block content %}
+    <div class="container">
+
+    </div>
     {% endblock %}
-        <main class="flex-shrink-0">
-            
-          <div class="container-sm">
-            <br>
-            {% block content %}
 
-            {% endblock %}
-          </div>
-        </main>
+  </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>

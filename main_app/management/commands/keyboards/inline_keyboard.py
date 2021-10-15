@@ -99,3 +99,8 @@ def purchase_keyboard(soldproduct):
         pay = sum([x.price*x.count for x in item.sold_product.all()]) + item.delivery_pay
         keyboard.add(types.InlineKeyboardButton(text=f"От {item.datetime.strftime('%m/%d/%Y')} на сумму {pay} руб.", callback_data=f'sp~{item.pk}'))
     return keyboard
+
+def manager_keyboard():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Связаться с нашим менеджером', url='https://t.me/kyle_krn'))
+    return keyboard

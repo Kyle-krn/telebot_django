@@ -28,8 +28,10 @@ def track_code_handlers(call):
     try:
         pk = call.data.split('~')[1]
         order_product = OrderingProduct.objects.get(Q(user__chat_id=call.message.chat.id) & Q(pk=pk))
+        if order_product.payment_bool == False:
+            return bot.send_message(chat_id=call.message.chat.id, text='Вы не оплатили заказ, пожалуйста, свяжитесь с нашим менеджером @kyle_krn', reply_markup=manager_keyboard())
     except:
-        return bot.send_message(chat_id=call.message.chat.id, text='Что то пошло не так')
+        return bot.send_message(chat_id=call.message.chat.id, text='Ваш неоплаченный заказ был удален')
     text = ''
     for item in order_product.sold_product.all():
         text += f'***Товар -*** {item.product.title}\n***Количество -*** {item.count} шт.\n\n'

@@ -9,6 +9,8 @@
 </ul>
 {% endif %}
 
+<div class='container'>
+
 <form action="" method='POST'>
     {% csrf_token %}
     {{form.as_p}}
@@ -28,5 +30,5 @@
     </div>
 </form>
 
-
+</div>
 {% endblock %}

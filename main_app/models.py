@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 # from django.utils.text import slugify
 from slugify import slugify
 from django.urls import reverse
-
+from django.utils.timezone import pytz
+import vape_shop.settings as settings
 
 class Category(models.Model):
     '''Модель категорий'''
@@ -71,6 +72,11 @@ class ReceptionProduct(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     liquidated = models.BooleanField(default=False) # True для ликвидированного товара
 
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.date.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
+
     def get_my_model_name(self):
         return self._meta.model_name
 
@@ -92,42 +98,6 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return f"{self.chat_id} -- {self.username}"
-
-
-class SoldProduct(models.Model):
-    '''Модель проданных товаров'''
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)    
-    count = models.IntegerField()
-    date = models.DateTimeField(auto_now_add=True)
-
-    def get_my_model_name(self):
-        return self._meta.model_name
-
-    def __str__(self):
-        return f"{self.product} -- {self.count}"
-
-
-
-
-class OrderingProduct(models.Model):
-    '''Модель заказа'''
-    user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
-    delivery_pay = models.IntegerField()
-    sold_product = models.ManyToManyField(SoldProduct)  # <==== тут
-    track_code = models.BigIntegerField(blank=True, null=True)
-    check_admin = models.BooleanField(default=False)
-    datetime = models.DateTimeField(auto_now_add=True)
-    fio = models.CharField(max_length=255, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    number = models.BigIntegerField(blank=True, null=True)
-    post_index = models.BigIntegerField(blank=True, null=True)
-
-    def get_order_price(self):
-        return sum([x.count * x.price for x in self.sold_product.all()]) + self.delivery_pay
-
-    def get_datetime(self):
-        return self.datetime.strftime('%m/%d/%Y')
 
 
 class TelegramProductCartCounter(models.Model):
@@ -159,29 +129,48 @@ class QiwiToken(models.Model):
     blocked = models.BooleanField(default=False)
 
 
-
-
-
-
-
-
-
 ###########################################################################
-class ProductInCard(models.Model):
-    '''Модель продуктов для оплаты через менеджера '''
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)    
+class SoldProduct(models.Model):
+    '''Модель проданных товаров'''
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)    
     count = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+    payment_bool = models.BooleanField(default=False)
+
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.date.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
+    
+    def get_my_model_name(self):
+        return self._meta.model_name
+
+    def __str__(self):
+        return f"{self.product} -- {self.count}"
 
 
-class OrderInCard(models.Model):
-    '''Модель заказа для оплаты через менеджера'''
+class OrderingProduct(models.Model):
+    '''Модель заказа'''
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE)
     delivery_pay = models.IntegerField()
-    order_product = models.ManyToManyField(ProductInCard)  # <==== тут
+    sold_product = models.ManyToManyField(SoldProduct)  # <==== тут
     track_code = models.BigIntegerField(blank=True, null=True)
-    payment_bool = models.BooleanField(default=False)
+    check_admin = models.BooleanField(default=False)
     datetime = models.DateTimeField(auto_now_add=True)
     fio = models.CharField(max_length=255, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     number = models.BigIntegerField(blank=True, null=True)
     post_index = models.BigIntegerField(blank=True, null=True)
+    payment_bool = models.BooleanField(default=False)
+
+
+    def get_order_price(self):
+        return sum([x.count * x.price for x in self.sold_product.all()]) + self.delivery_pay
+
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.datetime.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
+
+###########################################################################

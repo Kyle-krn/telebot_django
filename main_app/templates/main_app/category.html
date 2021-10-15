@@ -11,6 +11,7 @@
 </ul>
 {% endif %}
 
+<div class='container'>
 
 <div class="text-center">
     <h1>Категории</h1>
@@ -39,7 +40,7 @@
     </div>
 </form>
 <br>
-
+</div>
 
 <div class="accordion" id="accordionExample">
     {% for c in queryset %}
@@ -104,7 +105,6 @@
 
                         </div>
                     </div>
-                </div>
                 <br>
                 <div class='row'>
                     <div class="col">
@@ -123,6 +123,9 @@
             </div>
         </div>
     </div>
+</div>
+</div>
+
     {% endfor %}
 </div>
 

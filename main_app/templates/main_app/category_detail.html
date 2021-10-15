@@ -4,7 +4,7 @@
 {% block content %}
 
 <link type="text/css" href="{% static 'css/img.css' %}" rel="stylesheet" />
-
+<div class='container'>
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
@@ -13,7 +13,6 @@
             <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
     </form>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
     {% endfor %}
 </ul>
 {% endif %}
@@ -60,6 +59,7 @@
     <span class="close">&times;</span>
     <img class="modal-content" id="img01">
     <div id="caption"></div>
+</div>
 </div>
 <script src="{% static 'js/modal.js' %}"></script>
 

@@ -1,0 +1,110 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid">
+
+
+<div class="accordion" id="accordionExample">
+    {% for qs in queryset %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{qs.pk}}"
+                aria-expanded="true" aria-controls="collapse-{{qs.pk}}">
+                Заказ от {{qs.get_datetime}} на сумму {{qs.get_order_price}} руб.
+                
+            </button>
+        </h2>
+        <div id="collapse-{{qs.pk}}" class="accordion-collapse collapse" aria-labelledby="heading-{{qs.pk}}"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+
+                <div class="row">
+                    <div class="col-sm align-self-center">
+                        Имя - {{qs.fio}} <br>
+                        адрес - {{qs.address}} <br>
+                        Индекс - {{qs.post_index}} <br>
+                        Телефон - {{qs.number}} <br>
+                        {% if qs.user.username %}
+                        Телеграм - <a href="https://t.me/{{qs.user.username}}">@{{qs.user.username}}</a> 
+                        {% else %}
+                        Пользователь скрыл свой юзернейм
+                        {% endif %}
+                    </div>
+                    <div class="col-sm align-self-center">
+
+                        <div class='text-primary'> Доставка - {{qs.delivery_pay}} руб. </div>
+                        {% url 'new_order' as no %}
+                        {% if request.path == no %}
+                        <form action="" method='post'>
+                            {% csrf_token %}
+                        {% for item in qs.sold_product.all %}
+                                  <label for="count" class="col-form-label" >{% if item.product.count < item.count %}<div class='text-danger'> {{item.product.title}}</div> {% else %} {{item.product.title}} {% endif %}</label><br>
+                                    <style>
+                                        #user {
+                                         width: 50px; /* Ширина поля в пикселах */
+                                        } 
+                                       </style>
+                                  <input type="hidden" name="product_id" value="{{item.pk}}">
+                                  <input type="number" id="user" name='product_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
+                                    <br>
+                        {% endfor %}
+                        <br>
+                        <button type="submit" class="btn btn-success" name='change_order'>Изменить заказ</button>
+                    </form>
+                    {% else %}
+                    {% for item in qs.sold_product.all %}
+                    {{item.product.title}} - {{item.count}} шт. - {% widthratio item.price 1 item.count %} рублей
+                    {% endfor %}
+                    {% endif %}
+                    
+                    </div>
+                    <div class="col-sm align-self-center">
+                        {% url 'new_order' as no %}
+                        {% if request.path == no %}
+                        <div class='text-center'>
+                        <form action="" method='post'>
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{qs.pk}}">
+                                
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment" id="inlineRadio1" value="paid">
+                                <label class="form-check-label" for="inlineRadio1">Оплачено</label>
+                              </div>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="payment" id="inlineRadio2" value="not_paid">
+                                <label class="form-check-label" for="inlineRadio2">Не оплачено</label>
+                              </div>
+
+                              <button type="sumbit" class="btn btn-success" name='paid_status'>Отметить</button>
+                            </form>
+                              
+                        {% else %}
+
+                            <form action="" method='post'>
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{qs.pk}}">
+                                <div class="input-group mb-3">
+                                    <input type="text" name="track_code" class="form-control" pattern="[0-9]{13,14}" {% if qs.track_code %} value="{{qs.track_code}}"{% endif %} placeholder="Трек номер"
+                                        aria-label="Username" aria-describedby="addon-wrapping">
+                                    <button class="btn btn-outline-secondary" type="submit" name="input_trackcode"
+                                        id="button-addon2">Отправить</button>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+    
+    {% endfor %}
+    
+</div>
+</div>
+
+{% endblock %}

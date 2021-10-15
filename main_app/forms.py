@@ -20,18 +20,6 @@ class Product_reqForm(ProductForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
 
-# class Product_reqForm(forms.ModelForm):
-#       title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-#       description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
-#       price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
-#       weight = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
-#       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-
-#       class Meta:
-#             model = Product
-#             fields = ['title', 'photo', 'description', 'price', 'subcategory', 'weight']
-
-
 
 class CategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
@@ -46,15 +34,6 @@ class Category_reqForm(CategoryForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
 
-# class Category_reqForm(forms.ModelForm):
-#       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
-#       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-#       max_count_product = forms.IntegerField( widget=forms.TextInput(attrs={'placeholder': 'Кол-во макс. товара', 'type': 'number'}))
-
-#       class Meta:
-#             model = Category
-#             fields = ['name', 'photo', 'max_count_product']
-
 class SubcategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
@@ -65,14 +44,6 @@ class SubcategoryForm(forms.ModelForm):
 
 class Subcategory_reqForm(SubcategoryForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-
-# class Subcategory_reqForm(forms.ModelForm):
-#       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
-#       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-
-#       class Meta:
-#             model = SubCategory
-#             fields = ['name', 'photo']
 
 
 class ReceptionForm(forms.ModelForm):
@@ -95,7 +66,6 @@ class QiwiTokenForm(forms.ModelForm):
 
 class TrackCodeForm(forms.ModelForm):
       # track_code = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form_control', 'type': 'text'}))
-
       class Meta:
             model = OrderingProduct
             fields = ['track_code']
@@ -104,5 +74,3 @@ class TrackCodeForm(forms.ModelForm):
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-input'}))
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
-
-

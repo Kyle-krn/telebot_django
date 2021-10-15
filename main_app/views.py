@@ -120,31 +120,138 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
         return super().get(self)
 
 
-class OrderView(ListView):
-    '''Представление новых/обработанных заказов'''
-    template_name = 'main_app/order.html'
-    form_class = TrackCodeForm
-    success_url = reverse_lazy('new_order')
-    context_object_name = 'queryset'
-    queryset = OrderingProduct.objects.filter(check_admin=False)
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.resolver_match.url_name == 'new_order':
-            context['title'] = 'Новые заказы'
-        else:
-            context['title'] = 'Обработанные заказы'
+
+
+
+
+
+class CategoriesView(LoginRequiredMixin, View):
+    template_name = 'main_app/category.html'
+    queryset = Category.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['title'] = 'Категории'
+        context['queryset'] = self.queryset
+        context['category_form'] = CategoryForm()
+        context['sc_form'] = SubcategoryForm()
         return context
 
     def post(self, request):
-        order_id = int(request.POST['order_id'])
-        track_code = int(request.POST['track_number'])
-        order = OrderingProduct.objects.get(pk=order_id)
-        order.track_code = track_code
-        order.check_admin = True
-        order.save()
-        return redirect('new_order') if self.request.resolver_match.url_name == 'new_order' else redirect('old_order')
+        if 'create_category' in request.POST:   # Создать категорию
+            category_form = CategoryForm(request.POST, files=request.FILES)
+            if category_form.is_valid():
+                category_form.save()
+                messages.info(request, 'Новая категория успешно создана!')
+                return redirect('add_category')
+        elif 'create_sc' in request.POST:   # Создать подкатеогрию
+            sc_form = SubcategoryForm(request.POST, files=request.FILES)
+            if sc_form.is_valid():
+                f = sc_form.save(commit=False)    
+                f.category = Category.objects.get(pk=int(request.POST['category_id']))
+                f.save()
+                messages.info(request, 'Новая подкатегория успешно создана!')
+                return redirect('add_category')
 
+    def get(self, request):
+        return render(request, self.template_name, context=self.get_context_data())
+
+
+class NoPaidOrderView(ListView):
+    '''Неоплаченные заказы'''
+    template_name = 'main_app/manager_order.html'
+    queryset = OrderingProduct.objects.filter(payment_bool=False).order_by('-datetime')
+    context_object_name = 'queryset'
+
+    def post(self, request):
+        if 'paid_status' in request.POST:
+            order_id = int(request.POST['order_id'])
+            order = OrderingProduct.objects.get(pk=order_id)
+            if request.POST['payment'] == 'paid':        
+                for item in order.sold_product.all():
+                    item.product.count -= item.count
+                    item.product.save()
+                    item.payment_bool = True
+                    item.save()
+                order.payment_bool = True
+                order.save()
+                messages.add_message(request,messages.SUCCESS, 'Заказ успешно обработан!')
+            else:
+                order.sold_product.all().delete()
+                order.delete()
+                messages.add_message(request,messages.SUCCESS, 'Заказ успешно удален!')
+
+        elif 'change_order' in request.POST:
+            list_id = request.POST.getlist('product_id')
+            list_count = request.POST.getlist('product_count')
+            tuple_product = [(int(list_id[i]), int(list_count[i])) for i in range(len(list_id))]
+            for item in tuple_product:
+                if item[1] <= 0:
+                    SoldProduct.objects.get(pk=item[0]).delete()
+                else:
+                    SoldProduct.objects.filter(pk=item[0]).update(count=item[1])
+            messages.add_message(request,messages.SUCCESS, 'Заказ успешно изменен!')
+        return redirect('new_order')
+
+
+
+
+class PaidOrderView(ListView):
+    '''Оплаченные заказы'''
+    template_name = 'main_app/manager_order.html'
+    queryset = OrderingProduct.objects.filter(payment_bool=True).order_by('-datetime')
+    context_object_name = 'queryset'
+
+    def post(self, request):
+        order_id = int(request.POST['order_id'])
+        order = OrderingProduct.objects.get(pk=order_id)
+        track_code = request.POST['track_code']
+        order.track_code = track_code
+        order.save()
+        messages.add_message(request,messages.SUCCESS, 'Трек номер успешно добавлен!')
+        return redirect('old_order')
+
+
+class StatisticView(LoginRequiredMixin, View):
+    '''Представления общей статистики по товарам'''
+    template_name = 'main_app/user_stat.html'
+    sold_queryset = SoldProduct.objects.filter(payment_bool=True)
+    reception_queryset = ReceptionProduct.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['title'] = 'Статистика'
+        context['users'] = TelegramUser.objects.all().count()
+        context['stat_dict'] = self.get_statistic()
+        return context
+
+    def get_statistic(self):
+        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+                 'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
+                 'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
+        stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
+        return stat_dict
+
+    def get_params(self):
+        return {k:v for k,v in self.request.GET.items() if v != ''}
+
+    def get_queryset(self):
+        params = self.get_params()
+        if 'start' in params and 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
+        elif 'start' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.reception_queryset =self. reception_queryset.filter(date__gte=params['start'])
+        elif 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])      
+
+    def get(self, request):
+        if 'start' in self.get_params() or 'end' in self.get_params():
+            self.get_queryset()
+        return render(request, self.template_name, context=self.get_context_data())
 
 
 @login_required
@@ -187,7 +294,7 @@ def product_view(request, pk):
 
     reception_form = ReceptionForm()
     reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
-    sold_queryset = SoldProduct.objects.filter(product__pk=pk)
+    sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
 
     sold_stat = (sum([x.count * x.price for x in sold_queryset]), sum([x.count for x in sold_queryset]))
     reception_stat = (sum([x.count * x.price for x in reception_queryset]), sum([x.count for x in reception_queryset]))
@@ -237,68 +344,6 @@ def product_view(request, pk):
                                                      })
 
 
-class CategoriesView(LoginRequiredMixin, View):
-    template_name = 'main_app/category.html'
-    queryset = Category.objects.all()
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        context['title'] = 'Категории'
-        context['queryset'] = self.queryset
-        context['category_form'] = CategoryForm()
-        context['sc_form'] = SubcategoryForm()
-        return context
-
-    def post(self, request):
-        if 'create_category' in request.POST:   # Создать категорию
-            category_form = CategoryForm(request.POST, files=request.FILES)
-            if category_form.is_valid():
-                category_form.save()
-                messages.info(request, 'Новая категория успешно создана!')
-                return redirect('add_category')
-        elif 'create_sc' in request.POST:   # Создать подкатеогрию
-            sc_form = SubcategoryForm(request.POST, files=request.FILES)
-            if sc_form.is_valid():
-                f = sc_form.save(commit=False)    
-                f.category = Category.objects.get(pk=int(request.POST['category_id']))
-                f.save()
-                messages.info(request, 'Новая подкатегория успешно создана!')
-                return redirect('add_category')
-
-    def get(self, request):
-        return render(request, self.template_name, context=self.get_context_data())
-
-
-# def create_category(request):
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     if request.method == 'POST' and 'create_category' in request.POST:
-#         category_form = CategoryForm(request.POST, files=request.FILES)
-#         if category_form.is_valid():
-#             category_form.save()
-#             messages.info(request, 'Новая категория успешно создана!')
-#             return redirect('add_category')
-#         else:
-#             messages.info(request, 'Ошибка!')
-#             return redirect('add_category')
-
-#     elif request.method == "POST" and 'create_sc' in request.POST:
-#         sc_form = SubcategoryForm(request.POST, files=request.FILES)
-#         if sc_form.is_valid():
-#             f = sc_form.save(commit=False)    
-#             f.category = Category.objects.get(pk=int(request.POST['category_id']))
-#             f.save()
-#             messages.info(request, 'Новая категория успешно создана!')
-#             return redirect('add_category')
-
-#     category_form = CategoryForm()
-#     sc_form = SubcategoryForm()
-#     category = Category.objects.all()
-#     return render(request, 'main_app/category.html', {'category_form': category_form, 'sc_form': sc_form ,'queryset': category})
-
-
-
-
 def control_qiwi(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -324,44 +369,3 @@ def control_qiwi(request):
     queryset = QiwiToken.objects.all()
     form = QiwiTokenForm()
     return render(request, 'main_app/qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})
-
-
-class StatisticView(LoginRequiredMixin, View):
-    '''Представления общей статистики по товарам'''
-    template_name = 'main_app/user_stat.html'
-    sold_queryset = SoldProduct.objects.all()
-    reception_queryset = ReceptionProduct.objects.all()
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        context['title'] = 'Статистика'
-        context['users'] = TelegramUser.objects.all().count()
-        context['stat_dict'] = self.get_statistic()
-        return context
-
-    def get_statistic(self):
-        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
-                 'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
-                 'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
-        stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
-        return stat_dict
-
-    def get_params(self):
-        return {k:v for k,v in self.request.GET.items() if v != ''}
-
-    def get_queryset(self):
-        params = self.get_params()
-        if 'start' in params and 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
-            self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
-        elif 'start' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
-            self.reception_queryset =self. reception_queryset.filter(date__gte=params['start'])
-        elif 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
-            self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])      
-
-    def get(self, request):
-        if 'start' in self.get_params() or 'end' in self.get_params():
-            self.get_queryset()
-        return render(request, self.template_name, context=self.get_context_data())
