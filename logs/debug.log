@@ -1,0 +1,61 @@
+[2021-10-09 07:28:03 +0000] [4172] [INFO] Starting gunicorn 20.1.0
+[2021-10-09 07:28:03 +0000] [4172] [INFO] Listening at: http://127.0.0.1:8000 (4172)
+[2021-10-09 07:28:03 +0000] [4172] [INFO] Using worker: sync
+[2021-10-09 07:28:03 +0000] [4175] [INFO] Booting worker with pid: 4175
+[2021-10-10 15:23:44 +0000] [4172] [INFO] Handling signal: term
+[2021-10-10 15:23:44 +0000] [4175] [INFO] Worker exiting (pid: 4175)
+True
+[2021-10-10 15:23:44 +0000] [4172] [INFO] Shutting down: Master
+[2021-10-10 15:23:49 +0000] [23849] [INFO] Starting gunicorn 20.1.0
+[2021-10-10 15:23:49 +0000] [23849] [INFO] Listening at: http://127.0.0.1:8000 (23849)
+[2021-10-10 15:23:49 +0000] [23849] [INFO] Using worker: sync
+[2021-10-10 15:23:49 +0000] [23852] [INFO] Booting worker with pid: 23852
+[2021-10-10 16:53:41 +0000] [23849] [INFO] Handling signal: term
+[2021-10-10 16:53:41 +0000] [23852] [INFO] Worker exiting (pid: 23852)
+[2021-10-10 16:53:41 +0000] [23849] [INFO] Shutting down: Master
+[2021-10-10 16:53:49 +0000] [24795] [INFO] Starting gunicorn 20.1.0
+[2021-10-10 16:53:49 +0000] [24795] [INFO] Listening at: http://127.0.0.1:8000 (24795)
+[2021-10-10 16:53:49 +0000] [24795] [INFO] Using worker: sync
+[2021-10-10 16:53:49 +0000] [24798] [INFO] Booting worker with pid: 24798
+[2021-10-10 18:23:10 +0000] [24795] [INFO] Handling signal: term
+[2021-10-10 18:23:10 +0000] [24798] [INFO] Worker exiting (pid: 24798)
+[2021-10-10 18:23:11 +0000] [24795] [INFO] Shutting down: Master
+[2021-10-10 18:23:16 +0000] [25791] [INFO] Starting gunicorn 20.1.0
+[2021-10-10 18:23:16 +0000] [25791] [INFO] Listening at: http://127.0.0.1:8000 (25791)
+[2021-10-10 18:23:16 +0000] [25791] [INFO] Using worker: sync
+[2021-10-10 18:23:16 +0000] [25794] [INFO] Booting worker with pid: 25794
+[2021-10-10 18:31:15 +0000] [25791] [INFO] Handling signal: term
+[2021-10-10 18:31:15 +0000] [25794] [INFO] Worker exiting (pid: 25794)
+[2021-10-10 18:31:15 +0000] [25791] [INFO] Shutting down: Master
+[2021-10-10 18:31:25 +0000] [25918] [INFO] Starting gunicorn 20.1.0
+[2021-10-10 18:31:25 +0000] [25918] [INFO] Listening at: http://127.0.0.1:8000 (25918)
+[2021-10-10 18:31:25 +0000] [25918] [INFO] Using worker: sync
+[2021-10-10 18:31:25 +0000] [25921] [INFO] Booting worker with pid: 25921
+[2021-10-10 18:34:04 +0000] [25918] [INFO] Handling signal: term
+[2021-10-10 18:34:04 +0000] [25921] [INFO] Worker exiting (pid: 25921)
+[2021-10-10 18:34:04 +0000] [25918] [INFO] Shutting down: Master
+[2021-10-10 18:34:09 +0000] [25985] [INFO] Starting gunicorn 20.1.0
+[2021-10-10 18:34:09 +0000] [25985] [INFO] Listening at: http://127.0.0.1:8000 (25985)
+[2021-10-10 18:34:09 +0000] [25985] [INFO] Using worker: sync
+[2021-10-10 18:34:09 +0000] [25988] [INFO] Booting worker with pid: 25988
+[2021-10-16 01:17:14 +0000] [25985] [INFO] Handling signal: term
+[2021-10-16 01:17:14 +0000] [25988] [INFO] Worker exiting (pid: 25988)
+[2021-10-16 01:17:14 +0000] [25985] [INFO] Shutting down: Master
+[2021-10-16 01:17:20 +0000] [11050] [INFO] Starting gunicorn 20.1.0
+[2021-10-16 01:17:20 +0000] [11050] [INFO] Listening at: http://127.0.0.1:8000 (11050)
+[2021-10-16 01:17:20 +0000] [11050] [INFO] Using worker: sync
+[2021-10-16 01:17:20 +0000] [11053] [INFO] Booting worker with pid: 11053
+[2021-10-16 01:18:30 +0000] [11050] [INFO] Handling signal: term
+[2021-10-16 04:18:30 +0300] [11053] [INFO] Worker exiting (pid: 11053)
+[2021-10-16 01:18:30 +0000] [11050] [INFO] Shutting down: Master
+[2021-10-16 01:18:34 +0000] [11078] [INFO] Starting gunicorn 20.1.0
+[2021-10-16 01:18:34 +0000] [11078] [INFO] Listening at: http://127.0.0.1:8000 (11078)
+[2021-10-16 01:18:34 +0000] [11078] [INFO] Using worker: sync
+[2021-10-16 01:18:34 +0000] [11081] [INFO] Booting worker with pid: 11081
+[2021-10-16 01:19:51 +0000] [11078] [INFO] Handling signal: term
+[2021-10-16 04:19:51 +0300] [11081] [INFO] Worker exiting (pid: 11081)
+[2021-10-16 01:19:52 +0000] [11078] [INFO] Shutting down: Master
+[2021-10-16 01:19:58 +0000] [11154] [INFO] Starting gunicorn 20.1.0
+[2021-10-16 01:19:58 +0000] [11154] [INFO] Listening at: http://127.0.0.1:8000 (11154)
+[2021-10-16 01:19:58 +0000] [11154] [INFO] Using worker: sync
+[2021-10-16 01:19:58 +0000] [11157] [INFO] Booting worker with pid: 11157
