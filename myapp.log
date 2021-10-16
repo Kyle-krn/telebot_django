@@ -16,3 +16,14 @@
 2021-10-10 17:34:26,495 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
 2021-10-10 17:51:45,774 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message to edit not found
 2021-10-14 19:24:45,437 ERROR:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message to edit not found
+2021-10-16 04:17:29,554 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:17:33,157 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:17:37,263 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:17:42,364 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:17:49,467 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:17:57,565 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:18:13,688 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:18:42,483 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:19:17,830 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:20:25,180 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2021-10-16 04:22:36,812 ERROR:A request to the Telegram API was unsuccessful. Error code: 409. Description: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
