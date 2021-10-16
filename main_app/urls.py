@@ -7,7 +7,8 @@ from .forms import *
 
 urlpatterns = [
     path('', IndexView.as_view(), name='all_product'),                              # Все товары
-    path('product/<int:pk>', product_view, name='productdetail'),                   # Товар - подробнее
+    # path('product/<int:pk>', product_view, name='productdetail'),                   # Товар - подробнее
+    path('product/<int:pk>', ProductView.as_view(), name='productdetail'),                   # Товар - подробнее
     path('category/<int:pk>', CategoryUpdateView.as_view(), name='category_detail'),               # Катеогрии - подробнее
     path('subcategory/<int:pk>', CategoryUpdateView.as_view(model=SubCategory, form_class=Subcategory_reqForm), name='subcategory_detail'),      # Подкатеогии - подробнее
     path('add_category/', CategoriesView.as_view(), name='add_category'),                    # Новая катеогрия

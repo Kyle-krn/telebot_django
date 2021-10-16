@@ -13,10 +13,12 @@
 <script src="magnific-popup/jquery.magnific-popup.js"></script>
 
 <div class='container'>
+    {% block message %}
     {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    <form action="" method="get">
+    <form action="" method="post">
+        {% csrf_token %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
             <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
     </form>
@@ -24,6 +26,7 @@
     {% endfor %}
 </ul>
 {% endif %}
+{% endblock %}
 
 <div class='text-center'>
     <h1>{{product.title}}</h1>
@@ -184,20 +187,20 @@
 <div class='text-center'>
     <div class="container">
         <h2>Общая выручка:</h2>
-        <h3>{{all_stat}} руб.</h3>
+        <h3>{{stat_dict.all_stat}} руб.</h3>
         <br>
         <div class="row">
             <div class="col-sm">
                 <h2>Продано всего:</h2>
-                <h3>{{sold_stat.1}} ед. на {{sold_stat.0}} руб.</h3>
+                <h3>{{stat_dict.sold_stat.1}} ед. на {{stat_dict.sold_stat.0}} руб.</h3>
             </div>
             <div class="col-sm">
                 <h2>Закуплено всего:</h2>
-                <h3>{{reception_stat.1}} ед. на {{reception_stat.0}} руб.</h3>
+                <h3>{{stat_dict.reception_stat.1}} ед. на {{stat_dict.reception_stat.0}} руб.</h3>
             </div>
             <div class="col-sm">
                 <h2>Списано всего:</h2>
-                <h3>{{liquidated_stat.1}} ед. на {{liquidated_stat.0}} руб.</h3>
+                <h3>{{stat_dict.liquidated_stat.1}} ед. на {{stat_dict.liquidated_stat.0}} руб.</h3>
             </div>
         </div>
     </div>

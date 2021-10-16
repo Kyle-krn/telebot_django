@@ -254,6 +254,113 @@ class StatisticView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
+class ProductView(View):
+    template_name = 'main_app/product.html'
+    
+    def get_object(self):
+        self.product = get_object_or_404(Product, pk=self.kwargs.get('pk'))
+
+
+    def get_params(self):
+        return {k:v for k,v in self.request.GET.items() if v != ''}
+
+    def filter_queryset(self):
+        params = self.get_params()
+        if 'only' in params:
+            if params['only'] == 'reception':
+                result_list = self.reception_queryset.filter(liquidated=False)
+            elif params['only'] == 'sold':
+                result_list = self.sold_queryset
+            elif params['only'] == 'liquidated':
+                result_list = self.reception_queryset.filter(liquidated=True)
+        else:
+            result_list = sorted(
+                    chain(self.reception_queryset, self.sold_queryset),
+                    key=lambda instance: instance.date, reverse=True)
+        return result_list
+
+    def get_queryset(self, pk):
+        params = self.get_params()
+        self.reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
+        self.sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
+
+        if 'start' in params and 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
+        elif 'start' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.reception_queryset = self.reception_queryset.filter(date__gte=params['start'])
+        elif 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])   
+
+    def get_statistic(self):
+        stat_dict = {
+            'sold_stat': (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+            'reception_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
+            'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))
+        }
+        stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0]
+        return stat_dict
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['product'] = self.product
+        context['category'] = Category.objects.all()
+        context['reception_form'] = ReceptionForm()
+        context['stat_dict'] = self.get_statistic()
+        context['trade_queryset'] = self.filter_queryset()
+        context['product_form'] = Product_reqForm(initial={'title': self.product.title,
+                                        'description': self.product.description,
+                                        'price': self.product.price,
+                                        'weight': self.product.weight,
+                                        'subcategory': self.product.subcategory_id})
+        return context
+
+    def post(self, request, pk):
+        self.get_object()
+        self.get_queryset(pk)
+
+        if 'update' in request.POST:
+            product_form = Product_reqForm(request.POST, files=request.FILES, instance=self.product)
+            if product_form.is_valid():
+                product_form.save()
+                return redirect('productdetail', pk=pk)
+
+        elif 'delete' in request.POST:
+            messages.info(request, 'Вы уверены?')
+            return redirect('productdetail', pk=pk)
+
+        elif 'confirm_delete' in request.POST:
+            self.product.delete()
+            return redirect ('all_product')
+
+        elif 'reception' in request.POST:
+            form = ReceptionForm(request.POST)
+            print(form.is_valid())
+            if form.is_valid():
+                self.product.count += form.cleaned_data['count']
+                self.product.save()
+                f = form.save(commit=False)
+                f.product = self.product
+                f.save()
+                return redirect('productdetail', pk=pk)           
+
+        elif 'liquidated' in request.POST:
+            count = int(request.POST['liquidated_count'])
+            note = request.POST['liquidated_note']
+            ReceptionProduct.objects.create(price=int(request.POST['liquidated_price']), count=count, note=note, product=self.product, liquidated=True)
+            self.product.count -= count
+            self.product.save()
+            return redirect('productdetail', pk=pk) 
+        
+
+    
+    def get(self, request, pk):
+        self.get_object()
+        self.get_queryset(pk)
+        return render(request, self.template_name, context=self.get_context_data())
+
 @login_required
 def product_view(request, pk):
     '''Страница изменения продукта/добавления кол-ва в товар и списание'''
@@ -268,7 +375,7 @@ def product_view(request, pk):
     if request.method == "POST" and 'delete' in request.POST:
         messages.info(request, 'Вы уверены?')
 
-    if request.method == 'GET' and 'confirm_delete' in request.GET:
+    if request.method == 'POST' and 'confirm_delete' in request.POST:
         product.delete()
         return redirect('all_product')
 
@@ -296,13 +403,10 @@ def product_view(request, pk):
     reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
     sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
 
-    sold_stat = (sum([x.count * x.price for x in sold_queryset]), sum([x.count for x in sold_queryset]))
-    reception_stat = (sum([x.count * x.price for x in reception_queryset]), sum([x.count for x in reception_queryset]))
-    liquidated_stat = sum([x.count * x.price for x in reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in reception_queryset.filter(liquidated=True)])
-    all_stat = sold_stat[0] - reception_stat[0]
     
 
     params = {k:v for k,v in request.GET.items() if len(v) != 0}
+
     if 'start' in params and 'end' in params:
         sold_queryset = sold_queryset.filter(date__range=[params['start'], params['end']])
         reception_queryset = reception_queryset.filter(date__range=[params['start'], params['end']])
@@ -312,6 +416,13 @@ def product_view(request, pk):
     elif 'end' in params:
         sold_queryset = sold_queryset.filter(date__lte=params['end'])
         reception_queryset = reception_queryset.filter(date__lte=params['end'])      
+
+    stat_dict = {
+        'sold_stat': (sum([x.count * x.price for x in sold_queryset]), sum([x.count for x in sold_queryset])),
+        'reception_stat': (sum([x.count * x.price for x in reception_queryset.filter(liquidated=False)]), sum([x.count for x in reception_queryset.filter(liquidated=False)])),
+        'liquidated_stat': (sum([x.count * x.price for x in reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in reception_queryset.filter(liquidated=True)]))
+    }
+    stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
 
     if 'only' in params:
         if params['only'] == 'reception':
@@ -337,10 +448,8 @@ def product_view(request, pk):
                                                      'category': category,
                                                      'reception_form': reception_form,
                                                      'trade_queryset': result_list,
-                                                     'sold_stat': sold_stat,
-                                                     'reception_stat': reception_stat, 
-                                                     'liquidated_stat': liquidated_stat,
-                                                     'all_stat': all_stat,
+
+                                                     'stat_dict': stat_dict
                                                      })
 
 
