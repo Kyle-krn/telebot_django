@@ -7,3 +7,4 @@ vape_shop/__pycache__
 media/
 **/__pycache__/
 static/
+logs/
