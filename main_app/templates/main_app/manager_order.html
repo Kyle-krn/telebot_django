@@ -8,7 +8,7 @@
 <div class="accordion" id="accordionExample">
     {% for qs in queryset %}
     <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
+        <h2 class="accordion-header" id="heading-{{qs.pk}}">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{qs.pk}}"
                 aria-expanded="true" aria-controls="collapse-{{qs.pk}}">
                 Заказ от {{qs.get_datetime}} на сумму {{qs.get_order_price}} руб.

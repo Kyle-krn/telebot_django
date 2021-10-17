@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.views import View
+from django.contrib.messages.views import SuccessMessageMixin
 
 
 class LoginUser(LoginView):
@@ -68,10 +69,11 @@ class IndexView(ListView):
 
 
 
-class CreateProductView(LoginRequiredMixin, CreateView):
+class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Создание нового товара'''
     template_name = 'main_app/add_product.html'
-    form_class = ProductForm   
+    form_class = ProductForm
+    success_message = "Товар успешно создан!"
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -79,11 +81,12 @@ class CreateProductView(LoginRequiredMixin, CreateView):
         return context
 
 
-class ReceptionProductView(LoginRequiredMixin, CreateView):
+class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'main_app/reception.html'
     form_class = ReceptionForm
     success_url = reverse_lazy('reception')
+    success_message = 'Количество товара успешно увеличено!'
 
     def form_valid(self, form):
         product = Product.objects.get(pk=int(self.request.POST['product_pk']))
@@ -92,7 +95,6 @@ class ReceptionProductView(LoginRequiredMixin, CreateView):
         f = form.save(commit=False)
         f.product = product
         f.save()
-        messages.info(self.request, 'Успешно!')
         return super().form_valid(form)
 
     def get_context_data(self, *args, **kwargs):
@@ -101,32 +103,31 @@ class ReceptionProductView(LoginRequiredMixin, CreateView):
         return context
 
 
-class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     '''Обновить категорию'''
     model = Category
     template_name = 'main_app/category_detail.html'
     form_class = Category_reqForm
     success_url = reverse_lazy('add_category')
+    success_message = 'Категория успешно обновлена!'
 
-    def get(self, *args, **kwargs):
-        if 'delete' in self.request.GET:
-            messages.info(self.request, 'Вы уверены?')
-        if 'confirm_delete' in self.request.GET:
+
+    def post(self, *args, **kwargs):
+        if 'delete' in self.request.POST:
             category = self.get_object()
             category.delete()
-            return redirect('add_category')  
-        return super().get(self)
+            return redirect('add_category')
+        return super().post(self)
 
 
 class CategoriesView(LoginRequiredMixin, View):
     '''Представление создания/просмотра категорий/подкатегорий'''
     template_name = 'main_app/category.html'
-    queryset = Category.objects.all()
 
     def get_context_data(self, **kwargs):
         context = {}
         context['title'] = 'Категории'
-        context['queryset'] = self.queryset
+        context['queryset'] = Category.objects.all()
         context['category_form'] = CategoryForm()
         context['sc_form'] = SubcategoryForm()
         return context
@@ -151,7 +152,7 @@ class CategoriesView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class NoPaidOrderView(ListView):
+class NoPaidOrderView(LoginRequiredMixin, ListView):
     '''Неоплаченные заказы'''
     template_name = 'main_app/manager_order.html'
     queryset = OrderingProduct.objects.filter(payment_bool=False).order_by('-datetime')
@@ -169,11 +170,11 @@ class NoPaidOrderView(ListView):
                     item.save()
                 order.payment_bool = True
                 order.save()
-                messages.add_message(request,messages.SUCCESS, 'Заказ успешно обработан!')
+                messages.info(request, 'Заказ успешно обработан!')
             else:
                 order.sold_product.all().delete()
                 order.delete()
-                messages.add_message(request,messages.SUCCESS, 'Заказ успешно удален!')
+                messages.info(request, 'Заказ успешно удален!')
 
         elif 'change_order' in request.POST:
             list_id = request.POST.getlist('product_id')
@@ -184,13 +185,13 @@ class NoPaidOrderView(ListView):
                     SoldProduct.objects.get(pk=item[0]).delete()
                 else:
                     SoldProduct.objects.filter(pk=item[0]).update(count=item[1])
-            messages.add_message(request,messages.SUCCESS, 'Заказ успешно изменен!')
+            messages.info(request, 'Заказ успешно изменен!')
         return redirect('new_order')
 
 
 
 
-class PaidOrderView(ListView):
+class PaidOrderView(LoginRequiredMixin, ListView):
     '''Оплаченные заказы'''
     template_name = 'main_app/manager_order.html'
     queryset = OrderingProduct.objects.filter(payment_bool=True).order_by('-datetime')
@@ -202,7 +203,7 @@ class PaidOrderView(ListView):
         track_code = request.POST['track_code']
         order.track_code = track_code
         order.save()
-        messages.add_message(request,messages.SUCCESS, 'Трек номер успешно добавлен!')
+        messages.info(request, 'Трек-номер успешно добавлен!')
         return redirect('old_order')
 
 
@@ -247,13 +248,12 @@ class StatisticView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class ProductView(View):
+class ProductView(LoginRequiredMixin, View):
     '''Детальное представление товара и управление им'''
     template_name = 'main_app/product.html'
     
     def get_object(self):
         self.product = get_object_or_404(Product, pk=self.kwargs.get('pk'))
-
 
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
@@ -319,14 +319,12 @@ class ProductView(View):
             product_form = Product_reqForm(request.POST, files=request.FILES, instance=self.product)
             if product_form.is_valid():
                 product_form.save()
+                messages.info(request, 'Товар успешно обновлен!')
                 return redirect('productdetail', pk=pk)
 
         elif 'delete' in request.POST:
-            messages.info(request, 'Вы уверены?')
-            return redirect('productdetail', pk=pk)
-
-        elif 'confirm_delete' in request.POST:
             self.product.delete()
+            messages.info(request, 'Товар усппешно удален!')
             return redirect ('all_product')
 
         elif 'reception' in request.POST:
@@ -338,6 +336,7 @@ class ProductView(View):
                 f = form.save(commit=False)
                 f.product = self.product
                 f.save()
+                messages.info(request, 'Количество товара успешно увеличено!')
                 return redirect('productdetail', pk=pk)           
 
         elif 'liquidated' in request.POST:
@@ -346,6 +345,7 @@ class ProductView(View):
             ReceptionProduct.objects.create(price=int(request.POST['liquidated_price']), count=count, note=note, product=self.product, liquidated=True)
             self.product.count -= count
             self.product.save()
+            messages.info(request, 'Количество товара успешно списано!')
             return redirect('productdetail', pk=pk) 
         
 

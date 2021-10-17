@@ -13,20 +13,7 @@
 <script src="magnific-popup/jquery.magnific-popup.js"></script>
 
 <div class='container'>
-    {% block message %}
-    {% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}
-            <button type="submit" name="confirm_delete" class="btn btn-danger btn-sm">Удалить</button>
-    </form>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endblock %}
+
 
 <div class='text-center'>
     <h1>{{product.title}}</h1>
@@ -153,7 +140,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-          <button type="submit" name="confirm_delete" class="btn btn-danger">Удалить</button>
+          <button type="submit" name="delete" class="btn btn-danger">Удалить</button>
         </div>
       </div>
     </div>

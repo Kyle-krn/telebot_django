@@ -27,11 +27,30 @@
           {% else %}
           <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
           {% endif %}
+          {% url 'new_order' as no %}
+          {% if request.path == no %}
+          <li><a href="{% url 'new_order' %}" class="nav-link px-2 disabled">Неоплаченные заказы</a></li>
+          {% else %}
           <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Неоплаченные заказы</a></li>
+          {% endif %}
+          {% url 'old_order' as oo %}
+          {% if request.path == oo %}
+          <li><a href="{% url 'old_order' %}" class="nav-link px-2 disabled">Оплаченные заказы</a></li>
+          {% else %}
           <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Оплаченные заказы</a></li>
+          {% endif %}
+          {% url 'user_stat' as us %}
+          {% if request.path == us %}
+          <li><a href="{% url 'user_stat' %}" class="nav-link px-2 disabled">Общая статистика</a></li>
+          {% else %}
           <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
+          {% endif %}
+          {% url 'reception' as r %}
+          {% if request.path == r %}
+          <li><a href="{% url 'reception' %}" class="nav-link px-2 disabled">Прием товаров</a></li>
+          {% else %}
           <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
-
+          {% endif %}
 
 
 
@@ -46,7 +65,7 @@
           {% endif %}
           {% url 'add_product' as ap %}
           {% if request.path == ap %}
-          <a class="btn btn-warning disabled" href="{% url 'add_product' %}" role="button">+ Товар</a>
+          <a class="btn btn-warning me-3 disabled" href="{% url 'add_product' %}" role="button">+ Товар</a>
           {% else %}
           <a class="btn btn-warning me-3" href="{% url 'add_product' %}" role="button">+ Товар</a>
           {% endif %}
@@ -57,14 +76,17 @@
   </header>
   {% endblock %}
 
+
   {% block message %}
+  <div class='container'>
   {% if messages %}
-  <ul class="messages">
+  
     {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    <div class="alert alert-success" role="alert">{{ message }}</div>
     {% endfor %}
-  </ul>
+
   {% endif %}
+</div>
   {% endblock %}
   
 
