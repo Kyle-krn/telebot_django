@@ -62,6 +62,7 @@ class IndexView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Все товары'
         context['category'] = Category.objects.all()
         return context
 
@@ -80,6 +81,7 @@ class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Новый товар'
         context['category'] = Category.objects.all()
         return context
 
@@ -102,6 +104,7 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = 'Приемка товара'
         context['subcategory'] = SubCategory.objects.all()
         return context
 
@@ -113,6 +116,11 @@ class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     form_class = Category_reqForm
     success_url = reverse_lazy('add_category')
     success_message = 'Категория успешно обновлена!'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Изменить категорию/подкатегорию'
+        return context
 
 
     def post(self, *args, **kwargs):
@@ -161,6 +169,11 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
     queryset = OrderingProduct.objects.filter(payment_bool=False).order_by('-datetime')
     context_object_name = 'queryset'
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Неоплаченные заказы'
+        return context
+
     def post(self, request):
         if 'paid_status' in request.POST:
             order_id = int(request.POST['order_id'])
@@ -199,6 +212,11 @@ class PaidOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/manager_order.html'
     queryset = OrderingProduct.objects.filter(payment_bool=True).order_by('-datetime')
     context_object_name = 'queryset'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Оплаченные заказы'
+        return context
 
     def post(self, request):
         order_id = int(request.POST['order_id'])
@@ -303,6 +321,7 @@ class ProductView(LoginRequiredMixin, View):
     def get_context_data(self, **kwargs):
         context = {}
         context['product'] = self.product
+        context['title'] = self.product.title
         context['category'] = Category.objects.all()
         context['reception_form'] = ReceptionForm()
         context['stat_dict'] = self.get_statistic()
@@ -356,6 +375,9 @@ class ProductView(LoginRequiredMixin, View):
         self.get_object()
         self.get_queryset(pk)
         return render(request, self.template_name, context=self.get_context_data())
+
+
+
 
 
 
