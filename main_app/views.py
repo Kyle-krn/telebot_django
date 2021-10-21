@@ -17,6 +17,9 @@ from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.views import View
 from django.contrib.messages.views import SuccessMessageMixin
 
+def test(request):
+    return render(request, 'main_app/test.html')
+
 
 class LoginUser(LoginView):
     '''Аутенификация пользователя'''

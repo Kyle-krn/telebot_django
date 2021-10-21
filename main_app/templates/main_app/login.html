@@ -1,15 +1,28 @@
-{% extends 'main_app/base.html' %}
+{% load static %}
+<link type="text/css" href="{% static 'css/login.css' %}" rel="stylesheet"/>
 
-{% block header %}
-{% endblock %}
-{% block content %}
-<h1>{{title}}</h1>
- 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-</form>
 
- 
-{% endblock %}
+
+<div id="range5">
+
+    <div class="outer">
+      <div class="middle">
+        <div class="inner">
+    
+            <div class="login-wr">
+              <h2>Вход</h2>
+              <div class="form">
+                  <form method="post">
+                {% csrf_token %}
+                <p> {{ form.username }} </p>
+                <p> {{form.password}} </p>
+                <button type='submit'> Вход </button>
+            </form>
+              </div>
+            </div>
+    
+        </div>
+      </div>
+    </div>
+    
+    </div>
