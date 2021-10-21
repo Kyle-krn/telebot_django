@@ -1,4 +1,5 @@
 venv/
+/static/
 vape_shop/settings.py
 vape_shop/prod_settings.py
 main_app/management/commands/__pycache__
@@ -6,5 +7,4 @@ main_app/__pycache__
 vape_shop/__pycache__
 media/
 **/__pycache__/
-static/
 logs/
