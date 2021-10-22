@@ -16,9 +16,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.views import View
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth import login 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 
-def test(request):
-    return render(request, 'main_app/test.html')
+
+class RegisterUser(CreateView):
+    """В приложении не используется, можно использовать для стандартной регистрации"""
+    form_class = RegisterUserForm
+    template_name = 'main_app/register.html'
+    success_url = reverse_lazy('all_product')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Регистрация продовца'
+        return context
 
 
 class LoginUser(LoginView):
@@ -31,9 +43,16 @@ class LoginUser(LoginView):
         context['title'] = 'Логин'
         return context
 
-    def get_success_url(self):
-        return reverse_lazy('all_product')
+    def form_valid(self, form):
+        login(self.request, form.get_user())
+        user = form.get_user()
+        return HttpResponseRedirect(self.get_success_url(user))
 
+    def get_success_url(self, user):
+        if user.is_superuser:
+            return reverse_lazy('all_product')
+        else:
+            return reverse_lazy('add_product')
 
 def logout_user(request):
     '''Выход'''
@@ -41,9 +60,11 @@ def logout_user(request):
     return redirect('login')
 
 
-class IndexView(ListView):
+@method_decorator(staff_member_required, name='dispatch')
+class IndexView(LoginRequiredMixin, ListView):
     '''Вывод всех товаров'''
     context_object_name = 'product'
+    login_url = '/login/'
     template_name = 'main_app/index.html'
 
     def get_queryset(self):
@@ -65,12 +86,6 @@ class IndexView(ListView):
         context['title'] = 'Все товары'
         context['category'] = Category.objects.all()
         return context
-
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return redirect('login')
-        return super().get(request)
-
 
 
 class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):

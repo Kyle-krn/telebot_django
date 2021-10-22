@@ -1,6 +1,8 @@
 from django import forms
 from .models import *
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.models import User
+
 
 
 class ProductForm(forms.ModelForm):
@@ -74,3 +76,16 @@ class TrackCodeForm(forms.ModelForm):
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+
+
+
+class RegisterUserForm(UserCreationForm):
+    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ('username', 'password1', 'password2', 'first_name', 'last_name')

@@ -1,0 +1,46 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class='container'>
+
+<div class="text-center">
+<h1>{{title}}</h1>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="fieldWrapper">
+        {{ form.username.errors }}
+        <label for="{{ form.username.id_for_label }}">Логин:</label>
+        {{ form.username }}
+    </div>
+    <div class="fieldWrapper">
+        {{ form.first_name.errors }}
+        <label for="{{ form.first_name.id_for_label }}">Имя:</label>
+        {{ form.first_name }}
+    </div>
+    <div class="fieldWrapper">
+        {{ form.last_name.errors }}
+        <label for="{{ form.last_name.id_for_label }}">Фамилия:</label>
+        {{ form.last_name }}
+    </div>
+    <div class="fieldWrapper">
+        {{ form.password1.errors }}
+        <label for="{{ form.password1.id_for_label }}">Пароль:</label>
+        {{ form.password1 }}
+    </div>
+    <div class="fieldWrapper">
+        {{ form.password2.errors }}
+        <label for="{{ form.password2.id_for_label }}">Пароль снова:</label>
+        {{ form.password2 }}
+    </div>
+    <br>
+    <div class="text-center">
+    <button class='btn btn-success btn-lg' type="submit">Зарегистрировать</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}
+

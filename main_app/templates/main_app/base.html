@@ -51,7 +51,12 @@
           {% else %}
           <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
           {% endif %}
-
+          {% url 'register' as r %}
+          {% if request.path == r %}
+          <li><a href="{% url 'register' %}" class="nav-link px-2 disabled">Регистрация продовца</a></li>
+          {% else %}
+          <li><a href="{% url 'register' %}" class="nav-link px-2 text-white">Регистрация продовца</a></li>
+          {% endif %}
 
 
         </ul>
