@@ -52,7 +52,7 @@ class LoginUser(LoginView):
         if user.is_superuser:
             return reverse_lazy('all_product')
         else:
-            return reverse_lazy('add_product')
+            return reverse_lazy('seller_main')
 
 def logout_user(request):
     '''Выход'''
