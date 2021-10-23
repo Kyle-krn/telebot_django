@@ -25,3 +25,12 @@ class OfflineSubcategoryForm(forms.ModelForm):
       class Meta:
             model = OfflineSubCategory
             fields = ['name']
+
+
+class OfflineReceptionForm(forms.ModelForm):
+      count = forms.IntegerField(label='Кол-во товара', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
+      note = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для заметки'}))
+
+      class Meta:
+            model = OfflineReceptionProduct
+            fields = ['count', 'note']

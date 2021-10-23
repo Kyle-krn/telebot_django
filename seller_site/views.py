@@ -126,6 +126,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         context['product'] = self.product
         context['title'] = self.product.title
         context['category'] = OfflineCategory.objects.all()
+        context['reception_form'] = OfflineReceptionForm()
         context['product_form'] = OfflineProductForm(initial={'title': self.product.title,
                                         'price': self.product.price,
                                         'purchase_price': self.product.purchase_price,
@@ -146,6 +147,35 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
             self.product.delete()
             messages.info(request, 'Товар усппешно удален!')
             return redirect ('all_product_offline')
+
+        elif 'reception' in request.POST:
+            form = OfflineReceptionForm(request.POST)
+            print(form.is_valid())
+            if form.is_valid():
+                self.product.count += form.cleaned_data['count']
+                self.product.save()
+                f = form.save(commit=False)
+                f.product = self.product
+                f.price = self.product.purchase_price
+                f.user = request.user
+                f.save()
+                messages.info(request, 'Количество товара успешно увеличено!')
+                return redirect('product_detail_offline', pk=pk)
+
+        elif 'liquidated' in request.POST:
+            form = OfflineReceptionForm(request.POST)
+            if form.is_valid():
+                self.product.count -= form.cleaned_data['count']
+                self.product.save()
+                f = form.save(commit=False)
+                f.product = self.product
+                f.price = self.product.purchase_price
+                f.user = request.user
+                f.liquidated = True
+                f.save()
+                messages.info(request, 'Товар успешно списан!')
+                return redirect('product_detail_offline', pk=pk)
+
 
  
     def get(self, request, pk):

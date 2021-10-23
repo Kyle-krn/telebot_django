@@ -74,7 +74,6 @@
                           </div>
                         </div>
                       </div>
-
                 </form>
             </div>
         </div>
@@ -82,6 +81,59 @@
 </div>
 <br>
 <!-- Конец -->
+
+<div class="text-center">
+    <button type='button' class='btn btn-success btn-lg' data-bs-toggle="modal" data-bs-target="#receptionModal" >Добавить</button>
+    <button type='button' class='btn btn-primary btn-lg' data-bs-toggle="modal" data-bs-target="#liquidatedModal" >Списать</button>
+</div>
+
+<!-- Модальное окно приемки начало -->
+<div class="modal fade" id="receptionModal" tabindex="-1" aria-labelledby="receptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="receptionModalLabel">Приемка товара</h5>
+        </div>
+        <div class="modal-body">
+            <form action="" method='POST'>
+                {% csrf_token %}
+                {{reception_form.as_p}}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-success" name="reception">Добавить в товар</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Модальное окно приемки конец  -->
+
+<!-- Модальное окно списание начало -->
+<div class="modal fade" id="liquidatedModal" tabindex="-1" aria-labelledby="liquidatedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="liquidatedModalLabel">Списание товара</h5>
+        </div>
+        <div class="modal-body">
+            <form action="" method='POST'>
+                {% csrf_token %}
+                {{reception_form.as_p}}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-success" name="liquidated">Списать товар</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Модальное окно списание конец  -->
+
+<br>
 
 </div>
 {% endblock %}

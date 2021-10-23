@@ -375,13 +375,16 @@ class ProductView(LoginRequiredMixin, View):
                 return redirect('productdetail', pk=pk)           
 
         elif 'liquidated' in request.POST:
-            count = int(request.POST['liquidated_count'])
-            note = request.POST['liquidated_note']
-            ReceptionProduct.objects.create(price=int(request.POST['liquidated_price']), count=count, note=note, product=self.product, liquidated=True)
-            self.product.count -= count
-            self.product.save()
-            messages.info(request, 'Количество товара успешно списано!')
-            return redirect('productdetail', pk=pk) 
+            form = ReceptionForm(request.POST)
+            if form.is_valid():
+                self.product.count -= form.cleaned_data['count']
+                self.product.save()
+                f = form.save(commit=False)
+                f.product = self.product
+                f.liquidated = True
+                f.save()
+                messages.info(request, 'Товар успешно списан!')
+                return redirect('productdetail', pk=pk)
         
 
     def get(self, request, pk):
