@@ -1,8 +1,12 @@
 from django.urls import path, re_path
+from seller_site.forms import OfflineSubcategoryForm
+
+from seller_site.models import OfflineSubCategory
 from .views import *
 from django.conf.urls.static import static
 from vape_shop import settings
 from .models import *
+from seller_site.views import OfflineCategoriesView, OfflineCategoryUpdateView
 from .forms import *
 
 urlpatterns = [
@@ -20,9 +24,7 @@ urlpatterns = [
     path('reception/', ReceptionProductView.as_view(), name='reception'),                                                       # Приемка товара
     path('new_order/', NoPaidOrderView.as_view(), name='new_order'),                                                            # Неоплаченные заказы
     path('old_order', PaidOrderView.as_view(), name='old_order'),                                                               # Оплаченные заказы
-    path('register_seller/', RegisterUser.as_view(), name='register'),
-
-    path('qiwi/', control_qiwi, name='qiwi'),                                       # Добавить, удалить токен для QIWI
+    path('qiwi/', control_qiwi, name='qiwi'),                                       # Добавить, удалить токен для QIWI    
     ]
 
 

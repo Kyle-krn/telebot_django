@@ -25,6 +25,7 @@ class OfflineSubCategory(models.Model):
 class OfflineProduct(models.Model):
     '''Модель товара'''
     title = models.CharField(max_length=255, verbose_name='Название товара')
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Закупочная цена товара')
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена товара')
     count = models.IntegerField(default=0, help_text='Остаток на складе')
     subcategory = models.ForeignKey(OfflineSubCategory, on_delete=models.CASCADE, help_text='Подкатегория товара')

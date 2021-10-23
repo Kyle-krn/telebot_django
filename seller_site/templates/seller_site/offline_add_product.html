@@ -1,0 +1,49 @@
+{% extends 'seller_site/base.html' %}
+{% block content %}
+{% load static %}
+
+<div class='container'>
+    <div class='text-center'>
+<h1>{{title}}</h1>
+</div>
+<form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="{{ form.title.id_for_label }}">{{form.title.label}}:</label>
+    {{form.title}}
+     <br>
+    <div class="input-group mb-3">
+        {{form.purchase_price}}
+        <span class="input-group-text">@</span>
+        {{form.price}}
+      </div>
+                 <!-- Подкатегория -->
+
+        <div class="col-sm">
+            <div class="fieldWrapper">
+                {{ form.subcategory.errors }}
+                <label for="{{ form.subcategory.id_for_label }}">Категория:</label>
+                
+                <select class="form-select" name="subcategory" required id='id_subcategory'>
+                    {% for c in category %}
+                    <optgroup label="{{c}}">
+                        {% for sc in c.offlinesubcategory_set.all %}
+                        {% if sc == product.subcategory %}
+                        <option selected value="{{sc.pk}}">{{sc.name}}</option>
+                        {% else %}
+                        <option value="{{sc.pk}}">{{sc.name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+                        <!-- Подкатегория -->
+
+<br>
+    <div class='text-end'>
+        <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
+    </div>
+</form>
+</div>
+{% endblock %}

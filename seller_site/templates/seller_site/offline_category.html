@@ -1,0 +1,101 @@
+{% extends 'seller_site/base.html' %}
+
+{% block content %}
+
+<div class='container'>
+    <div class="text-center">
+        <h1>{{title}}</h1>
+    </div>
+    <br>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ category_form.name }}
+
+        <br>
+
+        <div class="col">
+            <div class="text-end">
+                <button class="btn btn-success" type="Submit" id="button-addon2" name="create_category">Создать</button>
+            </div>
+        </div>
+    </form>
+    <br>
+
+    <div class="accordion" id="accordionExample">
+        {% for c in queryset %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{c.pk}}" aria-expanded="true" aria-controls="collapse-{{c.pk}}">
+                    {{c}}
+                </button>
+            </h2>
+            <div id="collapse-{{c.pk}}" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Имя подкатегории</th>
+                                <th scope="col"></th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sc in c.offlinesubcategory_set.all %}
+                            <tr>
+                                <th scope="row">{{sc.pk}}</th>
+                                <td>{{sc.name}}</td>
+                                <td>
+                                    <div class="text-end">
+                                        <a class="btn btn-primary btn-sm" href="{% url 'subcategory_detail_offline' pk=sc.pk %}"
+                                            role="button">Изменить</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="mb-3">
+                                <!-- Поле ввода файла -->
+                                <div class='text-end'>
+                                    <!-- <input class="form-control-sm" type="file" id="formFile"> -->
+                                    <form action="" method='post' enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {{sc_form.name}}
+                                        <input type="hidden" name="category_id" value="{{c.pk}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+                    <div class='row'>
+                        <div class="col">
+                            <a class="btn btn-warning btn-sm" href="{% url 'category_detail_offline' pk=c.pk %}"
+                                role="button">Изменить</a>
+                        </div>
+
+                        <div class='col'>
+                            <div class='text-end'>
+                                <button class="btn btn-outline-success" type="submit" name="create_sc">Создать</button>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+</div>
+
+{% endblock %}

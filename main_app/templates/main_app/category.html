@@ -7,7 +7,7 @@
 <div class='container'>
 
 <div class="text-center">
-    <h1>Категории</h1>
+    <h1>{{title}}</h1>
 </div>
 <br>
 <form action="{% url 'add_category' %}" method="post" enctype="multipart/form-data">
@@ -122,14 +122,6 @@
     {% endfor %}
 </div>
 
-
-
-
-
-
-
-
-{{request.urls}}
 
 
 

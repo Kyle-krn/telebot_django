@@ -5,15 +5,13 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from itertools import chain
 from django.db.models import Q
-from datetime import date
 from main_app.management.commands.utils import get_qiwi_balance
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 from django.views.generic import ListView
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView, FormView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views import View
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth import login 
@@ -152,7 +150,7 @@ class CategoriesView(LoginRequiredMixin, View):
 
     def get_context_data(self, **kwargs):
         context = {}
-        context['title'] = 'Категории'
+        context['title'] = 'Категории (Онлайн магазин)'
         context['queryset'] = Category.objects.all()
         context['category_form'] = CategoryForm()
         context['sc_form'] = SubcategoryForm()
