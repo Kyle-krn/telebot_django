@@ -116,7 +116,7 @@
         <td>{{p.subcategory.category}}</td>
         <td>{{p.subcategory}}</td>
         <td>{{p.count}}</td>
-        <td><a class="btn btn-primary btn-warning" href="{% url 'productdetail' pk=p.pk %}" role="button">#</a>
+        <td><a class="btn btn-primary btn-warning" href="{% url 'product_detail_offline' pk=p.pk %}" role="button">#</a>
         </td>
       </tr>
       {% endfor %}

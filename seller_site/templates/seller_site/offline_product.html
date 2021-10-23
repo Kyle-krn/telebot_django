@@ -8,6 +8,79 @@
     </div>
 
 <!-- Начало -->
+<div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="true" aria-controls="collapseOne">
+                Изменить товар
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="{{ product_form.title.id_for_label }}">{{product_form.title.label}}:</label>
+                    {{product_form.title}}
+                     <br>
+                    <div class="input-group mb-3">
+                        {{product_form.purchase_price}}
+                        <span class="input-group-text">@</span>
+                        {{product_form.price}}
+                      </div>
+                                 <!-- Подкатегория -->
+                
+                        <div class="col-sm">
+                            <div class="fieldWrapper">
+                                {{ product_form.subcategory.errors }}
+                                <label for="{{ product_form.subcategory.id_for_label }}">Категория:</label>
+                                
+                                <select class="form-select" name="subcategory" required id='id_subcategory'>
+                                    {% for c in category %}
+                                    <optgroup label="{{c}}">
+                                        {% for sc in c.offlinesubcategory_set.all %}
+                                        {% if sc == product.subcategory %}
+                                        <option selected value="{{sc.pk}}">{{sc.name}}</option>
+                                        {% else %}
+                                        <option value="{{sc.pk}}">{{sc.name}}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                                        <!-- Подкатегория -->
+                
+                <br>
+                    <div class='text-end'>
+                        <input type="submit" class='btn btn-success btn-lg' name='update' value="Изменить">
+                        <button type='button' class='btn btn-danger btn-lg' data-bs-toggle="modal" data-bs-target="#exampleModal" >Удалить</button>
+                    </div>
+
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Вы уверены что хотите удалить товар?</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                    
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                              <button type="submit" name="delete" class="btn btn-danger">Удалить</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
 <!-- Конец -->
 
 </div>

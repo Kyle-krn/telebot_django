@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from .models import *
@@ -107,3 +107,48 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
         context['category'] = OfflineCategory.objects.all()
         return context
 
+
+
+class OfflineProductAdminView(LoginRequiredMixin, View):
+    '''Детальное представление товара и управление им'''
+    template_name = 'seller_site/offline_product.html'
+    
+    def get_object(self):
+        self.product = get_object_or_404(OfflineProduct, pk=self.kwargs.get('pk'))
+
+    def get_params(self):
+        return {k:v for k,v in self.request.GET.items() if v != ''}
+
+
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['product'] = self.product
+        context['title'] = self.product.title
+        context['category'] = OfflineCategory.objects.all()
+        context['product_form'] = OfflineProductForm(initial={'title': self.product.title,
+                                        'price': self.product.price,
+                                        'purchase_price': self.product.purchase_price,
+                                        'subcategory': self.product.subcategory_id})
+        return context
+
+    def post(self, request, pk):
+        self.get_object()
+
+        if 'update' in request.POST:
+            product_form = OfflineProductForm(request.POST, instance=self.product)
+            if product_form.is_valid():
+                product_form.save()
+                messages.info(request, 'Товар успешно обновлен!')
+                return redirect('product_detail_offline', pk=pk)
+
+        elif 'delete' in request.POST:
+            self.product.delete()
+            messages.info(request, 'Товар усппешно удален!')
+            return redirect ('all_product_offline')
+
+ 
+    def get(self, request, pk):
+        self.get_object()
+        # self.get_queryset(pk)
+        return render(request, self.template_name, context=self.get_context_data())

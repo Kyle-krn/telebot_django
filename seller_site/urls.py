@@ -12,4 +12,7 @@ urlpatterns = [
     path('offline_subcategory/<int:pk>', OfflineCategoryUpdateView.as_view(model=OfflineSubCategory,
                                                                            form_class = OfflineSubcategoryForm,
                                                                            success_message = 'Подкатегория успешно обновлена!'), name='subcategory_detail_offline'),
+
+    path('offline_product/<int:pk>', OfflineProductAdminView.as_view(), name='product_detail_offline'),
+
 ]
