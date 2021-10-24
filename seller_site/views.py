@@ -7,8 +7,16 @@ from .forms import *
 from django.views.generic.edit import UpdateView, CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 
+def test(request):
+    print('here')
+    if request.method == 'POST':
+        pk_list = request.POST.getlist('product_id')
+        count_list = request.POST.getlist('product_count')
+        l_list = [(pk_list[i], count_list[i]) for i in range(len(pk_list))]
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def main_seller_view(request):
     return render(request, 'seller_site/base.html')
@@ -87,6 +95,12 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
     login_url = '/login/'
     template_name = 'seller_site/offline_all_product.html'
 
+    def post(self, request):
+        if 'delete_product' in request.POST:
+            pk_product = int(request.POST.get('pk_p'))
+            OfflineProduct.objects.get(pk=pk_product).delete()
+            return redirect('all_product_offline')
+
     def get_queryset(self):
         queryset = OfflineProduct.objects.all()
         if 'search' in self.request.GET:
@@ -119,8 +133,6 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
 
-
-
     def get_context_data(self, **kwargs):
         context = {}
         context['product'] = self.product
@@ -134,8 +146,6 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         return context
 
     def post(self, request, pk):
-        self.get_object()
-
         if 'update' in request.POST:
             product_form = OfflineProductForm(request.POST, instance=self.product)
             if product_form.is_valid():

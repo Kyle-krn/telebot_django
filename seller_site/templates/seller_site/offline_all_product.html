@@ -86,7 +86,6 @@
               </div>
             </div>
           </div>
-
         </form>
       </div>
     </div>
@@ -104,6 +103,7 @@
         <th scope="col">Подкатегория</th>
         <th scope="col">Остаток</th>
         <th scope="col">#</th>
+        <th scope="col">DEL</th>
       </tr>
     </thead>
     <tbody>
@@ -117,11 +117,41 @@
         <td>{{p.subcategory}}</td>
         <td>{{p.count}}</td>
         <td><a class="btn btn-primary btn-warning" href="{% url 'product_detail_offline' pk=p.pk %}" role="button">#</a>
-        </td>
+        <td><button type='button' class='btn btn-danger' data-bs-toggle="modal" data-bs-target="#deletedModal" onclick="delProduct({{p.pk}}, '{{p.title}}')">DEL</button></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
+  <!-- Модальное окно удаление начало -->
+<div class="modal fade" id="deletedModal" tabindex="-1" aria-labelledby="deletedModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deletedModalLabel"><div id="title_product"></div></h5>
+        
+      </div>
+      <div class="modal-body">
+          <form action="" method='POST'>
+            {% csrf_token %}
+            <input name='pk_p' id='del_hidden' type="hidden">
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <button type="submit" class="btn btn-danger" name="delete_product">Удалить</button>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Модальное окно удаление конец  -->
+
+<script>
+  function delProduct(pk, title) {
+document.getElementById('del_hidden').value = pk ;
+document.getElementById("title_product").innerHTML = 'Вы уверенны что хотите удалить'+ ' ' + title + '?';
+  }
+</script>
 
   {% endblock %}
