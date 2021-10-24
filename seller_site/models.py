@@ -49,6 +49,16 @@ class OfflineReceptionProduct(models.Model):
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время приемки')
     liquidated = models.BooleanField(default=False, help_text='Ликвидация товара') # True для ликвидированного товара
 
+    def save(self, *args, **kwargs):
+        if self.count <= 0:
+            return
+        if self.liquidated:
+            self.product.count -= self.count
+        else:
+            self.product.count += self.count
+        self.product.save()
+        super(OfflineReceptionProduct, self).save(*args, **kwargs)
+
     def get_datetime(self):
         '''Возвращает московское время'''
         user_timezone = pytz.timezone(settings.TIME_ZONE)

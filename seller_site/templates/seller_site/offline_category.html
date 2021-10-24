@@ -22,7 +22,7 @@
     <br>
 
     <div class="accordion" id="accordionExample">
-        {% for c in queryset %}
+        {% for c in category %}
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -80,8 +80,9 @@
                         <div class="col">
                             <a class="btn btn-warning btn-sm" href="{% url 'category_detail_offline' pk=c.pk %}"
                                 role="button">Изменить</a>
-                        </div>
+                                <button type='button' class='btn btn-danger' data-bs-toggle="modal" data-bs-target="#deletedModal" onclick="delProduct({{c.pk}}, '{{c.name}}')">chan</button>
 
+                        </div>
                         <div class='col'>
                             <div class='text-end'>
                                 <button class="btn btn-outline-success" type="submit" name="create_sc">Создать</button>
@@ -97,5 +98,29 @@
 
     {% endfor %}
 </div>
+
+  <!-- Модальное окно изменение начало -->
+  <div class="modal fade" id="deletedModal" tabindex="-1" aria-labelledby="deletedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deletedModalLabel"><div id="title_product"></div></h5>
+          
+        </div>
+        <div class="modal-body">
+            <form action="" method='POST'>
+              {% csrf_token %}
+              <input name='pk_p' id='del_hidden' type="hidden">
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-danger" name="delete_product">Удалить</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Модальное окно изменение конец  -->
 
 {% endblock %}

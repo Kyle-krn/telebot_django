@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 
-def test(request):
+def make_order_view(request):
     print('here')
     if request.method == 'POST':
         pk_list = request.POST.getlist('product_id')
@@ -18,8 +18,15 @@ def test(request):
         l_list = [(pk_list[i], count_list[i]) for i in range(len(pk_list))]
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-def main_seller_view(request):
-    return render(request, 'seller_site/base.html')
+def reception_view(request):
+    if request.method == 'POST':
+        print(request.POST)
+        count =int(request.POST.get('count_reception'))
+        note = request.POST.get('note_reception')
+        product_pk = int(request.POST.get('product_id'))
+        product = OfflineProduct.objects.get(pk=product_pk)
+        OfflineReceptionProduct.objects.create(product=product, user=request.user, note=note, price=product.purchase_price, count=count)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 class OfflineCategoriesView(LoginRequiredMixin, View):
@@ -29,7 +36,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
     def get_context_data(self, **kwargs):
         context = {}
         context['title'] = 'Категории (Оффлайн магазин)'
-        context['queryset'] = OfflineCategory.objects.all()
+        context['category'] = OfflineCategory.objects.all()
         context['category_form'] = OffilneCategoryForm()
         context['sc_form'] = OfflineSubcategoryForm()
         return context
@@ -129,6 +136,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
     
     def get_object(self):
         self.product = get_object_or_404(OfflineProduct, pk=self.kwargs.get('pk'))
+        print(self.product)
 
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
@@ -146,6 +154,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         return context
 
     def post(self, request, pk):
+        self.get_object()
         if 'update' in request.POST:
             product_form = OfflineProductForm(request.POST, instance=self.product)
             if product_form.is_valid():
@@ -160,10 +169,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
 
         elif 'reception' in request.POST:
             form = OfflineReceptionForm(request.POST)
-            print(form.is_valid())
             if form.is_valid():
-                self.product.count += form.cleaned_data['count']
-                self.product.save()
                 f = form.save(commit=False)
                 f.product = self.product
                 f.price = self.product.purchase_price
@@ -175,8 +181,6 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         elif 'liquidated' in request.POST:
             form = OfflineReceptionForm(request.POST)
             if form.is_valid():
-                self.product.count -= form.cleaned_data['count']
-                self.product.save()
                 f = form.save(commit=False)
                 f.product = self.product
                 f.price = self.product.purchase_price

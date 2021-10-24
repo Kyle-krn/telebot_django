@@ -3,7 +3,6 @@ from .views import *
 from main_app.views import RegisterUser
 
 urlpatterns = [
-    path('', main_seller_view, name='seller_main'),
     path('register_seller/', RegisterUser.as_view(), name='register'),
     path('offline_all_product/', OfflineIndexView.as_view(), name='all_product_offline'),
     path('offline_add_product/', OfflineCreateProductView.as_view(), name='add_product_offline'),
@@ -14,6 +13,7 @@ urlpatterns = [
                                                                            success_message = 'Подкатегория успешно обновлена!'), name='subcategory_detail_offline'),
     path('offline_product/<int:pk>', OfflineProductAdminView.as_view(), name='product_detail_offline'),
 
-    path('testing/', test, name='teest')
+    path('offline_order/', make_order_view, name='order_offline'),
+    path('offline_reception/', reception_view, name='reception_offline')
 
 ]
