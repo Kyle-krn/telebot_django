@@ -1,0 +1,49 @@
+{% extends 'seller_site/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class='container'>
+<div class='text-center'><h1>{{title}}</h1></div>
+
+<div class="accordion" id="accordionExample">
+    {% for qs in queryset %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{qs.pk}}"
+                aria-expanded="true" aria-controls="collapse{{qs.pk}}">
+                От {{qs.get_datetime}} на сумму {{ qs.get_order_price }} руб. (Продавец - {{qs.user.first_name}} {{qs.user.last_name}})
+            </button>
+        </h2>
+        <div id="collapse{{qs.pk}}" class="accordion-collapse collapse " aria-labelledby="heading{{qs.pk}}"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <div class="text-center">
+                <form action="" method='post'>
+                    {% csrf_token %}
+                {% for item in qs.sold_product.all %}
+                          <label for="count" class="col-form-label" >{{item.product.title}} --></label>
+                            <style>
+                                #user {
+                                 width: 50px; /* Ширина поля в пикселах */
+                                } 
+                               </style>
+                          <input type="hidden" name="sold_id" value="{{item.pk}}">
+                          <input type="number" id="user" name='product_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
+                            <br>
+                {% endfor %}
+            </div>
+                <br>
+                <div class="text-end">
+                <button type="submit" class="btn btn-success" name='change_order'>Изменить заказ</button>
+            </div>
+            </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+
+
+
+{% endblock %}

@@ -58,7 +58,7 @@ class OfflineReceptionProduct(models.Model):
         else:
             self.product.count += self.count
         self.product.save()
-        super(OfflineReceptionProduct, self).save(*args, **kwargs)
+        return super(OfflineReceptionProduct, self).save(*args, **kwargs)
 
     def get_datetime(self):
         '''Возвращает московское время'''
@@ -76,11 +76,17 @@ class OfflineReceptionProduct(models.Model):
 
 class OfflineSoldProduct(models.Model):
     '''Модель проданных товаров'''
-    user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
     product = models.ForeignKey(OfflineProduct, on_delete=models.CASCADE, help_text='Продукт')
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена на момент продажи')    
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
+
+    def save(self, *args, **kwargs):
+        if self.count <= 0:
+            return
+        self.product.count -= self.count
+        self.product.save()
+        return super(OfflineSoldProduct, self).save(*args, **kwargs)
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -94,11 +100,14 @@ class OfflineSoldProduct(models.Model):
         return f"{self.product} -- {self.count}"
 
 
-class OrderingProduct(models.Model):
+class OfflineOrderingProduct(models.Model):
     '''Модель заказа'''
     user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
     sold_product = models.ManyToManyField(OfflineSoldProduct, help_text='Товары в заказе')  # <==== тут
     datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
+
+    def get_order_price(self):
+        return sum([x.price * x.count for x in self.sold_product.all()])
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)

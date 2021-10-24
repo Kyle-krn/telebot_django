@@ -132,9 +132,92 @@
     </div>
   </div>
 <!-- Модальное окно списание конец  -->
-
+<br>
+<div class='text-center'>
+  <div class="container">
+      <h2>Общая выручка:</h2>
+      <h3>{{stat_dict.all_stat}} руб.</h3>
+      <br>
+      <div class="row">
+          <div class="col-sm">
+              <h2>Продано всего:</h2>
+              <h3>{{stat_dict.sold_stat.1}} ед. на {{stat_dict.sold_stat.0}} руб.</h3>
+          </div>
+          <div class="col-sm">
+              <h2>Закуплено всего:</h2>
+              <h3>{{stat_dict.reception_stat.1}} ед. на {{stat_dict.reception_stat.0}} руб.</h3>
+          </div>
+          <div class="col-sm">
+              <h2>Списано всего:</h2>
+              <h3>{{stat_dict.liquidated_stat.1}} ед. на {{stat_dict.liquidated_stat.0}} руб.</h3>
+          </div>
+      </div>
+  </div>
+</div>
 <br>
 
+<div class='text-center'>
+  <form action="" method='get'>
+      <label for="start">Start date:</label>
+      <input type="date" id="start" name="start" value="" min="">
+      <label for="start">End date:</label>
+      <input type="date" id="end" name="end" value="" min="">
+      <br><br>
+  
+      <div class="input-group mb-3">
+          <select name='only' class="form-select" aria-label="Default select example">
+              <option value='' selected>Показать:</option>
+              <option value="reception">Только приемка</option>
+              <option value="sold">Только проданные</option>
+              <option value="liquidated">Только списанные</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Показать</button>
+      </div>
+  </form>
+  </div>
+
+
+<table class="table">
+  <thead>
+      <tr>
+          <th scope="col">#</th>
+          <th scope="col">Цена за 1 шт.</th>
+          <th scope="col">Цена за все</th>
+          <th scope="col">Кол-во</th>
+          <th scope="col">Дата</th>
+          <th scope="col">Заметка</th>
+      </tr>
+  </thead>
+  <tbody>
+      {% for tq in trade_queryset %}
+
+      {% if tq.get_my_model_name == 'offlinesoldproduct' %}
+      <tr class="table-light">
+          <th scope="">Продано</th>
+          {% else %}
+          {% if tq.liquidated %}
+      <tr class="table-danger">
+          <th scope="row">Списано</th>
+          {% else %}
+      <tr class="table-dark">
+          <th scope="row">Закуплено</th>
+          {% endif %}
+          {% endif %}
+          <td>{{tq.price}} р.</td>
+          <td>{% widthratio tq.price 1 tq.count %} р.</td>
+          <td>{{tq.count}}</td>
+          <td>{{tq.get_datetime}}</td>
+          {% if tq.note %}
+          <td><button onclick="alert('{{tq.note}}')">Заметка</button>
+          </td>
+          {% else %}
+          <td></td>
+          {% endif %}
+      </tr>
+      {% endfor %}
+      </tr>
+  </tbody>
+</table>
 
 
 

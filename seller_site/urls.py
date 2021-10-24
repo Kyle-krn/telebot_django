@@ -14,6 +14,7 @@ urlpatterns = [
     path('offline_product/<int:pk>', OfflineProductAdminView.as_view(), name='product_detail_offline'),
 
     path('offline_order/', make_order_view, name='order_offline'),
-    path('offline_reception/', reception_view, name='reception_offline')
+    path('offline_reception/', reception_view, name='reception_offline'),
+    path('offline_list_order/', OfflineOrderView.as_view(), name='list_order_offline')
 
 ]

@@ -49,6 +49,7 @@
           {% else %}
           <li><a href="{% url 'register' %}" class="nav-link px-2 text-white">Регистрация продовца</a></li>
           {% endif %}
+          <li><a href="{% url 'list_order_offline' %}" class="nav-link px-2 text-white">Заказы</a></li>
         </ul>
 
         <div class="text-end">
@@ -101,12 +102,13 @@
     crossorigin="anonymous"></script>
     
     <script>
-      var items=1;
+      
       function AddItem() {
+        var items=0;
         div=document.getElementById("items");
         button=document.getElementById("add");
         items++;
-        newitem='<div class="input-group mb-3"> <select class="form-select" name="product_id" id="product_id" required>';
+        newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <select class="form-select" name="product_id" required>';
         newitem+='{% for c in category %}';
         newitem+=' <optgroup style="color:blue" label="{{c}}">'
         newitem+='{% for sc in c.offlinesubcategory_set.all %}'
@@ -114,11 +116,17 @@
         newitem+='{% for p in sc.offlineproduct_set.all %}';
         newitem+='<option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>'
         newitem+= '{% endfor %} {% endfor %}</optgroup>{% endfor %}</select>'
-        newitem+= '<span class="input-group-text">@</span> <input type="number" name="product_count" class="form-control" placeholder="Кол-во" aria-label="count" required> </div>'
+        newitem+= '<span class="input-group-text" name="product_span_id"></span> <input id="product_input_id" type="number" name="product_count" class="form-control" placeholder="Кол-во" aria-label="count" required>'
+        newitem+= '<button type="button" id="product_but_id" onclick="removeForm('+items+')" class="btn btn-danger">x</button> </div>'
         newnode=document.createElement("span");
         newnode.innerHTML=newitem;
         div.insertBefore(newnode,button);
       }
+
+      function removeForm(items) {
+      (elem=document.getElementById('div_id_'+ items)).parentNode.removeChild(elem);
+        }
+
       </script>
 
       
@@ -149,12 +157,12 @@
               </optgroup>
               {% endfor %}
             </select>
-            <span class="input-group-text">@</span>
+            <span class="input-group-text" id="product_span_id_1"></span>
             <input type="number" name='product_count' class="form-control" placeholder="Кол-во" aria-label="count" required>
           </div>
-        
           <div ID="items">
-          <input type="button" value="Добавить поле" onClick="AddItem();" ID="add">
+            
+          <input type="button" class="btn btn-outline-primary" value="+" onClick="AddItem();" ID="add">
           </div>
       </div>
 

@@ -9,13 +9,20 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView
+from itertools import chain
+
 
 def make_order_view(request):
     print('here')
     if request.method == 'POST':
         pk_list = request.POST.getlist('product_id')
         count_list = request.POST.getlist('product_count')
-        l_list = [(pk_list[i], count_list[i]) for i in range(len(pk_list))]
+        l_list = [(int(pk_list[i]), int(count_list[i])) for i in range(len(pk_list))]
+        order = OfflineOrderingProduct.objects.create(user=request.user)
+        for item in l_list:
+            product = OfflineProduct.objects.get(pk=item[0])
+            sold_product = OfflineSoldProduct.objects.create(product=product ,price=product.price, count=item[1])
+            order.sold_product.add(sold_product)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def reception_view(request):
@@ -176,11 +183,52 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         context['title'] = self.product.title
         context['category'] = OfflineCategory.objects.all()
         context['reception_form'] = OfflineReceptionForm()
+        context['stat_dict'] = self.get_statistic()
+        context['trade_queryset'] = self.filter_queryset()
         context['product_form'] = OfflineProductForm(initial={'title': self.product.title,
                                         'price': self.product.price,
                                         'purchase_price': self.product.purchase_price,
                                         'subcategory': self.product.subcategory_id})
         return context
+
+    def filter_queryset(self):
+        params = self.get_params()
+        if 'only' in params:
+            if params['only'] == 'reception':
+                result_list = self.reception_queryset.filter(liquidated=False)
+            elif params['only'] == 'sold':
+                result_list = self.sold_queryset
+            elif params['only'] == 'liquidated':
+                result_list = self.reception_queryset.filter(liquidated=True)
+        else:
+            result_list = sorted(
+                    chain(self.reception_queryset, self.sold_queryset),
+                    key=lambda instance: instance.date, reverse=True)
+        return result_list
+
+    def get_queryset(self, pk):
+        params = self.get_params()
+        self.reception_queryset = OfflineReceptionProduct.objects.filter(product__pk=pk)
+        self.sold_queryset = OfflineSoldProduct.objects.filter(product__pk=pk)
+
+        if 'start' in params and 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
+        elif 'start' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.reception_queryset = self.reception_queryset.filter(date__gte=params['start'])
+        elif 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.reception_queryset = self.reception_queryset.filter(date__lte=params['end']) 
+
+    def get_statistic(self):
+        stat_dict = {
+            'sold_stat': (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+            'reception_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
+            'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))
+        }
+        stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0]
+        return stat_dict
 
     def post(self, request, pk):
         self.get_object()
@@ -218,10 +266,21 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
                 f.save()
                 messages.info(request, 'Товар успешно списан!')
                 return redirect('product_detail_offline', pk=pk)
-
-
  
     def get(self, request, pk):
         self.get_object()
-        # self.get_queryset(pk)
+        self.get_queryset(pk)
         return render(request, self.template_name, context=self.get_context_data())
+
+
+class OfflineOrderView(ListView):
+    '''Оплаченные заказы'''
+    template_name = 'seller_site/offline_order.html'
+    queryset = OfflineOrderingProduct.objects.all().order_by('-datetime')
+    context_object_name = 'queryset'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = OfflineCategory.objects.all()
+        context['title'] = 'Заказы'
+        return context
