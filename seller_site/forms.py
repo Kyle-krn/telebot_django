@@ -18,6 +18,9 @@ class OffilneCategoryForm(forms.ModelForm):
             model = OfflineCategory
             fields = ['name']
 
+class OffilneChangeCategoryForm(OffilneCategoryForm):
+      name = forms.CharField(widget=forms.TextInput(attrs={'id': 'category_name', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
+
 
 class OfflineSubcategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))

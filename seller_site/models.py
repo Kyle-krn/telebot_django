@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 class OfflineCategory(models.Model):
     '''Модель категорий'''
     name = models.CharField(max_length=255, help_text='Имя категории')
+    price_for_seller = models.DecimalField(max_digits=10, decimal_places=2, help_text='Сумма отчисления для продавца')
 
     def __str__(self):
         return self.name
@@ -70,3 +71,36 @@ class OfflineReceptionProduct(models.Model):
 
     def __str__(self):
         return f"{self.product} -- {self.count}"
+
+
+
+class OfflineSoldProduct(models.Model):
+    '''Модель проданных товаров'''
+    user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
+    product = models.ForeignKey(OfflineProduct, on_delete=models.CASCADE, help_text='Продукт')
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена на момент продажи')    
+    count = models.IntegerField(help_text='Кол-во проданного товара')
+    date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
+
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.date.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
+    
+    def get_my_model_name(self):
+        return self._meta.model_name
+
+    def __str__(self):
+        return f"{self.product} -- {self.count}"
+
+
+class OrderingProduct(models.Model):
+    '''Модель заказа'''
+    user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
+    sold_product = models.ManyToManyField(OfflineSoldProduct, help_text='Товары в заказе')  # <==== тут
+    datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
+
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.datetime.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')

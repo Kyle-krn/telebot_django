@@ -51,8 +51,7 @@
                                 <td>{{sc.name}}</td>
                                 <td>
                                     <div class="text-end">
-                                        <a class="btn btn-primary btn-sm" href="{% url 'subcategory_detail_offline' pk=sc.pk %}"
-                                            role="button">Изменить</a>
+                                        <button type='button' class='btn btn-primary btn-sm' data-bs-toggle="modal" data-bs-target="#deletedModal" onclick="changeSubategory({{sc.pk}}, '{{sc.name}}');">Изменить</button>
                                     </div>
                                 </td>
                             </tr>
@@ -78,9 +77,7 @@
                     <br>
                     <div class='row'>
                         <div class="col">
-                            <a class="btn btn-warning btn-sm" href="{% url 'category_detail_offline' pk=c.pk %}"
-                                role="button">Изменить</a>
-                                <button type='button' class='btn btn-danger' data-bs-toggle="modal" data-bs-target="#deletedModal" onclick="delProduct({{c.pk}}, '{{c.name}}')">chan</button>
+                                <button type='button' class='btn btn-warning btn-sm' data-bs-toggle="modal" data-bs-target="#deletedModal" onclick="changeCategory({{c.pk}}, '{{c.name}}');">Изменить</button>
 
                         </div>
                         <div class='col'>
@@ -110,17 +107,50 @@
         <div class="modal-body">
             <form action="" method='POST'>
               {% csrf_token %}
-              <input name='pk_p' id='del_hidden' type="hidden">
+              <input name='category_pk' id='category_hidden_id' type="hidden">
+              <input name='category_name' id='category_name' type="text" class="form-control">
+
+              
         </div>
   
         <div class="modal-footer">
+            
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-          <button type="submit" class="btn btn-danger" name="delete_product">Удалить</button>
+          <button type="submit" class="btn btn-danger" id='delete_button' onclick='return delCategory();' name="delete_category">Удалить</button>
+          <button type="submit" class="btn btn-success" id='change_button' name="change_category">Изменить</button>
         </form>
         </div>
       </div>
     </div>
   </div>
   <!-- Модальное окно изменение конец  -->
+
+  <script>
+    function changeCategory(pk, title) {
+  document.getElementById('category_hidden_id').value = pk ;
+  document.getElementById('category_name').value = title;
+  document.getElementById("title_product").innerHTML = 'Вы уверенны что хотите изменить'+ ' ' + title + '?';
+    }
+
+    function changeSubategory(pk, title) {
+  document.getElementById('category_hidden_id').value = pk ;
+  document.getElementById('category_name').value = title;
+  document.getElementById('category_hidden_id').name =  'subcategory_pk';
+  document.getElementById('category_name').name =  'subcategory_name';
+  document.getElementById('delete_button').name =  'delete_subcategory';
+  document.getElementById('change_button').name =  'change_subcategory';
+  document.getElementById("title_product").innerHTML = 'Вы уверенны что хотите изменить'+ ' ' + title + '?';
+    }
+
+    function delCategory() {
+    var retVal = confirm("Вы уверены что хотите удалить категорию?");
+    if (retVal == true) {
+        // do stuff
+        return true;
+    } else {
+        return false;
+    }
+    }
+  </script>
 
 {% endblock %}

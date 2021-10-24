@@ -16,12 +16,18 @@
 
 <body>
 
+  <style>
+.bg-company-red {
+    background-color: rgb(0, 8, 54) !important;
+}
+  </style>
+
   {% block header %}
-  <header class="p-3 bg-dark text-white">
+  <header class="p-3 bg-dark text-white bg-company-red">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-
-        <a href="#"> 
+  
+        <a href="{% url 'all_product' %}"> 
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
               <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10zm0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
@@ -46,46 +52,14 @@
         </ul>
 
         <div class="text-end">
-          <button type='button' class='btn btn-success' data-bs-toggle="modal" data-bs-target="#receptionGlobalModal" >+ Приемка</button>
-          <button type='button' class='btn btn-success' data-bs-toggle="modal" data-bs-target="#sellModal" >+ Продажа</button>
-
+          <button type='button' class='btn btn-outline-light' data-bs-toggle="modal" data-bs-target="#receptionGlobalModal" >+ Приемка</button>
+          <button type='button' class='btn btn-outline-light' data-bs-toggle="modal" data-bs-target="#sellModal" >+ Продажа</button>
           <div class="btn-group">
-            <div class="dropdown">
-              <button class="btn btn-outline-light dropdown-toggle" type="button" id="dropdownMenuButton1"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                + Категория
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% url 'add_category' as ac %}
-                {% if request.path == ac %}
-                <li><a class="dropdown-item disabled" href="{% url 'add_category' %}">Онлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'add_category' %}">Онлайн магазин</a></li>
-                {% endif %}
-                {% url 'category_offline' as co %}
-                {% if request.path == co %}
-                <li><a class="dropdown-item disabled" href="{% url 'category_offline' %}">Офлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'category_offline' %}">Офлайн магазин</a></li>
-                {% endif %}
-              </ul>
-            </div>
+            <a class="btn btn-outline-light" href="{% url 'category_offline' %}" role="button">+ Категория</a>
           </div><!-- /btn-group -->
           <div class="btn-group">
             <div class="dropdown">
-              <button class="btn btn-warning me-3 dropdown-toggle" type="button" id="dropdownMenuButton1"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                + Товар
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% url 'add_product' as ap %}
-                {% if request.path == ap %}
-                <li><a class="dropdown-item disabled" href="#">Онлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'add_product_offline' %}">Онлайн магазин</a></li>
-                {% endif %}
-                <li><a class="dropdown-item" href="{% url 'add_product_offline' %}">Оффлайн магазин</a></li>
-              </ul>
+              <a class="btn btn-outline-light" href="{% url 'add_product_offline' %}" role="button">+ Товар</a>
             </div>
           </div><!-- /btn-group -->
           <a class="btn btn-danger " href="{% url 'logout' %}" role="button">Выход</a>

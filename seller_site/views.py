@@ -38,6 +38,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
         context['title'] = 'Категории (Оффлайн магазин)'
         context['category'] = OfflineCategory.objects.all()
         context['category_form'] = OffilneCategoryForm()
+        context['category_change_form'] = OffilneChangeCategoryForm()
         context['sc_form'] = OfflineSubcategoryForm()
         return context
 
@@ -47,7 +48,21 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             if category_form.is_valid():
                 category_form.save()
                 messages.info(request, 'Новая категория успешно создана!')
-                return redirect('category_offline')
+                
+        
+        elif 'change_category' in request.POST:
+            category_pk = int(request.POST.get('category_pk'))
+            name = request.POST.get('category_name')
+            category = OfflineCategory.objects.get(pk=category_pk)  # Изменить на update
+            category.name = name                                    #   
+            category.save()                                         #
+            messages.info(request, 'Категория  успешно изменена!')
+
+        elif 'delete_category' in request.POST:
+            category_pk = int(request.POST.get('category_pk'))
+            OfflineCategory.objects.get(pk=category_pk).delete()
+            messages.info(request, 'Категория успешно удалена!')
+
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = OfflineSubcategoryForm(request.POST)
             if sc_form.is_valid():
@@ -55,7 +70,21 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
                 f.category = OfflineCategory.objects.get(pk=int(request.POST['category_id']))
                 f.save()
                 messages.info(request, 'Новая подкатегория успешно создана!')
-                return redirect('category_offline')
+
+        elif 'change_subcategory' in request.POST:
+            subcategory_pk = int(request.POST.get('subcategory_pk'))
+            subcategory_name = request.POST.get('subcategory_name')
+            subcategory = OfflineSubCategory.objects.get(pk=subcategory_pk) # Изменить на update
+            subcategory.name = subcategory_name
+            subcategory.save()
+            messages.info(request, 'Подкатегория успешно изменена!')
+
+        elif 'delete_subcategory' in request.POST:
+            subcategory_pk = int(request.POST.get('subcategory_pk'))
+            OfflineSubCategory.objects.get(pk=subcategory_pk).delete()
+            messages.info(request, 'Подкатегория успешно удалена!')
+            
+        return redirect('category_offline')
 
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
