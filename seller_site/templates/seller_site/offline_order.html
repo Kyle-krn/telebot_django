@@ -28,7 +28,7 @@
                                 } 
                                </style>
                           <input type="hidden" name="sold_id" value="{{item.pk}}">
-                          <input type="number" id="user" name='product_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
+                          <input type="number" id="user" name='sold_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
                             <br>
                 {% endfor %}
             </div>
@@ -42,8 +42,7 @@
     </div>
     {% endfor %}
 </div>
+
 </div>
-
-
 
 {% endblock %}

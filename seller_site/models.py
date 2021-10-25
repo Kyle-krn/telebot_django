@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.timezone import pytz
 import vape_shop.settings as settings
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 
 class OfflineCategory(models.Model):
@@ -35,6 +36,19 @@ class OfflineProduct(models.Model):
 
     def get_absolute_url(self):
         return reverse('product_detail_offline', kwargs={'pk': self.pk})
+
+    def statistic(self):
+        general_count = sum([x.count for x in self.offlinesoldproduct_set.all()])
+        general_sold_sum = sum([x.count*x.price for x in self.offlinesoldproduct_set.all()])
+        general_reception_count = sum([x.count for x in self.offlinereceptionproduct_set.filter(liquidated=False)])
+        general_reception_sum = sum([x.count*x.price for x in self.offlinereceptionproduct_set.filter(liquidated=False)])
+        return {
+            'general_count': general_count,
+            'general_sold_sum': general_sold_sum,
+            'general_reception_count': general_reception_count,
+            'general_reception_sum': general_reception_sum
+        }
+
 
     def __str__(self):
         return self.title
@@ -87,6 +101,22 @@ class OfflineSoldProduct(models.Model):
         self.product.count -= self.count
         self.product.save()
         return super(OfflineSoldProduct, self).save(*args, **kwargs)
+
+    def return_in_product(self, request, new_count):
+        if new_count <= 0:
+            self.product.count += self.count
+            self.product.save()
+            order = OfflineOrderingProduct.objects.get(sold_product=self)
+            super(OfflineSoldProduct, self).delete()
+            if order.sold_product.all().count() == 0:
+                return order.delete()
+            
+        else:
+            self.product.count += (self.count - new_count)
+            self.product.save()
+            self.count = new_count
+            return super(OfflineSoldProduct, self).save()
+
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)

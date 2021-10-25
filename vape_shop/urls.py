@@ -17,10 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from vape_shop import settings
-
+from main_app.views import LoginUser
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('main/', include('main_app.urls')),
+    path('login/', LoginUser.as_view(), name='login'),                                                                          # Логин
     path('seller/', include('seller_site.urls')),
 
 ]

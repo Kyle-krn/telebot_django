@@ -1,0 +1,83 @@
+{% extends 'seller_site/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <div class='text-center'>
+        <br><br>
+        <div class="container">
+            <h3>Общая выручка:</h3>
+            <h4>{{stat_dict.all_stat}} руб.</h4>
+            <br>
+            <div class="row">
+                <div class="col-sm">
+                    <h3>Продано всего:</h3>
+                    <h4>{{stat_dict.sold_stat.1}} ед. на {{stat_dict.sold_stat.0}} руб.</h4>
+                </div>
+                <div class="col-sm">
+                    <h3>Закуплено всего:</h3>
+                    <h4>{{stat_dict.reception_stat.1}} ед. на {{stat_dict.reception_stat.0}} руб.</h4>
+                </div>
+                <div class="col-sm">
+                    <h3>Списано всего:</h3>
+                    <h4>{{stat_dict.liquidated_stat.1}} ед. на {{stat_dict.liquidated_stat.0}} руб.</h4>
+                </div>
+            </div>
+        </div>
+
+        <br><br>
+
+        <form action="" method="get">
+            <label for="start">Start date:</label>
+
+            <input type="date" id="start" name="start" value="" min="">
+            <label for="start">End date:</label>
+
+            <input type="date" id="end" name="end" value="" min="">
+
+            <button type='submit'>GO</button>
+        </form>
+    </div>
+    <br><br>
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    aria-expanded="true" aria-controls="collapseOne">
+                    Элемент аккордеона #1
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Название</th>
+                            <th scope="col">Всего проданно</th>
+                            <th scope="col">Сумма проданного</th>
+                            <th scope="col">Всего закупленно</th>
+                            <th scope="col">Сумма закупленного</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in product %}
+                          <tr>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{p.title}}</td>
+                            <td>{{p.statistic.general_count}} шт.</td>
+                            <td>{{p.statistic.general_sold_sum}} руб.</td>
+                            <td>{{p.statistic.general_reception_count}} шт.</td>
+                            <td>{{p.statistic.general_reception_sum}} руб.</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

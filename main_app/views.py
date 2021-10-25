@@ -50,7 +50,7 @@ class LoginUser(LoginView):
         if user.is_superuser:
             return reverse_lazy('all_product')
         else:
-            return reverse_lazy('seller_main')
+            return reverse_lazy('all_product_offline')
 
 def logout_user(request):
     '''Выход'''
@@ -364,7 +364,6 @@ class ProductView(LoginRequiredMixin, View):
 
         elif 'reception' in request.POST:
             form = ReceptionForm(request.POST)
-            print(form.is_valid())
             if form.is_valid():
                 self.product.count += form.cleaned_data['count']
                 self.product.save()

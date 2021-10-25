@@ -49,22 +49,34 @@
           {% else %}
           <li><a href="{% url 'register' %}" class="nav-link px-2 text-white">Регистрация продовца</a></li>
           {% endif %}
+          {% url 'list_order_offline' as loo %}
+          {% if request.path == loo %}
+          <li><a href="{% url 'list_order_offline' %}" class="nav-link px-2 disabled">Заказы</a></li>
+          {% else %}
           <li><a href="{% url 'list_order_offline' %}" class="nav-link px-2 text-white">Заказы</a></li>
+          {% endif %}
+          {% url 'stat_offline' as so %}
+          {% if request.path == so %}
+          <li><a href="{% url 'stat_offline' %}" class="nav-link px-2 disabled">Статистика</a></li>
+          {% else %}
+          <li><a href="{% url 'stat_offline' %}" class="nav-link px-2 text-white">Статистика</a></li>
+          {% endif %}
+          <li><a href="{% url 'my_sales_offline' %}" class="nav-link px-2 text-white">Мои продажи</a></li>
+          
+          
         </ul>
 
-        <div class="text-end">
-          <button type='button' class='btn btn-outline-light' data-bs-toggle="modal" data-bs-target="#receptionGlobalModal" >+ Приемка</button>
-          <button type='button' class='btn btn-outline-light' data-bs-toggle="modal" data-bs-target="#sellModal" >+ Продажа</button>
+          <button type='button' class='btn btn-outline-light me-2' data-bs-toggle="modal" data-bs-target="#receptionGlobalModal" >+ Приемка</button>
+          <button type='button' class='btn btn-outline-light me-2' data-bs-toggle="modal" data-bs-target="#sellModal" >+ Продажа</button>
           <div class="btn-group">
-            <a class="btn btn-outline-light" href="{% url 'category_offline' %}" role="button">+ Категория</a>
+            <a class="btn btn-outline-light me-2" href="{% url 'category_offline' %}" role="button">+ Категория</a>
           </div><!-- /btn-group -->
           <div class="btn-group">
             <div class="dropdown">
-              <a class="btn btn-outline-light" href="{% url 'add_product_offline' %}" role="button">+ Товар</a>
+              <a class="btn btn-outline-light me-2" href="{% url 'add_product_offline' %}" role="button">+ Товар</a>
             </div>
           </div><!-- /btn-group -->
           <a class="btn btn-danger " href="{% url 'logout' %}" role="button">Выход</a>
-        </div>
       </div>
     </div>
   </header>
@@ -86,16 +98,16 @@
 
 
 
-  <main class="flex-shrink-0">
+  <!-- <main class="flex-shrink-0"> -->
 
     <br>
     {% block content %}
-    <div class="container">
+    <!-- <div class="container">
 
-    </div>
+    </div> -->
     {% endblock %}
 
-  </main>
+  <!-- </main> -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
@@ -108,7 +120,7 @@
         div=document.getElementById("items");
         button=document.getElementById("add");
         items++;
-        newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <select class="form-select" name="product_id" required>';
+        newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <div style="display: inline-block"> <select style="float: left; width: 60%;" class="form-select" name="product_id" id="product_id" required>';
         newitem+='{% for c in category %}';
         newitem+=' <optgroup style="color:blue" label="{{c}}">'
         newitem+='{% for sc in c.offlinesubcategory_set.all %}'
@@ -116,8 +128,8 @@
         newitem+='{% for p in sc.offlineproduct_set.all %}';
         newitem+='<option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>'
         newitem+= '{% endfor %} {% endfor %}</optgroup>{% endfor %}</select>'
-        newitem+= '<span class="input-group-text" name="product_span_id"></span> <input id="product_input_id" type="number" name="product_count" class="form-control" placeholder="Кол-во" aria-label="count" required>'
-        newitem+= '<button type="button" id="product_but_id" onclick="removeForm('+items+')" class="btn btn-danger">x</button> </div>'
+        newitem+= '<input style="float: right;width: 30%" type="number" name="product_count" class="form-control" placeholder="Кол-во" min="1" value="1" aria-label="count" required>'
+        newitem+= '</div><span class="input-group-text">шт.</span><button type="button" id="product_but_id" onclick="removeForm('+items+')" class="btn btn-danger">x</button> </div>'
         newnode=document.createElement("span");
         newnode.innerHTML=newitem;
         div.insertBefore(newnode,button);
@@ -143,25 +155,28 @@
       <div class="modal-body">
         <form action="{% url 'order_offline' %}" name="form1" method='post'>
           {% csrf_token %}
-        
           <div class="input-group mb-3">
-            <select class="form-select" name="product_id" id='product_id' required>
-              {% for c in category %}
-              <optgroup style="color:blue" label="{{c}}">
-                  {% for sc in c.offlinesubcategory_set.all %}
-                  <optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">
-                    {% for p in sc.offlineproduct_set.all %}
-                    <option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>
-                  {% endfor %}
-                  {% endfor %}
-              </optgroup>
-              {% endfor %}
-            </select>
-            <span class="input-group-text" id="product_span_id_1"></span>
-            <input type="number" name='product_count' class="form-control" placeholder="Кол-во" aria-label="count" required>
-          </div>
+
+            <div style="display: inline-block">
+            <select style="float: left; width: 60%;" class="form-select" name="product_id" id='product_id' required>
+                {% for c in category %}
+                <optgroup style="color:blue" label="{{c}}">
+                    {% for sc in c.offlinesubcategory_set.all %}
+                    <optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">
+                      {% for p in sc.offlineproduct_set.all %}
+                      <option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>
+                    {% endfor %}
+                    {% endfor %}
+                </optgroup>
+                {% endfor %}
+              </select>
+            <input style="float: right;width: 30%" type="number" name='product_count' class="form-control" placeholder="Кол-во" min="1" value="1" aria-label="count" required>
+            </div>
+            <span class="input-group-text">шт.</span>
+            <button type="button" id="product_but_id" class="btn btn-danger">x</button>
+            </div>
+
           <div ID="items">
-            
           <input type="button" class="btn btn-outline-primary" value="+" onClick="AddItem();" ID="add">
           </div>
       </div>
@@ -187,7 +202,7 @@
           <form action="{% url 'reception_offline' %}" method='POST'>
             {% csrf_token %}
             <label for="count_reception" class="form-label">Кол-во товара:</label>
-            <input type="number" name="count_reception" class="form-control">
+            <input type="number" name="count_reception" min="1" value="1" class="form-control">
             <br>
 
             <label for="note_reception" class="form-label">Заметка:</label>
@@ -218,5 +233,7 @@
   </div>
 </div>
 <!-- Модальное окно приемка глобально конец  -->
+
+
 
 </html>

@@ -1,0 +1,63 @@
+{% extends 'seller_site/base.html' %}
+
+{% block content %}
+
+<div class="text-center">
+    {{sum_for_seller}} руб.
+</div>
+
+<div class="container">
+<div class="accordion" id="accordionExample">
+
+    <div class="accordion-item">
+        {% for order in queryset %}
+
+        <h2 class="accordion-header" id="heading{{order.pk}}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse{{order.pk}}" aria-expanded="true" aria-controls="collapse{{order.pk}}">
+                От {{order.get_datetime}} на сумму {{ order.get_order_price }} руб. (Продавец -
+                {{order.user.first_name}} {{order.user.last_name}})
+            </button>
+        </h2>
+        <div id="collapse{{order.pk}}" class="accordion-collapse collapse" aria-labelledby="heading{{order.pk}}"
+            data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Товар</th>
+                        <th scope="col">Цена за 1 шт.</th>
+                        <th scope="col">Кол-во</th>
+                        <th scope="col">Общая сумма</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in order.sold_product.all %}
+                      <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td>{{product.product.title}}</td>
+                        <td>{{product.price}} руб.</td>
+                        <td>{{product.count}} шт.</td>
+                        <td>{% widthratio product.price 1 product.count %} руб.</td>
+                      </tr>
+                      {% endfor %}
+                      <tr>
+                        <th scope="row"></th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>Общая сумма - {{order.get_order_price}} руб.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+</div>
+{% endblock %}

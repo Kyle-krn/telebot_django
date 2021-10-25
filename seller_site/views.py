@@ -10,30 +10,59 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from itertools import chain
+from collections import Counter
+from django.db.models import Count, Sum
 
 
 def make_order_view(request):
-    print('here')
+    '''Представление для формы продажи'''
     if request.method == 'POST':
-        pk_list = request.POST.getlist('product_id')
+        if 'product_id' not in request.POST and 'product_count' not in request.POST:
+            return redirect('all_product_offline')
+
+        pk_list = request.POST.getlist('product_id')    
         count_list = request.POST.getlist('product_count')
-        l_list = [(int(pk_list[i]), int(count_list[i])) for i in range(len(pk_list))]
-        order = OfflineOrderingProduct.objects.create(user=request.user)
-        for item in l_list:
+
+        if len(pk_list) != len(count_list):     # Доп проверка
+            return redirect('all_product_offline')
+
+        try:
+            l_list = [(int(pk_list[i]), int(count_list[i])) for i in range(len(pk_list))]
+        except ValueError:
+            return redirect('all_product_offline')
+
+        c = Counter()
+        for item in l_list:         # Прогоняем через Counter что бы не плодить одинаковые товары в чеке
+            c[item[0]] += item[1]
+        l_list = c.most_common()        
+        order = OfflineOrderingProduct.objects.create(user=request.user)    # Создаем чек
+        for item in l_list: # Добавляем проданные товары в чек
             product = OfflineProduct.objects.get(pk=item[0])
             sold_product = OfflineSoldProduct.objects.create(product=product ,price=product.price, count=item[1])
             order.sold_product.add(sold_product)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))   # Возвращаем юзера обратно 
+    else:
+        return redirect('all_product_offline')
+
 
 def reception_view(request):
+    '''Представление для формы приемки товара'''
     if request.method == 'POST':
-        print(request.POST)
-        count =int(request.POST.get('count_reception'))
-        note = request.POST.get('note_reception')
-        product_pk = int(request.POST.get('product_id'))
+        if 'count_reception' not in request.POST and 'note_reception' not in request.POST and 'product_id' not in request.POST:
+            return redirect('all_product_offline')
+
+        try:
+            count =int(request.POST.get('count_reception'))
+            product_pk = int(request.POST.get('product_id'))
+            note = request.POST.get('note_reception')
+        except ValueError:
+            return redirect('all_product_offline')
+        
         product = OfflineProduct.objects.get(pk=product_pk)
         OfflineReceptionProduct.objects.create(product=product, user=request.user, note=note, price=product.purchase_price, count=count)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return redirect('all_product_offline')
 
 
 class OfflineCategoriesView(LoginRequiredMixin, View):
@@ -58,15 +87,31 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
                 
         
         elif 'change_category' in request.POST:
-            category_pk = int(request.POST.get('category_pk'))
-            name = request.POST.get('category_name')
+            if 'category_pk' not in request.POST and 'category_name' not in request.POST and 'category_price_for_seller' not in request.POST:
+                return redirect('all_product_offline')
+            
+            try:
+                category_pk = int(request.POST.get('category_pk'))
+                name = request.POST.get('category_name')
+                price_for_seller = request.POST.get('category_price_for_seller')
+            except ValueError:
+                return redirect('all_product_offline')
+
             category = OfflineCategory.objects.get(pk=category_pk)  # Изменить на update
-            category.name = name                                    #   
+            category.name = name
+            category.price_for_seller = price_for_seller                                 #   
             category.save()                                         #
             messages.info(request, 'Категория  успешно изменена!')
 
         elif 'delete_category' in request.POST:
-            category_pk = int(request.POST.get('category_pk'))
+            if 'category_pk' not in request.POST:
+                return redirect('all_product_offline')
+            
+            try:
+                category_pk = int(request.POST.get('category_pk'))
+            except ValueError:
+                return redirect('all_product_offline')
+
             OfflineCategory.objects.get(pk=category_pk).delete()
             messages.info(request, 'Категория успешно удалена!')
 
@@ -79,15 +124,29 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
                 messages.info(request, 'Новая подкатегория успешно создана!')
 
         elif 'change_subcategory' in request.POST:
-            subcategory_pk = int(request.POST.get('subcategory_pk'))
-            subcategory_name = request.POST.get('subcategory_name')
+            if 'subcategory_pk' not in request.POST and 'subcategory_name' not in request.POST:
+                return redirect ('all_product_offline')
+
+            try:
+                subcategory_pk = int(request.POST.get('subcategory_pk'))
+                subcategory_name = request.POST.get('subcategory_name')
+            except ValueError:
+                return redirect('all_product_offline')
+
             subcategory = OfflineSubCategory.objects.get(pk=subcategory_pk) # Изменить на update
             subcategory.name = subcategory_name
             subcategory.save()
             messages.info(request, 'Подкатегория успешно изменена!')
 
         elif 'delete_subcategory' in request.POST:
-            subcategory_pk = int(request.POST.get('subcategory_pk'))
+            if 'subcategory_pk' not in request.POST:
+                return redirect('all_product_offline')
+            
+            try:
+                subcategory_pk = int(request.POST.get('subcategory_pk'))
+            except ValueError:
+                return redirect('all_product_offline')
+
             OfflineSubCategory.objects.get(pk=subcategory_pk).delete()
             messages.info(request, 'Подкатегория успешно удалена!')
             
@@ -140,7 +199,14 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
 
     def post(self, request):
         if 'delete_product' in request.POST:
-            pk_product = int(request.POST.get('pk_p'))
+            if 'pk_p' not in request.POST:
+                return redirect('all_product_offline')
+
+            try:
+                pk_product = int(request.POST.get('pk_p'))
+            except ValueError:
+                return redirect('all_product_offline')
+
             OfflineProduct.objects.get(pk=pk_product).delete()
             return redirect('all_product_offline')
 
@@ -172,7 +238,6 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
     
     def get_object(self):
         self.product = get_object_or_404(OfflineProduct, pk=self.kwargs.get('pk'))
-        print(self.product)
 
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
@@ -198,7 +263,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
                 result_list = self.reception_queryset.filter(liquidated=False)
             elif params['only'] == 'sold':
                 result_list = self.sold_queryset
-            elif params['only'] == 'liquidated':
+            else:
                 result_list = self.reception_queryset.filter(liquidated=True)
         else:
             result_list = sorted(
@@ -284,3 +349,93 @@ class OfflineOrderView(ListView):
         context['category'] = OfflineCategory.objects.all()
         context['title'] = 'Заказы'
         return context
+
+    def post(self, request):
+        if 'sold_id' not in request.POST and 'sold_count' not in request.POST:
+            return redirect('all_product_offline')
+
+        sold_pk = request.POST.getlist('sold_id')
+        sold_count = request.POST.getlist('sold_count')
+
+        try:
+            res = [(int(sold_pk[i]), int(sold_count[i])) for i in range(len(sold_pk))]
+        except ValueError:
+            return redirect('all_product_offline')
+
+        for item in res:
+            sold_product = OfflineSoldProduct.objects.get(pk=item[0])
+            sold_product.return_in_product(request, item[1])
+        return redirect('order_offline')
+
+    def get(self, request, *args, **kwargs):
+        return super(OfflineOrderView, self).get(request, *args, **kwargs)
+
+
+class OfflineStatisticView(LoginRequiredMixin, View):
+    '''Представления общей статистики по товарам'''
+    template_name = 'seller_site/offline_statistic.html'
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['title'] = 'Статистика'
+        context['stat_dict'] = self.get_statistic()
+        context['category'] = OfflineCategory.objects.all()
+        context['product'] = OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count')).order_by('-sold_count')
+        return context
+
+    def get_statistic(self):
+        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+                 'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
+                 'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
+        stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
+        print(stat_dict)
+        return stat_dict
+
+    def get_params(self):
+        return {k:v for k,v in self.request.GET.items() if v != ''}
+
+    def get_queryset(self):
+        params = self.get_params()
+        self.sold_queryset = OfflineSoldProduct.objects.all()
+        self.reception_queryset = OfflineReceptionProduct.objects.all()
+
+        if 'start' in params and 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
+        elif 'start' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.reception_queryset =self. reception_queryset.filter(date__gte=params['start'])
+        elif 'end' in params:
+            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])      
+
+    def get(self, request):
+        self.get_queryset()
+        return render(request, self.template_name, context=self.get_context_data())
+
+
+class OfflineSellerPage(View):
+    template_name = 'seller_site/offline_seller_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['title'] = 'Продажи за день'
+        context['category'] = OfflineCategory.objects.all()
+        context['queryset'] = self.get_queryset()
+        context['sum_for_seller'] = self.get_sum_for_seller()
+        return context
+
+    def get_sum_for_seller(self):
+        return sum([i2.count * i2.product.subcategory.category.price_for_seller for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.filter(user=self.request.user)] for i2 in i])
+
+    def get_queryset(self):
+        return OfflineOrderingProduct.objects.filter(user=self.request.user)
+
+    def get(self, request):
+        return render(request, self.template_name, context=self.get_context_data())
+
+
+# [(i2.count, i2.product.subcategory.category.price_for_seller) for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.all()] for i2 in i] для расчета зп сотрудника
+
+# OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count'))
+

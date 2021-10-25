@@ -3,8 +3,8 @@ from django import forms
 
 class OfflineProductForm(forms.ModelForm):
       title = forms.CharField(label='Название', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название товара'}))
-      price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number', 'placeholder': 'Введите цену для продажи'}))
-      purchase_price = forms.IntegerField(widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number', 'placeholder': 'Введите закупочную цену'}))
+      price = forms.IntegerField(widget=forms.TextInput(attrs={'min': '1','class': 'form-control', 'type': 'number', 'placeholder': 'Введите цену для продажи'}))
+      purchase_price = forms.IntegerField(widget=forms.TextInput(attrs={'min': 1,'class': 'form-control', 'type': 'number', 'placeholder': 'Введите закупочную цену'}))
       
       class Meta:
             model = OfflineProduct
@@ -12,11 +12,12 @@ class OfflineProductForm(forms.ModelForm):
             fields = ['title', 'price', 'subcategory', 'purchase_price']
 
 class OffilneCategoryForm(forms.ModelForm):
-      name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
+      name = forms.CharField(widget=forms.TextInput(attrs={'style': 'float: left; width: 60%;', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
+      price_for_seller = forms.IntegerField(widget=forms.TextInput(attrs={'min': 0,'class': 'form-control', 'type': 'number', 'placeholder': 'Сумма для продовца'}))
 
       class Meta:
             model = OfflineCategory
-            fields = ['name']
+            fields = ['name', 'price_for_seller']
 
 class OffilneChangeCategoryForm(OffilneCategoryForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'id': 'category_name', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
@@ -31,7 +32,7 @@ class OfflineSubcategoryForm(forms.ModelForm):
 
 
 class OfflineReceptionForm(forms.ModelForm):
-      count = forms.IntegerField(label='Кол-во товара', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
+      count = forms.IntegerField(label='Кол-во товара', widget=forms.TextInput(attrs={'min': 1,'class': 'form-control', 'type': 'number'}))
       note = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для заметки'}))
 
       class Meta:

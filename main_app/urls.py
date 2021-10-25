@@ -19,7 +19,6 @@ urlpatterns = [
     path('add_category/', CategoriesView.as_view(), name='add_category'),                                                       # Новая катеогрия
     path('add_product/', CreateProductView.as_view(), name='add_product'),                                                      # Новый товар
     path('user_stat/', StatisticView.as_view(), name='user_stat'),                                                              # Общая статистика
-    path('login/', LoginUser.as_view(), name='login'),                                                                          # Логин
     path('logout/', logout_user, name='logout'),                                                                                # Разлогиниться
     path('reception/', ReceptionProductView.as_view(), name='reception'),                                                       # Приемка товара
     path('new_order/', NoPaidOrderView.as_view(), name='new_order'),                                                            # Неоплаченные заказы

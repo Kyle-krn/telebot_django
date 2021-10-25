@@ -98,7 +98,6 @@ def del_product_in_cart_handlers(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.split('~')[0] == 'del_all')
 def del_all_product_in_cart_handlers(call):
-    print(call.data)
     '''Удалить из корзины все'''
     if call.data.split('~')[-1] == 'yes':
         cart = TelegramProductCartCounter.objects.filter(
