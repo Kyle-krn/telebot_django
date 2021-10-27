@@ -12,8 +12,14 @@ from django.views.generic import ListView
 from itertools import chain
 from collections import Counter
 from django.db.models import Count, Sum
+from datetime import date
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 
 
+@login_required
 def make_order_view(request):
     '''Представление для формы продажи'''
     if request.method == 'POST':
@@ -28,7 +34,7 @@ def make_order_view(request):
 
         try:
             l_list = [(int(pk_list[i]), int(count_list[i])) for i in range(len(pk_list))]
-        except ValueError:
+        except (ValueError, TypeError):
             return redirect('all_product_offline')
 
         c = Counter()
@@ -45,6 +51,7 @@ def make_order_view(request):
         return redirect('all_product_offline')
 
 
+@login_required
 def reception_view(request):
     '''Представление для формы приемки товара'''
     if request.method == 'POST':
@@ -55,7 +62,7 @@ def reception_view(request):
             count =int(request.POST.get('count_reception'))
             product_pk = int(request.POST.get('product_id'))
             note = request.POST.get('note_reception')
-        except ValueError:
+        except (ValueError, TypeError):
             return redirect('all_product_offline')
         
         product = OfflineProduct.objects.get(pk=product_pk)
@@ -65,6 +72,19 @@ def reception_view(request):
         return redirect('all_product_offline')
 
 
+@method_decorator(staff_member_required, name='dispatch')
+class RegisterUser(CreateView):
+    form_class = RegisterUserForm
+    template_name = 'seller_site/register.html'
+    success_url = reverse_lazy('all_product_offline')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Регистрация продовца'
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
 class OfflineCategoriesView(LoginRequiredMixin, View):
     '''Представление создания/просмотра категорий/подкатегорий'''
     template_name = 'seller_site/offline_category.html'
@@ -94,7 +114,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
                 category_pk = int(request.POST.get('category_pk'))
                 name = request.POST.get('category_name')
                 price_for_seller = request.POST.get('category_price_for_seller')
-            except ValueError:
+            except (ValueError, TypeError):
                 return redirect('all_product_offline')
 
             category = OfflineCategory.objects.get(pk=category_pk)  # Изменить на update
@@ -109,7 +129,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             
             try:
                 category_pk = int(request.POST.get('category_pk'))
-            except ValueError:
+            except (ValueError, TypeError):
                 return redirect('all_product_offline')
 
             OfflineCategory.objects.get(pk=category_pk).delete()
@@ -130,7 +150,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             try:
                 subcategory_pk = int(request.POST.get('subcategory_pk'))
                 subcategory_name = request.POST.get('subcategory_name')
-            except ValueError:
+            except (ValueError, TypeError):
                 return redirect('all_product_offline')
 
             subcategory = OfflineSubCategory.objects.get(pk=subcategory_pk) # Изменить на update
@@ -144,7 +164,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             
             try:
                 subcategory_pk = int(request.POST.get('subcategory_pk'))
-            except ValueError:
+            except (ValueError, TypeError):
                 return redirect('all_product_offline')
 
             OfflineSubCategory.objects.get(pk=subcategory_pk).delete()
@@ -156,28 +176,7 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class OfflineCategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    '''Обновить категорию'''
-    model = OfflineCategory
-    template_name = 'seller_site/offline_category_detail.html'
-    form_class = OffilneCategoryForm
-    success_url = reverse_lazy('category_offline')
-    success_message = 'Категория успешно обновлена!'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Изменить категорию/подкатегорию'
-        return context
-
-
-    def post(self, *args, **kwargs):
-        if 'delete' in self.request.POST:
-            category = self.get_object()
-            category.delete()
-            return redirect('category_offline')
-        return super().post(self)
-
-
+@method_decorator(staff_member_required, name='dispatch')
 class OfflineCreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Создание нового товара'''
     template_name = 'seller_site/offline_add_product.html'
@@ -197,6 +196,7 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
     login_url = '/login/'
     template_name = 'seller_site/offline_all_product.html'
 
+    @method_decorator(staff_member_required, name='dispatch')
     def post(self, request):
         if 'delete_product' in request.POST:
             if 'pk_p' not in request.POST:
@@ -204,7 +204,7 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
 
             try:
                 pk_product = int(request.POST.get('pk_p'))
-            except ValueError:
+            except (ValueError, TypeError):
                 return redirect('all_product_offline')
 
             OfflineProduct.objects.get(pk=pk_product).delete()
@@ -231,7 +231,7 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
         return context
 
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class OfflineProductAdminView(LoginRequiredMixin, View):
     '''Детальное представление товара и управление им'''
     template_name = 'seller_site/offline_product.html'
@@ -338,7 +338,8 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class OfflineOrderView(ListView):
+@method_decorator(staff_member_required, name='dispatch')
+class OfflineOrderView(LoginRequiredMixin, ListView):
     '''Оплаченные заказы'''
     template_name = 'seller_site/offline_order.html'
     queryset = OfflineOrderingProduct.objects.all().order_by('-datetime')
@@ -359,18 +360,20 @@ class OfflineOrderView(ListView):
 
         try:
             res = [(int(sold_pk[i]), int(sold_count[i])) for i in range(len(sold_pk))]
-        except ValueError:
+        except (ValueError, TypeError):
             return redirect('all_product_offline')
 
         for item in res:
             sold_product = OfflineSoldProduct.objects.get(pk=item[0])
             sold_product.return_in_product(request, item[1])
-        return redirect('order_offline')
+            
+        return redirect('list_order_offline')
 
     def get(self, request, *args, **kwargs):
         return super(OfflineOrderView, self).get(request, *args, **kwargs)
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class OfflineStatisticView(LoginRequiredMixin, View):
     '''Представления общей статистики по товарам'''
     template_name = 'seller_site/offline_statistic.html'
@@ -414,7 +417,7 @@ class OfflineStatisticView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class OfflineSellerPage(View):
+class OfflineSellerPage(LoginRequiredMixin, View):
     template_name = 'seller_site/offline_seller_page.html'
 
     def get_context_data(self, **kwargs):
@@ -426,10 +429,10 @@ class OfflineSellerPage(View):
         return context
 
     def get_sum_for_seller(self):
-        return sum([i2.count * i2.product.subcategory.category.price_for_seller for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.filter(user=self.request.user)] for i2 in i])
+        return sum([i2.count * i2.product.subcategory.category.price_for_seller for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today()))] for i2 in i])
 
     def get_queryset(self):
-        return OfflineOrderingProduct.objects.filter(user=self.request.user)
+        return OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today()))
 
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())

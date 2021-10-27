@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
 from .forms import *
 from .models import *
 from django.http import HttpResponseRedirect
@@ -18,17 +18,10 @@ from django.contrib.auth import login
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 
-
-class RegisterUser(CreateView):
-    """В приложении не используется, можно использовать для стандартной регистрации"""
-    form_class = RegisterUserForm
-    template_name = 'main_app/register.html'
-    success_url = reverse_lazy('all_product')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Регистрация продовца'
-        return context
+def index(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return redirect('all_product') if request.user.is_superuser else redirect('all_product_offline')
 
 
 class LoginUser(LoginView):
@@ -85,7 +78,7 @@ class IndexView(LoginRequiredMixin, ListView):
         context['category'] = Category.objects.all()
         return context
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Создание нового товара'''
     template_name = 'main_app/add_product.html'
@@ -98,7 +91,7 @@ class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         context['category'] = Category.objects.all()
         return context
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'main_app/reception.html'
@@ -107,7 +100,15 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_message = 'Количество товара успешно увеличено!'
 
     def form_valid(self, form):
-        product = Product.objects.get(pk=int(self.request.POST['product_pk']))
+        if 'product_pk' not in self.request.POST:
+            return redirect('all_product')
+        
+        try:
+            pk = int(self.request.POST['product_pk'])
+        except (ValueError, TypeError):
+            return('all_product')
+
+        product = get_object_or_404(Product, pk=pk)
         product.count += form.cleaned_data['count']
         product.save()
         f = form.save(commit=False)
@@ -122,6 +123,7 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     '''Обновить категорию'''
     model = Category
@@ -135,7 +137,6 @@ class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         context['title'] = 'Изменить категорию/подкатегорию'
         return context
 
-
     def post(self, *args, **kwargs):
         if 'delete' in self.request.POST:
             category = self.get_object()
@@ -144,6 +145,7 @@ class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return super().post(self)
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class CategoriesView(LoginRequiredMixin, View):
     '''Представление создания/просмотра категорий/подкатегорий'''
     template_name = 'main_app/category.html'
@@ -166,8 +168,16 @@ class CategoriesView(LoginRequiredMixin, View):
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = SubcategoryForm(request.POST, files=request.FILES)
             if sc_form.is_valid():
-                f = sc_form.save(commit=False)    
-                f.category = Category.objects.get(pk=int(request.POST['category_id']))
+                if 'category_id' not in request.POST:
+                    return redirect('all_product')
+
+                try:
+                    pk = int(request.POST['category_id'])
+                except (ValueError, TypeError):
+                    return redirect('all_product')
+
+                f = sc_form.save(commit=False)
+                f.category = get_object_or_404(Category, pk=pk)
                 f.save()
                 messages.info(request, 'Новая подкатегория успешно создана!')
                 return redirect('add_category')
@@ -175,7 +185,7 @@ class CategoriesView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class NoPaidOrderView(LoginRequiredMixin, ListView):
     '''Неоплаченные заказы'''
     template_name = 'main_app/manager_order.html'
@@ -189,8 +199,16 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
 
     def post(self, request):
         if 'paid_status' in request.POST:
-            order_id = int(request.POST['order_id'])
-            order = OrderingProduct.objects.get(pk=order_id)
+            if 'order_id' not in request.POST:
+                return redirect('all_product')
+
+            try:
+                order_id = int(request.POST['order_id'])
+            except (ValueError, TypeError):
+                return redirect('all_product')
+
+            order = get_object_or_404(OrderingProduct, pk=order_id)
+            # order = OrderingProduct.objects.get(pk=order_id)
             if request.POST['payment'] == 'paid':        
                 for item in order.sold_product.all():
                     item.product.count -= item.count
@@ -206,20 +224,33 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
                 messages.info(request, 'Заказ успешно удален!')
 
         elif 'change_order' in request.POST:
+            if 'product_id' not in request.POST and 'product_count' not in request.POST:
+                return redirect('all_product')
             list_id = request.POST.getlist('product_id')
             list_count = request.POST.getlist('product_count')
-            tuple_product = [(int(list_id[i]), int(list_count[i])) for i in range(len(list_id))]
+
+            if len(list_count) != len(list_id):
+                return redirect('all_product')
+
+            try:
+                tuple_product = [(int(list_id[i]), int(list_count[i])) for i in range(len(list_id))]
+            except (ValueError, TypeError):
+                return redirect('all_product')
+
             for item in tuple_product:
                 if item[1] <= 0:
-                    SoldProduct.objects.get(pk=item[0]).delete()
+                    sold_product = get_object_or_404(SoldProduct, pk=item[0])
+                    sold_product.delete()
+                    # SoldProduct.objects.get(pk=item[0]).delete()
                 else:
                     SoldProduct.objects.filter(pk=item[0]).update(count=item[1])
+
             messages.info(request, 'Заказ успешно изменен!')
         return redirect('new_order')
 
 
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class PaidOrderView(LoginRequiredMixin, ListView):
     '''Оплаченные заказы'''
     template_name = 'main_app/manager_order.html'
@@ -232,19 +263,28 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request):
-        order_id = int(request.POST['order_id'])
-        order = OrderingProduct.objects.get(pk=order_id)
-        track_code = request.POST['track_code']
+
+        if 'order_id' not in request.POST and 'track_code' not in request.POST:
+            return redirect('all_product')
+
+        try:
+            order_id = int(request.POST['order_id'])
+            track_code = request.POST['track_code']
+        except (ValueError, TypeError):
+            return redirect('all_product')
+
+        order = get_object_or_404(OrderingProduct, pk=order_id)
+        # order = OrderingProduct.objects.get(pk=order_id)
         order.track_code = track_code
         order.save()
         messages.info(request, 'Трек-номер успешно добавлен!')
         return redirect('old_order')
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class StatisticView(LoginRequiredMixin, View):
     '''Представления общей статистики по товарам'''
     template_name = 'main_app/user_stat.html'
-    sold_queryset = SoldProduct.objects.filter(payment_bool=True)
+    # sold_queryset = SoldProduct.objects.filter(payment_bool=True)
     reception_queryset = ReceptionProduct.objects.all()
 
     def get_context_data(self, **kwargs):
@@ -266,6 +306,7 @@ class StatisticView(LoginRequiredMixin, View):
 
     def get_queryset(self):
         params = self.get_params()
+        self.sold_queryset = SoldProduct.objects.filter(payment_bool=True)
         if 'start' in params and 'end' in params:
             self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
             self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
@@ -277,11 +318,11 @@ class StatisticView(LoginRequiredMixin, View):
             self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])      
 
     def get(self, request):
-        if 'start' in self.get_params() or 'end' in self.get_params():
-            self.get_queryset()
+        # if 'start' in self.get_params() or 'end' in self.get_params():
+        self.get_queryset()
         return render(request, self.template_name, context=self.get_context_data())
 
-
+@method_decorator(staff_member_required, name='dispatch')
 class ProductView(LoginRequiredMixin, View):
     '''Детальное представление товара и управление им'''
     template_name = 'main_app/product.html'

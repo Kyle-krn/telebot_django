@@ -98,11 +98,15 @@
         <th scope="col">#</th>
         <th scope="col">Название</th>
         <th scope="col">Цена</th>
+        {% if request.user.is_superuser %}
         <th scope="col">Закупочная цена</th>
+        {% endif %}
         <th scope="col">Категория</th>
         <th scope="col">Подкатегория</th>
         <th scope="col">Остаток</th>
+        {% if request.user.is_superuser %}
         <th scope="col">#</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -111,11 +115,14 @@
         <th scope="row">{{ forloop.counter }}</th>
         <td>{{p.title|truncatewords:3}}</td>
         <td>{{p.price}}</td>
+        {% if request.user.is_superuser %}
         <td>{{p.purchase_price}}</td>
+        {% endif %}
         <td>{{p.subcategory.category}}</td>
         <td>{{p.subcategory}}</td>
-        <td>{{p.count}}</td>
+        <td>{{p.count}} шт.</td>
 
+        {% if request.user.is_superuser %}
         <td><div class="btn-group">
           <a class="btn btn-outline-dark" href="{% url 'product_detail_offline' pk=p.pk %}" role="button">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
@@ -129,7 +136,7 @@
             </svg>
           </button>
         </div></td>
-
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
@@ -164,7 +171,6 @@ document.getElementById('del_hidden').value = pk ;
 document.getElementById("title_product").innerHTML = 'Вы уверенны что хотите удалить'+ ' ' + title + '?';
   }
 </script>
-
 
 
   {% endblock %}

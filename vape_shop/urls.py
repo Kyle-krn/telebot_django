@@ -17,11 +17,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from vape_shop import settings
-from main_app.views import LoginUser
+from main_app.views import LoginUser, logout_user, index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('main/', include('main_app.urls')),
     path('login/', LoginUser.as_view(), name='login'),                                                                          # Логин
+    path('logout/', logout_user, name='logout'),                                                                                # Разлогиниться
+    path('', index, name='index_url'),                                                                                # Разлогиниться
     path('seller/', include('seller_site.urls')),
-
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

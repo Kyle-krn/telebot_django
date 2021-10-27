@@ -21,14 +21,13 @@
     <div class="container-xxl">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
 
-        <a href="{% url 'all_product_offline' %}"> 
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16">
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-              <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10zm0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
-              <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-              <path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-            </svg>
+        <h3><a style="color: white;" href="{% url 'all_product_offline' %}"> 
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-door-closed" viewBox="0 0 16 16">
+            <path d="M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v13h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3V2zm1 13h8V2H4v13z"/>
+            <path d="M9 9a1 1 0 1 0 2 0 1 1 0 0 0-2 0z"/>
+          </svg>
          </a>
+        </h3>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
 
@@ -67,43 +66,10 @@
 
         <div class="text-end">
           <div class="btn-group">
-            <div class="dropdown">
-              <button class="btn btn-outline-light dropdown-toggle" type="button" id="dropdownMenuButton1"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                + Категория
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% url 'add_category' as ac %}
-                {% if request.path == ac %}
-                <li><a class="dropdown-item disabled" href="{% url 'add_category' %}">Онлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'add_category' %}">Онлайн магазин</a></li>
-                {% endif %}
-                {% url 'category_offline' as co %}
-                {% if request.path == co %}
-                <li><a class="dropdown-item disabled" href="{% url 'category_offline' %}">Офлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'category_offline' %}">Офлайн магазин</a></li>
-                {% endif %}
-              </ul>
-            </div>
+            <a class="btn btn-outline-light me-2" href="{% url 'add_category' %}" role="button">+ Категория</a>
           </div><!-- /btn-group -->
           <div class="btn-group">
-            <div class="dropdown">
-              <button class="btn btn-warning me-3 dropdown-toggle" type="button" id="dropdownMenuButton1"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                + Товар
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% url 'add_product' as ap %}
-                {% if request.path == ap %}
-                <li><a class="dropdown-item disabled" href="#">Онлайн магазин</a></li>
-                {% else %}
-                <li><a class="dropdown-item" href="{% url 'add_product' %}">Онлайн магазин</a></li>
-                {% endif %}
-                <li><a class="dropdown-item" href="#">Оффлайн магазин</a></li>
-              </ul>
-            </div>
+            <a class="btn btn-outline-light me-2" href="{% url 'add_product' %}" role="button">+ Товар</a>
           </div><!-- /btn-group -->
           <a class="btn btn-danger " href="{% url 'logout' %}" role="button">Выход</a>
         </div>

@@ -20,17 +20,39 @@
                 <div class="text-center">
                 <form action="" method='post'>
                     {% csrf_token %}
-                {% for item in qs.sold_product.all %}
-                          <label for="count" class="col-form-label" >{{item.product.title}} --></label>
-                            <style>
-                                #user {
-                                 width: 50px; /* Ширина поля в пикселах */
-                                } 
-                               </style>
-                          <input type="hidden" name="sold_id" value="{{item.pk}}">
-                          <input type="number" id="user" name='sold_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
-                            <br>
-                {% endfor %}
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Товар</th>
+                        <th scope="col">Цена за 1 шт.</th>
+                        <th scope="col">Кол-во</th>
+                        <th scope="col">Общая сумма</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in qs.sold_product.all %}
+                      <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td>{{product.product.title}}</td>
+                        <td>{{product.price}} руб.</td>
+                        <td>
+                            <input type="hidden" name="sold_id" value="{{product.pk}}">
+                            <input style="width: 25%" type="number" id="user" name='sold_count' pattern="" value={{product.count}}> шт.
+
+                        </td>
+                        <td>{% widthratio product.price 1 product.count %} руб.</td>
+                      </tr>
+                      {% endfor %}
+                      <tr>
+                        <th scope="row"></th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>Общая сумма - {{qs.get_order_price}} руб.</td>
+                      </tr>
+                    </tbody>
+                  </table>
             </div>
                 <br>
                 <div class="text-end">
@@ -46,3 +68,14 @@
 </div>
 
 {% endblock %}
+
+
+<!-- <label for="count" class="col-form-label" >{{item.product.title}} </label>
+<style>
+    #user {
+     width: 50px; /* Ширина поля в пикселах */
+    } 
+   </style>
+<input type="hidden" name="sold_id" value="{{item.pk}}">
+<input type="number" id="user" name='sold_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
+<br> -->
