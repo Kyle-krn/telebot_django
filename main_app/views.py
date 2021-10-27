@@ -163,7 +163,7 @@ class CategoriesView(LoginRequiredMixin, View):
             category_form = CategoryForm(request.POST, files=request.FILES)
             if category_form.is_valid():
                 category_form.save()
-                messages.info(request, 'Новая категория успешно создана!')
+                messages.success(request, 'Новая категория успешно создана!')
                 return redirect('add_category')
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = SubcategoryForm(request.POST, files=request.FILES)
@@ -179,7 +179,7 @@ class CategoriesView(LoginRequiredMixin, View):
                 f = sc_form.save(commit=False)
                 f.category = get_object_or_404(Category, pk=pk)
                 f.save()
-                messages.info(request, 'Новая подкатегория успешно создана!')
+                messages.success(request, 'Новая подкатегория успешно создана!')
                 return redirect('add_category')
 
     def get(self, request):
@@ -217,11 +217,11 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
                     item.save()
                 order.payment_bool = True
                 order.save()
-                messages.info(request, 'Заказ успешно обработан!')
+                messages.success(request, 'Заказ успешно обработан!')
             else:
                 order.sold_product.all().delete()
                 order.delete()
-                messages.info(request, 'Заказ успешно удален!')
+                messages.success(request, 'Заказ успешно удален!')
 
         elif 'change_order' in request.POST:
             if 'product_id' not in request.POST and 'product_count' not in request.POST:
@@ -245,7 +245,7 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
                 else:
                     SoldProduct.objects.filter(pk=item[0]).update(count=item[1])
 
-            messages.info(request, 'Заказ успешно изменен!')
+            messages.success(request, 'Заказ успешно изменен!')
         return redirect('new_order')
 
 
@@ -277,7 +277,7 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         # order = OrderingProduct.objects.get(pk=order_id)
         order.track_code = track_code
         order.save()
-        messages.info(request, 'Трек-номер успешно добавлен!')
+        messages.success(request, 'Трек-номер успешно добавлен!')
         return redirect('old_order')
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -395,12 +395,12 @@ class ProductView(LoginRequiredMixin, View):
             product_form = Product_reqForm(request.POST, files=request.FILES, instance=self.product)
             if product_form.is_valid():
                 product_form.save()
-                messages.info(request, 'Товар успешно обновлен!')
+                messages.success(request, 'Товар успешно обновлен!')
                 return redirect('productdetail', pk=pk)
 
         elif 'delete' in request.POST:
             self.product.delete()
-            messages.info(request, 'Товар усппешно удален!')
+            messages.success(request, 'Товар усппешно удален!')
             return redirect ('all_product')
 
         elif 'reception' in request.POST:
@@ -411,7 +411,7 @@ class ProductView(LoginRequiredMixin, View):
                 f = form.save(commit=False)
                 f.product = self.product
                 f.save()
-                messages.info(request, 'Количество товара успешно увеличено!')
+                messages.success(request, 'Количество товара успешно увеличено!')
                 return redirect('productdetail', pk=pk)           
 
         elif 'liquidated' in request.POST:
@@ -423,7 +423,7 @@ class ProductView(LoginRequiredMixin, View):
                 f.product = self.product
                 f.liquidated = True
                 f.save()
-                messages.info(request, 'Товар успешно списан!')
+                messages.success(request, 'Товар успешно списан!')
                 return redirect('productdetail', pk=pk)
         
 
@@ -450,7 +450,7 @@ def control_qiwi(request):
                 qiwi.balance = balance
                 qiwi.save()
         except:
-            messages.info(request, 'Ошибка получения баланса кошелька')
+            messages.success(request, 'Ошибка получения баланса кошелька')
     elif request.method == 'POST' and 'activate' in request.POST:
         QiwiToken.objects.update(active=False)
         qiwi_id = int(request.POST['radio'])

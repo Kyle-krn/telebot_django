@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from itertools import chain
 from collections import Counter
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from datetime import date
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -24,17 +24,20 @@ def make_order_view(request):
     '''Представление для формы продажи'''
     if request.method == 'POST':
         if 'product_id' not in request.POST and 'product_count' not in request.POST:
+            messages.error(request, 'Ошибка добавления чека!')
             return redirect('all_product_offline')
 
         pk_list = request.POST.getlist('product_id')    
         count_list = request.POST.getlist('product_count')
 
         if len(pk_list) != len(count_list):     # Доп проверка
+            messages.error(request, 'Ошибка добавления чека!')
             return redirect('all_product_offline')
 
         try:
             l_list = [(int(pk_list[i]), int(count_list[i])) for i in range(len(pk_list))]
         except (ValueError, TypeError):
+            messages.error(request, 'Ошибка добавления чека!')
             return redirect('all_product_offline')
 
         c = Counter()
@@ -43,9 +46,11 @@ def make_order_view(request):
         l_list = c.most_common()        
         order = OfflineOrderingProduct.objects.create(user=request.user)    # Создаем чек
         for item in l_list: # Добавляем проданные товары в чек
-            product = OfflineProduct.objects.get(pk=item[0])
+            product = get_object_or_404(OfflineProduct, pk=item[0])
+            # product = OfflineProduct.objects.get(pk=item[0])
             sold_product = OfflineSoldProduct.objects.create(product=product ,price=product.price, count=item[1])
             order.sold_product.add(sold_product)
+        messages.success(request, 'Чек успешно создан!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))   # Возвращаем юзера обратно 
     else:
         return redirect('all_product_offline')
@@ -56,6 +61,7 @@ def reception_view(request):
     '''Представление для формы приемки товара'''
     if request.method == 'POST':
         if 'count_reception' not in request.POST and 'note_reception' not in request.POST and 'product_id' not in request.POST:
+            messages.error(request, 'Ошибка добавления приемки!')
             return redirect('all_product_offline')
 
         try:
@@ -63,10 +69,13 @@ def reception_view(request):
             product_pk = int(request.POST.get('product_id'))
             note = request.POST.get('note_reception')
         except (ValueError, TypeError):
+            messages.error(request, 'Ошибка добавления приемки!')
             return redirect('all_product_offline')
         
-        product = OfflineProduct.objects.get(pk=product_pk)
+        product = get_object_or_404(OfflineProduct, pk=product_pk)
+        # product = OfflineProduct.objects.get(pk=product_pk)
         OfflineReceptionProduct.objects.create(product=product, user=request.user, note=note, price=product.purchase_price, count=count)
+        messages.success(request, 'Количество товара успешно обновлено!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         return redirect('all_product_offline')
@@ -103,11 +112,12 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             category_form = OffilneCategoryForm(request.POST)
             if category_form.is_valid():
                 category_form.save()
-                messages.info(request, 'Новая категория успешно создана!')
+                messages.success(request, 'Новая категория успешно создана!')
                 
         
         elif 'change_category' in request.POST:
             if 'category_pk' not in request.POST and 'category_name' not in request.POST and 'category_price_for_seller' not in request.POST:
+                messages.error(request, 'Ошибка изменения категории!')
                 return redirect('all_product_offline')
             
             try:
@@ -115,60 +125,81 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
                 name = request.POST.get('category_name')
                 price_for_seller = request.POST.get('category_price_for_seller')
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка изменения категории!')
                 return redirect('all_product_offline')
 
-            category = OfflineCategory.objects.get(pk=category_pk)  # Изменить на update
+            category = get_object_or_404(OfflineCategory, pk=category_pk)  # Изменить на update
+            # category = OfflineCategory.objects.get(pk=category_pk)  # Изменить на update
             category.name = name
             category.price_for_seller = price_for_seller                                 #   
             category.save()                                         #
-            messages.info(request, 'Категория  успешно изменена!')
+            messages.success(request, 'Категория  успешно изменена!')
 
         elif 'delete_category' in request.POST:
             if 'category_pk' not in request.POST:
+                messages.error(request, 'Ошибка удаления категории!')
                 return redirect('all_product_offline')
             
             try:
                 category_pk = int(request.POST.get('category_pk'))
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка удаления категории!')
                 return redirect('all_product_offline')
 
-            OfflineCategory.objects.get(pk=category_pk).delete()
-            messages.info(request, 'Категория успешно удалена!')
+            get_object_or_404(OfflineCategory, pk=category_pk).delete()
+            # OfflineCategory.objects.get(pk=category_pk).delete()
+            messages.success(request, 'Категория успешно удалена!')
 
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = OfflineSubcategoryForm(request.POST)
             if sc_form.is_valid():
-                f = sc_form.save(commit=False)    
-                f.category = OfflineCategory.objects.get(pk=int(request.POST['category_id']))
+                if 'category_id' not in request.POST:
+                    messages.error(request, 'Ошибка добавления подкатегории!')
+                    return redirect('all_product_offline')
+                f = sc_form.save(commit=False)
+                
+                try:
+                    category_id = int(request.POST['category_id'])
+                except (ValueError, TypeError):
+                    messages.error(request, 'Ошибка добавления подкатегории!')
+
+                f.category = get_object_or_404(OfflineCategory, pk=category_id)
+                # f.category = OfflineCategory.objects.get(pk=int(request.POST['category_id']))
                 f.save()
-                messages.info(request, 'Новая подкатегория успешно создана!')
+                messages.success(request, 'Новая подкатегория успешно создана!')
 
         elif 'change_subcategory' in request.POST:
             if 'subcategory_pk' not in request.POST and 'subcategory_name' not in request.POST:
+                messages.error(request, 'Ошибка изменения подкатегории!')
                 return redirect ('all_product_offline')
 
             try:
                 subcategory_pk = int(request.POST.get('subcategory_pk'))
                 subcategory_name = request.POST.get('subcategory_name')
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка изменения подкатегории!')
                 return redirect('all_product_offline')
 
-            subcategory = OfflineSubCategory.objects.get(pk=subcategory_pk) # Изменить на update
+            subcategory = get_object_or_404(OfflineSubCategory, pk=subcategory_pk)
+            # subcategory = OfflineSubCategory.objects.get(pk=subcategory_pk) # Изменить на update
             subcategory.name = subcategory_name
             subcategory.save()
-            messages.info(request, 'Подкатегория успешно изменена!')
+            messages.success(request, 'Подкатегория успешно изменена!')
 
         elif 'delete_subcategory' in request.POST:
             if 'subcategory_pk' not in request.POST:
+                messages.error(request, 'Ошибка удаления подкатегории!')
                 return redirect('all_product_offline')
             
             try:
                 subcategory_pk = int(request.POST.get('subcategory_pk'))
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка удаления подкатегории!')
                 return redirect('all_product_offline')
 
-            OfflineSubCategory.objects.get(pk=subcategory_pk).delete()
-            messages.info(request, 'Подкатегория успешно удалена!')
+            get_object_or_404(OfflineSubCategory, pk=subcategory_pk).delete()
+            # OfflineSubCategory.objects.get(pk=subcategory_pk).delete()
+            messages.success(request, 'Подкатегория успешно удалена!')
             
         return redirect('category_offline')
 
@@ -200,14 +231,17 @@ class OfflineIndexView(LoginRequiredMixin, ListView):
     def post(self, request):
         if 'delete_product' in request.POST:
             if 'pk_p' not in request.POST:
+                messages.error(request, 'Ошибка удаления товара!')
                 return redirect('all_product_offline')
 
             try:
                 pk_product = int(request.POST.get('pk_p'))
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка удаления товара!')
                 return redirect('all_product_offline')
 
-            OfflineProduct.objects.get(pk=pk_product).delete()
+            get_object_or_404(OfflineProduct, pk=pk_product).delete()
+            # OfflineProduct.objects.get(pk=pk_product).delete()
             return redirect('all_product_offline')
 
     def get_queryset(self):
@@ -301,12 +335,12 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
             product_form = OfflineProductForm(request.POST, instance=self.product)
             if product_form.is_valid():
                 product_form.save()
-                messages.info(request, 'Товар успешно обновлен!')
+                messages.success(request, 'Товар успешно обновлен!')
                 return redirect('product_detail_offline', pk=pk)
 
         elif 'delete' in request.POST:
             self.product.delete()
-            messages.info(request, 'Товар усппешно удален!')
+            messages.success(request, 'Товар усппешно удален!')
             return redirect ('all_product_offline')
 
         elif 'reception' in request.POST:
@@ -317,7 +351,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
                 f.price = self.product.purchase_price
                 f.user = request.user
                 f.save()
-                messages.info(request, 'Количество товара успешно увеличено!')
+                messages.success(request, 'Количество товара успешно увеличено!')
                 return redirect('product_detail_offline', pk=pk)
 
         elif 'liquidated' in request.POST:
@@ -329,7 +363,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
                 f.user = request.user
                 f.liquidated = True
                 f.save()
-                messages.info(request, 'Товар успешно списан!')
+                messages.success(request, 'Товар успешно списан!')
                 return redirect('product_detail_offline', pk=pk)
  
     def get(self, request, pk):
@@ -353,6 +387,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
 
     def post(self, request):
         if 'sold_id' not in request.POST and 'sold_count' not in request.POST:
+            messages.error(request, 'Ошибка обработки заказа!')
             return redirect('all_product_offline')
 
         sold_pk = request.POST.getlist('sold_id')
@@ -361,10 +396,12 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
         try:
             res = [(int(sold_pk[i]), int(sold_count[i])) for i in range(len(sold_pk))]
         except (ValueError, TypeError):
+            messages.error(request, 'Ошибка обработки заказа!')
             return redirect('all_product_offline')
 
         for item in res:
-            sold_product = OfflineSoldProduct.objects.get(pk=item[0])
+            sold_product = get_object_or_404(OfflineSoldProduct, pk=item[0])
+            # sold_product = OfflineSoldProduct.objects.get(pk=item[0])
             sold_product.return_in_product(request, item[1])
             
         return redirect('list_order_offline')
