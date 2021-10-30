@@ -4,7 +4,7 @@ from .models import *
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from itertools import chain
-from django.db.models import Q
+from django.db.models import Q, query
 from main_app.management.commands.utils import get_qiwi_balance
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
@@ -72,6 +72,24 @@ class IndexView(LoginRequiredMixin, ListView):
                 queryset = queryset.order_by(params['order_by'])
         return queryset
 
+
+    def post(self, request):
+        if 'delete_product' in request.POST:
+            if 'pk_p' not in request.POST:
+                messages.error(request, 'Ошибка удаления товара!')
+                return redirect('all_product')
+
+            try:
+                pk_product = int(request.POST.get('pk_p'))
+            except (ValueError, TypeError):
+                messages.error(request, 'Ошибка удаления товара!')
+                return redirect('all_product')
+
+            get_object_or_404(Product, pk=pk_product).delete()
+            # OfflineProduct.objects.get(pk=pk_product).delete()
+            return redirect('all_product')
+
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Все товары'
@@ -101,11 +119,13 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def form_valid(self, form):
         if 'product_pk' not in self.request.POST:
+            messages.error(self.request, 'Ошибка приемки товара!')
             return redirect('all_product')
         
         try:
             pk = int(self.request.POST['product_pk'])
         except (ValueError, TypeError):
+            messages.error(self.request, 'Ошибка приемки товара!')
             return('all_product')
 
         product = get_object_or_404(Product, pk=pk)
@@ -174,6 +194,7 @@ class CategoriesView(LoginRequiredMixin, View):
                 try:
                     pk = int(request.POST['category_id'])
                 except (ValueError, TypeError):
+                    messages.error(request, 'Ошибка создания подкатегории!')
                     return redirect('all_product')
 
                 f = sc_form.save(commit=False)
@@ -185,12 +206,45 @@ class CategoriesView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
 
+
+class QiwiOrderView(LoginRequiredMixin, ListView):
+    template_name = 'main_app/order.html'
+    queryset = OrderingProduct.objects.filter(qiwi_bool=True).order_by('-datetime')
+    context_object_name = 'queryset'
+
+    def post(self, request):
+        if 'order_id' not in request.POST and 'track_code' not in request.POST:
+            messages.error(request, 'Ошибка добавления трек-кода!')
+            return redirect('all_product')
+
+        try:
+            order_id = int(request.POST['order_id'])
+            track_code = request.POST['track_code']
+        except (ValueError, TypeError):
+            messages.error(request, 'Ошибка добавления трек-кода!')
+            return redirect('all_product')
+
+        order = get_object_or_404(OrderingProduct, pk=order_id)
+        # order = OrderingProduct.objects.get(pk=order_id)
+        order.track_code = track_code
+        order.save()
+        messages.success(request, 'Трек-номер успешно добавлен!')
+        return redirect('qiwi_order')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'QIWI заказы'
+        return context
+
+    
+
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidOrderView(LoginRequiredMixin, ListView):
     '''Неоплаченные заказы'''
     template_name = 'main_app/manager_order.html'
-    queryset = OrderingProduct.objects.filter(payment_bool=False).order_by('-datetime')
+    queryset = OrderingProduct.objects.filter(Q(payment_bool=False) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
+    
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -200,11 +254,13 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
     def post(self, request):
         if 'paid_status' in request.POST:
             if 'order_id' not in request.POST:
+                messages.error(request, 'Ошибка изменения статуса заказа!')
                 return redirect('all_product')
 
             try:
                 order_id = int(request.POST['order_id'])
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка изменения статуса заказа!')
                 return redirect('all_product')
 
             order = get_object_or_404(OrderingProduct, pk=order_id)
@@ -225,16 +281,19 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
 
         elif 'change_order' in request.POST:
             if 'product_id' not in request.POST and 'product_count' not in request.POST:
+                messages.error(request, 'Ошибка изменения заказа!')
                 return redirect('all_product')
             list_id = request.POST.getlist('product_id')
             list_count = request.POST.getlist('product_count')
 
             if len(list_count) != len(list_id):
+                messages.error(request, 'Ошибка изменения заказа!')
                 return redirect('all_product')
 
             try:
                 tuple_product = [(int(list_id[i]), int(list_count[i])) for i in range(len(list_id))]
             except (ValueError, TypeError):
+                messages.error(request, 'Ошибка изменения заказа!')
                 return redirect('all_product')
 
             for item in tuple_product:
@@ -254,7 +313,7 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
 class PaidOrderView(LoginRequiredMixin, ListView):
     '''Оплаченные заказы'''
     template_name = 'main_app/manager_order.html'
-    queryset = OrderingProduct.objects.filter(payment_bool=True).order_by('-datetime')
+    queryset = OrderingProduct.objects.filter(Q(payment_bool=True) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
 
     def get_context_data(self, *args, **kwargs):
@@ -263,14 +322,15 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request):
-
         if 'order_id' not in request.POST and 'track_code' not in request.POST:
+            messages.error(request, 'Ошибка добавления трек-кода!')
             return redirect('all_product')
 
         try:
             order_id = int(request.POST['order_id'])
             track_code = request.POST['track_code']
         except (ValueError, TypeError):
+            messages.error(request, 'Ошибка добавления трек-кода!')
             return redirect('all_product')
 
         order = get_object_or_404(OrderingProduct, pk=order_id)
@@ -431,9 +491,6 @@ class ProductView(LoginRequiredMixin, View):
         self.get_object()
         self.get_queryset(pk)
         return render(request, self.template_name, context=self.get_context_data())
-
-
-
 
 
 

@@ -4,7 +4,7 @@ from django.views import View
 from .models import *
 from django.contrib import messages
 from .forms import *
-from django.views.generic.edit import UpdateView, CreateView
+from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
@@ -17,7 +17,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-
+from main_app.management.commands.handlers.handlers import bot
+from vape_shop.settings import TELEGRAM_GROUP_ID
 
 @login_required
 def make_order_view(request):
@@ -45,11 +46,15 @@ def make_order_view(request):
             c[item[0]] += item[1]
         l_list = c.most_common()        
         order = OfflineOrderingProduct.objects.create(user=request.user)    # Создаем чек
+        total_price = 0
         for item in l_list: # Добавляем проданные товары в чек
             product = get_object_or_404(OfflineProduct, pk=item[0])
-            # product = OfflineProduct.objects.get(pk=item[0])
-            sold_product = OfflineSoldProduct.objects.create(product=product ,price=product.price, count=item[1])
+            sold_product = OfflineSoldProduct.objects.create(product=product,title=product.title ,price=product.price, count=item[1])
+            total_price += product.price * item[1]
             order.sold_product.add(sold_product)
+        order.price = total_price
+        order.save()
+        bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
         messages.success(request, 'Чек успешно создан!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))   # Возвращаем юзера обратно 
     else:
@@ -73,7 +78,6 @@ def reception_view(request):
             return redirect('all_product_offline')
         
         product = get_object_or_404(OfflineProduct, pk=product_pk)
-        # product = OfflineProduct.objects.get(pk=product_pk)
         OfflineReceptionProduct.objects.create(product=product, user=request.user, note=note, price=product.purchase_price, count=count)
         messages.success(request, 'Количество товара успешно обновлено!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -382,6 +386,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = OfflineCategory.objects.all()
+        context['users'] = User.objects.all() 
         context['title'] = 'Заказы'
         return context
 
@@ -407,6 +412,12 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
         return redirect('list_order_offline')
 
     def get(self, request, *args, **kwargs):
+        if 'seller_filter' in request.GET:
+            try:
+                user_id = int(request.GET['user_id'])
+                self.queryset = OfflineOrderingProduct.objects.filter(user__id=user_id).order_by('-datetime')
+            except (TypeError, ValueError):
+                pass    
         return super(OfflineOrderView, self).get(request, *args, **kwargs)
 
 

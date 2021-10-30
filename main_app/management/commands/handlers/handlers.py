@@ -187,6 +187,5 @@ def command_start(message):
 
 # @bot.message_handler(func=lambda message: True, content_types=['text'])
 # def get_answer(message):
-#     category = Category.objects.all()
 #     update_lists()
-#     bot.send_message(message.chat.id, f'ddd', reply_markup=main_keyboard())
+#     bot.send_message('-702248306', f'ddd')

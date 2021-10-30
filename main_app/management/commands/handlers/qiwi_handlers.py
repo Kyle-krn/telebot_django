@@ -5,6 +5,7 @@ from main_app.management.commands.utils import *
 from django.db.models import Q
 from main_app.management.commands.utils import *
 import datetime
+from vape_shop.settings import TELEGRAM_GROUP_ID
 
 ###///
 #datetime.datetime.now(datetime.timezone.utc)
@@ -41,7 +42,7 @@ def pay_handlers(call):
         qiwi.blocked = True
         qiwi.active = False
         qiwi.save()
-        send_email('Что то случилось с кошельком')
+        bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Что то случилось с кошельком +{qiwi.number}')
         return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна')
     
     pay_word = generate_alphanum_random_string(6)   # Генерим платежный комент
@@ -81,7 +82,7 @@ def check_pay_next_handler(message):
             qiwi.blocked = True
             qiwi.active = False
             qiwi.save()
-            send_email('Что то случилось с кошельком')
+            bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Что-то случилось с кошельком +{qiwi.number}')
             return bot.send_message(chat_id=message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна')
 
         bot.send_message(chat_id=message.chat.id, text='Ваш заказ принят!')
@@ -117,7 +118,7 @@ def check_pay_handlers(call):
             qiwi.blocked = True
             qiwi.active = False
             qiwi.save()
-            send_email('Что то случилось с кошельком')
+            bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Что-то случилось с кошельком +{qiwi.number}')
             bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
             return bot.send_message(chat_id=call.message.chat.id, text='К сожалению в данный момент оплата QIWI невозможна.')
 
@@ -132,8 +133,6 @@ def check_pay_handlers(call):
         return
 
     timenow = datetime.datetime.now(datetime.timezone.utc)
-    
-    
     time_passed = abs(int((pay_data.datetime - timenow).total_seconds() / 60))
     text = f'Прошло {time_passed} минут.\n\nПереведите на кошелек +{qiwi.number} {pay_data.product_pay + pay_data.delivery_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n{pay_data.pay_comment}\n\nТовар забронирован на 15 минут для оплаты.'
     bot.send_message(chat_id=call.message.chat.id, text=text, reply_markup=check_pay_keyboard())
@@ -142,10 +141,11 @@ def check_pay_handlers(call):
 def sold_product(user, pay_data):
     '''Успешная оплата'''
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
-    send_email(f'У вас новый заказ на сумму {pay_data.product_pay+pay_data.delivery_pay} руб.')
-    order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index)
+    # send_email(f'У вас новый заказ на сумму {pay_data.product_pay+pay_data.delivery_pay} руб.')
+    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через QIWI на сумму {pay_data.delivery_pay+pay_data.product_pay} руб.')
+    order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index, payment_bool=True, qiwi_bool=True)
     for item in cart:
-        sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count)
+        sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True)
         order.sold_product.add(sold_product)
     order.save()
     pay_data.delete()

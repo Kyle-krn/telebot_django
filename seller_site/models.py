@@ -90,6 +90,7 @@ class OfflineReceptionProduct(models.Model):
 
 class OfflineSoldProduct(models.Model):
     '''Модель проданных товаров'''
+    title = models.CharField(max_length=255, verbose_name='Название товара')
     product = models.ForeignKey(OfflineProduct, on_delete=models.CASCADE, help_text='Продукт')
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена на момент продажи')    
     count = models.IntegerField(help_text='Кол-во проданного товара')
@@ -135,9 +136,12 @@ class OfflineOrderingProduct(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
     sold_product = models.ManyToManyField(OfflineSoldProduct, help_text='Товары в заказе')  # <==== тут
     datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
+    price = models.IntegerField(blank=True, null=True)
+
 
     def get_order_price(self):
-        return sum([x.price * x.count for x in self.sold_product.all()])
+        # return sum([x.price * x.count for x in self.sold_product.all()])
+        return 1
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)

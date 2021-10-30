@@ -134,6 +134,7 @@ class SoldProduct(models.Model):
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
     payment_bool = models.BooleanField(default=False, help_text='Произведена ли оплата')
+    
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -160,6 +161,7 @@ class OrderingProduct(models.Model):
     number = models.BigIntegerField(blank=True, null=True, help_text='Номер телефона пользователя')
     post_index = models.BigIntegerField(blank=True, null=True, help_text='Почтовый индекс')
     payment_bool = models.BooleanField(default=False, help_text='Оплачен ли заказ') # что то с этим сделать
+    qiwi_bool = models.BooleanField(default=False, help_text='Способ оплаты - киви')
 
 
     def get_order_price(self):

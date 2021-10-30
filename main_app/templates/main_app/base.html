@@ -37,24 +37,14 @@
           {% else %}
           <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
           {% endif %}
-          {% url 'new_order' as no %}
-          {% if request.path == no %}
-          <li><a href="{% url 'new_order' %}" class="nav-link px-2 disabled">Неоплаченные заказы</a></li>
-          {% else %}
-          <li><a href="{% url 'new_order' %}" class="nav-link px-2 text-white">Неоплаченные заказы</a></li>
-          {% endif %}
-          {% url 'old_order' as oo %}
-          {% if request.path == oo %}
-          <li><a href="{% url 'old_order' %}" class="nav-link px-2 disabled">Оплаченные заказы</a></li>
-          {% else %}
-          <li><a href="{% url 'old_order' %}" class="nav-link px-2 text-white">Оплаченные заказы</a></li>
-          {% endif %}
+
           {% url 'user_stat' as us %}
           {% if request.path == us %}
           <li><a href="{% url 'user_stat' %}" class="nav-link px-2 disabled">Общая статистика</a></li>
           {% else %}
           <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
           {% endif %}
+
           {% url 'reception' as r %}
           {% if request.path == r %}
           <li><a href="{% url 'reception' %}" class="nav-link px-2 disabled">Прием товаров</a></li>
@@ -62,7 +52,44 @@
           <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
           {% endif %}
 
-        </ul>
+          {% url 'qiwi' as q %}
+          {% if request.path == q %}
+          <li><a href="{% url 'qiwi' %}" class="nav-link px-2 disabled">Управление киви</a></li>
+          {% else %}
+          <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">Управление киви</a></li>
+          {% endif %}
+
+          <div class="dropdown">
+            <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              Заказы
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              {% url 'new_order' as no %}
+              {% if request.path == no %}
+              <li><a class="dropdown-item disabled" href="{% url 'new_order' %}">Неоплаченные заказы</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'new_order' %}">Неоплаченные заказы</a></li>
+              {% endif %}
+
+              {% url 'old_order' as oo %}
+              {% if request.path == oo %}
+              <li><a href="{% url 'old_order' %}" class="dropdown-item disabled">Оплаченные заказы</a></li>
+              {% else %}
+              <li><a href="{% url 'old_order' %}" class="dropdown-item">Оплаченные заказы</a></li>
+              {% endif %}
+
+              {% url 'qiwi_order' as qo %}
+              {% if request.path == qo %}
+              <li><a class="dropdown-item disabled" href="{% url 'qiwi_order' %}">Qiwi заказы</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'qiwi_order' %}">Qiwi заказы</a></li>
+              {% endif %}
+            </ul>
+          </div>
+
+        </ul> 
+
+        
 
         <div class="text-end">
           <div class="btn-group">

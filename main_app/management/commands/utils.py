@@ -18,7 +18,8 @@ def check_price_delivery(post_index, weight):
         'mass': weight,
     }
     req = requests.get(url, data).json()
-    return sorted([req['pkg'], req['pkg_1class']])[0]
+    delibery_pay = sorted([req['pkg'], req['pkg_1class']])[0]
+    return int(float(delibery_pay))
 
 
 def check_time_delivery(post_index, weight):

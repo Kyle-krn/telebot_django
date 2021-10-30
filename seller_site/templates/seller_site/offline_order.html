@@ -5,13 +5,28 @@
 <div class='container'>
 <div class='text-center'><h1>{{title}}</h1></div>
 
+  <br>
+  <form action="" class="" method='get'>
+    
+  <select name='user_id' style="width: 20%;" class="form-select" aria-label="Default select example">
+    <option selected>Продавцы</option>
+    {% for u in users %}
+    <option value="{{u.pk}}">{{u.first_name}} {{u.last_name}}</option>
+    {% endfor %}
+  </select>
+  
+  <br>
+  <button name="seller_filter" type="submit">X</button>
+</form>
+  <br>
+
 <div class="accordion" id="accordionExample">
     {% for qs in queryset %}
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{qs.pk}}"
                 aria-expanded="true" aria-controls="collapse{{qs.pk}}">
-                От {{qs.get_datetime}} на сумму {{ qs.get_order_price }} руб. (Продавец - {{qs.user.first_name}} {{qs.user.last_name}})
+                От {{qs.get_datetime}} на сумму {{ qs.price }} руб. (Продавец - {{qs.user.first_name}} {{qs.user.last_name}})
             </button>
         </h2>
         <div id="collapse{{qs.pk}}" class="accordion-collapse collapse " aria-labelledby="heading{{qs.pk}}"
@@ -38,7 +53,7 @@
                         <td>{{product.price}} руб.</td>
                         <td>
                             <input type="hidden" name="sold_id" value="{{product.pk}}">
-                            <input style="width: 25%" type="number" id="user" name='sold_count' pattern="" value={{product.count}}> шт.
+                            <input style="width: 25%" type="number" id="user" name='sold_count' pattern="" value={{product.count}} required> шт.
 
                         </td>
                         <td>{% widthratio product.price 1 product.count %} руб.</td>
@@ -49,7 +64,7 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td>Общая сумма - {{qs.get_order_price}} руб.</td>
+                        <td>Общая сумма - {{qs.price}} руб.</td>
                       </tr>
                     </tbody>
                   </table>

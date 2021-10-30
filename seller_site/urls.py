@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import *
 
+
 urlpatterns = [
     path('', OfflineIndexView.as_view(), name='all_product_offline'),
     path('register_seller/', RegisterUser.as_view(), name='register'),

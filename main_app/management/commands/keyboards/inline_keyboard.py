@@ -46,8 +46,8 @@ def buy_keyboard(subcat_slug,slug, count):
 def cart_keyboard(pay=None):
     keyboard = types.InlineKeyboardMarkup()
     if pay:
-        # if QiwiToken.objects.filter(active=True):
-            # keyboard.add(types.InlineKeyboardButton(text='Оплатить Qiwi', callback_data=f'pay~{pay}'))
+        if QiwiToken.objects.filter(active=True):
+            keyboard.add(types.InlineKeyboardButton(text='Оплатить через Qiwi', callback_data=f'pay~{pay}'))
         keyboard.add(types.InlineKeyboardButton(text='Оформить заказ', callback_data=f'new_order~{pay}'))
     else:
         keyboard.add(types.InlineKeyboardButton(text='Заполнить данные для доставки', callback_data='new_delivery_data'))
