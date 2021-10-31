@@ -3,20 +3,24 @@
 {% block content %}
 
 <div class='container'>
-<div class='text-center'><h1>{{title}}</h1></div>
-
+<div class='text-center'><h1>{{title}}</h1>
+{% if cash_seller %}
+<h4>Отчисление продавцу за день: {{ cash_seller }} руб.</h4>
+{% endif %}
+</div>
   <br>
   <form action="" class="" method='get'>
-    
+  
+    <div class="input-group mb-3">
   <select name='user_id' style="width: 20%;" class="form-select" aria-label="Default select example">
-    <option selected>Продавцы</option>
+    <option selected>Все продавцы</option>
     {% for u in users %}
     <option value="{{u.pk}}">{{u.first_name}} {{u.last_name}}</option>
     {% endfor %}
   </select>
-  
+  <button name="seller_filter" class="btn btn-outline-secondary" type="submit">Button</button>
+</div>
   <br>
-  <button name="seller_filter" type="submit">X</button>
 </form>
   <br>
 
@@ -46,10 +50,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for product in qs.sold_product.all %}
+                        {% for product in qs.offlinesoldproduct_set.all %}
                       <tr>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td>{{product.product.title}}</td>
+                        <td>{{product.title}}</td>
                         <td>{{product.price}} руб.</td>
                         <td>
                             <input type="hidden" name="sold_id" value="{{product.pk}}">
@@ -79,18 +83,56 @@
     </div>
     {% endfor %}
 </div>
+<br>
+
+  <nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+      {% if page_obj.has_previous %}
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        {% endif %}
+      </a>
+    </li>
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a></li>
+    <li class="page-item">
+      {% if page_obj.has_next %}
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+      {% endif %}
+    </li>
+  </ul>
+</nav>
+<br>
+
+<!-- {% widthratio page_obj.number 1 -1 as res %}
+{{page_obj.paginator.num_pages|add:res}}  -->
+<!-- 
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+    {% endif %}
+    {% if page_obj.paginator.num_pages|add:res > 1 %}
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number|add:"1" }}</a></li>
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number|add:"2" }}</a></li>
+    {% elif page_obj.paginator.num_pages|add:res == 1 %}
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number|add:"1" }}</a></li>
+    {% elif page_obj.paginator.num_pages|add:res == 0 %}
+    <li class="page-item"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+    {% endif %}
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+    {% endif %}
+  </ul>
+</nav> -->
 
 </div>
+
 
 {% endblock %}
 
 
-<!-- <label for="count" class="col-form-label" >{{item.product.title}} </label>
-<style>
-    #user {
-     width: 50px; /* Ширина поля в пикселах */
-    } 
-   </style>
-<input type="hidden" name="sold_id" value="{{item.pk}}">
-<input type="number" id="user" name='sold_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
-<br> -->

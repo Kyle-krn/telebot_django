@@ -13,7 +13,7 @@ from itertools import chain
 from collections import Counter
 from django.db.models import Sum
 from datetime import date
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
@@ -49,16 +49,16 @@ def make_order_view(request):
         total_price = 0
         for item in l_list: # Добавляем проданные товары в чек
             product = get_object_or_404(OfflineProduct, pk=item[0])
-            sold_product = OfflineSoldProduct.objects.create(product=product,title=product.title ,price=product.price, count=item[1])
+            sold_product = OfflineSoldProduct.objects.create(user=request.user, product=product,title=product.title ,price=product.price, count=item[1], price_for_seller=product.subcategory.category.price_for_seller, order=order)
             total_price += product.price * item[1]
-            order.sold_product.add(sold_product)
+            # order.sold_product.add(sold_product)
         order.price = total_price
         order.save()
         bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
         messages.success(request, 'Чек успешно создан!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))   # Возвращаем юзера обратно 
     else:
-        return redirect('all_product_offline')
+        return render(request, 'seller_site/offline_make_order.html', context={'category': OfflineCategory.objects.all()})
 
 
 @login_required
@@ -82,7 +82,7 @@ def reception_view(request):
         messages.success(request, 'Количество товара успешно обновлено!')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
-        return redirect('all_product_offline')
+        return render(request, 'seller_site/offline_reception.html', context={'category': OfflineCategory.objects.all()})
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -380,6 +380,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
 class OfflineOrderView(LoginRequiredMixin, ListView):
     '''Оплаченные заказы'''
     template_name = 'seller_site/offline_order.html'
+    paginate_by = 10
     queryset = OfflineOrderingProduct.objects.all().order_by('-datetime')
     context_object_name = 'queryset'
 
@@ -387,6 +388,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['category'] = OfflineCategory.objects.all()
         context['users'] = User.objects.all() 
+        context['cash_seller'] = self.seller_filter()
         context['title'] = 'Заказы'
         return context
 
@@ -406,18 +408,25 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
 
         for item in res:
             sold_product = get_object_or_404(OfflineSoldProduct, pk=item[0])
-            # sold_product = OfflineSoldProduct.objects.get(pk=item[0])
             sold_product.return_in_product(request, item[1])
-            
+        
+        # order = sold_product.offlineorderingproduct_set.all()[0]
+        sold_product.order.set_order_price()
         return redirect('list_order_offline')
+
+    def seller_filter(self):
+        try:
+            user_id = int(self.request.GET.get('user_id'))
+            self.queryset = OfflineOrderingProduct.objects.filter(user__id=user_id).order_by('-datetime')
+            sold_for_day_seller = OfflineSoldProduct.objects.filter(Q(user__id=user_id) & Q(date__gte=date.today()))
+            return sum([x.price_for_seller * x.count for x in sold_for_day_seller])
+        except (TypeError, ValueError, AttributeError):
+            return None
+
 
     def get(self, request, *args, **kwargs):
         if 'seller_filter' in request.GET:
-            try:
-                user_id = int(request.GET['user_id'])
-                self.queryset = OfflineOrderingProduct.objects.filter(user__id=user_id).order_by('-datetime')
-            except (TypeError, ValueError):
-                pass    
+            self.seller_filter()
         return super(OfflineOrderView, self).get(request, *args, **kwargs)
 
 
@@ -431,16 +440,27 @@ class OfflineStatisticView(LoginRequiredMixin, View):
         context['title'] = 'Статистика'
         context['stat_dict'] = self.get_statistic()
         context['category'] = OfflineCategory.objects.all()
-        context['product'] = OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count')).order_by('-sold_count')
+        context['sold_product'] = self.get_sold_stat()
+        context['reception_product'] = self.get_reception_stat()
+        context['range'] = len(self.get_reception_stat())
         return context
 
+    def seller_stat(self):
+        User.objects.annotate(s=Sum(F('offlinesoldproduct__count')*F('offlinesoldproduct__price_for_seller'))) # сумма
+
+    def get_reception_stat(self):
+        return OfflineProduct.objects.annotate(reception_count=Sum('offlinereceptionproduct__count')).annotate(reception_sum=F('purchase_price') * F('reception_count'))
+
+    def get_sold_stat(self): 
+        return OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count')).annotate(sold_sum=F('price') * F('sold_count')).order_by('-sold_count') 
+
     def get_statistic(self):
-        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
-                        'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
-                        'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
+        stat_dict = {'sold_stat' :[int(x or 0) for x in tuple(self.sold_queryset.annotate(sold_sum=F('count') * F('price')).aggregate(all_sold_price = Sum('sold_sum'),all_sold_count = Sum('count')).values())],
+                     'reception_stat' :[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=False).annotate(reception_sum=F('count') * F('price')).aggregate(all_reception_price= Sum('reception_sum'), all_reception_count=Sum('count')).values())],
+                     'liquidated_stat':[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=True).annotate(reception_sum=F('count') * F('price')).aggregate(all_reception_price= Sum('reception_sum'), all_reception_count=Sum('count')).values())]}
         stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
-        print(stat_dict)
         return stat_dict
+
 
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
@@ -462,10 +482,12 @@ class OfflineStatisticView(LoginRequiredMixin, View):
 
     def get(self, request):
         self.get_queryset()
+        
         return render(request, self.template_name, context=self.get_context_data())
 
 
 class OfflineSellerPage(LoginRequiredMixin, View):
+    '''Представление для отображения продаж за день'''
     template_name = 'seller_site/offline_seller_page.html'
 
     def get_context_data(self, **kwargs):
@@ -477,10 +499,13 @@ class OfflineSellerPage(LoginRequiredMixin, View):
         return context
 
     def get_sum_for_seller(self):
-        return sum([i2.count * i2.product.subcategory.category.price_for_seller for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today()))] for i2 in i])
+        '''Вычисляет сумму заработка продавца за день'''
+        queryset = OfflineSoldProduct.objects.filter(Q(user=self.request.user) & Q(date__gte=date.today()))
+        return sum([x.price_for_seller * x.count for x in queryset])
+
 
     def get_queryset(self):
-        return OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today()))
+        return OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today())).order_by('-datetime')
 
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
@@ -488,5 +513,4 @@ class OfflineSellerPage(LoginRequiredMixin, View):
 
 # [(i2.count, i2.product.subcategory.category.price_for_seller) for i in [i.sold_product.all() for i in OfflineOrderingProduct.objects.all()] for i2 in i] для расчета зп сотрудника
 
-# OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count'))
 

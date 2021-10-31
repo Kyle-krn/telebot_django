@@ -48,7 +48,7 @@
                     Продавцы
                 </button>
             </h2>
-            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
                 data-bs-parent="#accordionExample">
                 <div class="accordion-body">
 
@@ -60,10 +60,10 @@
             <h2 class="accordion-header" id="headingTwo">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
-                    Товары
+                    Проданные тововары
                 </button>
             </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo"
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                 data-bs-parent="#accordionExample">
                 <div class="accordion-body">
                     <table class="table">
@@ -73,20 +73,68 @@
                             <th scope="col">Название</th>
                             <th scope="col">Всего проданно</th>
                             <th scope="col">Сумма проданного</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in sold_product %}
+                          <tr>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{p.title}}</td>
+                            {% if not p.sold_count %}
+                            <td>0 шт.</td>
+                            {% else %}
+                            <td>{{p.sold_count}} шт.</td>
+                            {% endif %}
+                            {% if not p.sold_sum %}
+                            <td>0 руб.</td>
+                            {% else %}
+                            <td>{{p.sold_sum}} руб.</td>
+                            {% endif %}
+
+                        </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree"
+                    aria-expanded="true" aria-controls="collapseThree">
+                    Закупленные тововары
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Название</th>
                             <th scope="col">Всего закупленно</th>
                             <th scope="col">Сумма закупленного</th>
                           </tr>
                         </thead>
                         <tbody>
-                            {% for p in product %}
+                            {% for p in reception_product %}
                           <tr>
                             <th scope="row">{{forloop.counter}}</th>
                             <td>{{p.title}}</td>
-                            <td>{{p.statistic.general_count}} шт.</td>
-                            <td>{{p.statistic.general_sold_sum}} руб.</td>
-                            <td>{{p.statistic.general_reception_count}} шт.</td>
-                            <td>{{p.statistic.general_reception_sum}} руб.</td>
-                          </tr>
+                            {% if not p.reception_count %}
+                            <td>0 шт.</td>
+                            {% else %}
+                            <td>{{p.reception_count}} шт.</td>
+                            {% endif %}
+                            {% if not p.reception_sum %}
+                            <td>0 руб.</td>
+                            {% else %}
+                            <td>{{p.reception_sum}} руб.</td>
+                            {% endif %}
+
+                        </tr>
                           {% endfor %}
                         </tbody>
                       </table>
@@ -95,8 +143,8 @@
         </div>
 
 
-
     </div>
 
 </div>
+
 {% endblock %}

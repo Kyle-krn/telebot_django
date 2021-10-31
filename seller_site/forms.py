@@ -28,12 +28,13 @@ class OfflineProductForm(forms.ModelForm):
 
 class OffilneCategoryForm(forms.ModelForm):
       '''Форма создания категории'''
+      id = forms.CharField(widget=forms.HiddenInput())
       name = forms.CharField(widget=forms.TextInput(attrs={'style': 'float: left; width: 60%;', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       price_for_seller = forms.IntegerField(widget=forms.TextInput(attrs={'min': 0,'class': 'form-control', 'type': 'number', 'placeholder': 'Сумма для продовца'}))
 
       class Meta:
             model = OfflineCategory
-            fields = ['name', 'price_for_seller']
+            fields = ['id', 'name', 'price_for_seller']
 
 class OffilneChangeCategoryForm(OffilneCategoryForm):
       '''Форма изменения категории'''

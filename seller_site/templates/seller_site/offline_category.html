@@ -35,6 +35,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="input-group mb-3">
+        {{category_form.id}}
         {{ category_form.price_for_seller }}
         {{ category_form.name }}
             </div>

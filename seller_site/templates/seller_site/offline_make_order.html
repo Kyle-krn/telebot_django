@@ -1,0 +1,64 @@
+{% extends 'seller_site/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <form action="{% url 'order_offline' %}" method='post'>
+<div class="input-group mb-3">
+    
+    {% csrf_token %}
+    <div style="display: inline-block; width: 90%">
+    <select style="float: left; width: 60%;" class="form-select" name="product_id" id='product_id' required>
+        {% for c in category %}
+        <optgroup style="color:blue" label="{{c}}">
+            {% for sc in c.offlinesubcategory_set.all %}
+            <optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">
+              {% for p in sc.offlineproduct_set.all %}
+              <option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>
+            {% endfor %}
+            {% endfor %}
+        </optgroup>
+        {% endfor %}
+      </select>
+    <input style="float: right;width: 30%" type="number" name='product_count' class="form-control" placeholder="Кол-во" min="1" value="1" aria-label="count" required>
+    </div>
+    <span class="input-group-text">шт.</span>
+    <button type="button" id="product_but_id" class="btn btn-secondary">x</button>
+    </div>
+    
+    <div ID="items">
+        <input type="button" class="btn btn-outline-primary" value="+" onClick="AddItem();" ID="add">
+        </div>
+    <button type="submit" class="submit">Создать чек</button>
+</form>
+</div>
+</div>
+
+<script>
+      
+    function AddItem() {
+      var items=0;
+      div=document.getElementById("items");
+      button=document.getElementById("add");
+      items++;
+      newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <div style="display: inline-block; width: 90%"> <select style="float: left; width: 60%;" class="form-select" name="product_id" id="product_id" required>';
+      newitem+='{% for c in category %}';
+      newitem+=' <optgroup style="color:blue" label="{{c}}">'
+      newitem+='{% for sc in c.offlinesubcategory_set.all %}'
+      newitem+='<optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">'
+      newitem+='{% for p in sc.offlineproduct_set.all %}';
+      newitem+='<option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>'
+      newitem+= '{% endfor %} {% endfor %}</optgroup>{% endfor %}</select>'
+      newitem+= '<input style="float: right;width: 30%" type="number" name="product_count" class="form-control" placeholder="Кол-во" min="1" value="1" aria-label="count" required>'
+      newitem+= '</div><span class="input-group-text">шт.</span><button type="button" id="product_but_id" onclick="removeForm('+items+')" class="btn btn-danger">x</button> </div>'
+      newnode=document.createElement("span");
+      newnode.innerHTML=newitem;
+      div.insertBefore(newnode,button);
+    }
+
+    function removeForm(items) {
+    (elem=document.getElementById('div_id_'+ items)).parentNode.removeChild(elem);
+      }
+
+    </script>
+
+{% endblock %}

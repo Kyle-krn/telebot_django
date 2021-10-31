@@ -15,7 +15,7 @@
         <h2 class="accordion-header" id="heading{{order.pk}}">
             <button class="accordion-button" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapse{{order.pk}}" aria-expanded="true" aria-controls="collapse{{order.pk}}">
-                От {{order.get_datetime}} на сумму {{ order.get_order_price }} руб. (Продавец -
+                От {{order.get_datetime}} на сумму {{ order.price }} руб. (Продавец -
                 {{order.user.first_name}} {{order.user.last_name}})
             </button>
         </h2>
@@ -33,10 +33,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for product in order.sold_product.all %}
+                        {% for product in order.offlinesoldproduct_set.all %}
                       <tr>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td>{{product.product.title}}</td>
+                        <td>{{product.title}}</td>
                         <td>{{product.price}} руб.</td>
                         <td>{{product.count}} шт.</td>
                         <td>{% widthratio product.price 1 product.count %} руб.</td>
@@ -47,7 +47,7 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td>Общая сумма - {{order.get_order_price}} руб.</td>
+                        <td>Общая сумма - {{order.price}} руб.</td>
                       </tr>
                     </tbody>
                   </table>

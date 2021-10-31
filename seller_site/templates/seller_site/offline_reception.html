@@ -1,0 +1,33 @@
+{% extends 'seller_site/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+<form action="{% url 'reception_offline' %}" method='POST'>
+    {% csrf_token %}
+    <label for="count_reception" class="form-label">Кол-во товара:</label>
+    <input type="number" name="count_reception" min="1" value="1" class="form-control">
+    <br>
+
+    <label for="note_reception" class="form-label">Заметка:</label>
+    <input type="text" name="note_reception" class="form-control">
+    <br>
+    <label for="product_id" class="form-label">Товар:</label>
+    <select class="form-select" name="product_id" id='product_id' required>
+      {% for c in category %}
+      <optgroup style="color:blue" label="{{c}}">
+          {% for sc in c.offlinesubcategory_set.all %}
+          <optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">
+            {% for p in sc.offlineproduct_set.all %}
+            <option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>
+          {% endfor %}
+          {% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+    <br>
+    <div class="text-center">
+    <button class='btn btn-success' type="submit">Добавить</button>
+</div>
+</form>
+</div>
+{% endblock %}
