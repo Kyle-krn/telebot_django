@@ -7,6 +7,7 @@
 <form action="" method='POST'>
     {% csrf_token %}
     {{form.as_p}}
+    
     <label for="{{ form.subcategory.id_for_label }}">Товар:</label>
     <select class="form-select" name="product_pk">
         {% for sc in subcategory %}

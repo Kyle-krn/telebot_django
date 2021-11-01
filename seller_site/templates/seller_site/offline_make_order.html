@@ -6,7 +6,7 @@
 <div class="input-group mb-3">
     
     {% csrf_token %}
-    <div style="display: inline-block; width: 90%">
+    <div style="display: inline-block; width: 70%">
     <select style="float: left; width: 60%;" class="form-select" name="product_id" id='product_id' required>
         {% for c in category %}
         <optgroup style="color:blue" label="{{c}}">
@@ -28,7 +28,9 @@
     <div ID="items">
         <input type="button" class="btn btn-outline-primary" value="+" onClick="AddItem();" ID="add">
         </div>
-    <button type="submit" class="submit">Создать чек</button>
+        <div class="text-end" style="display: inline-block; width: 77%">
+    <button type="submit" class="btn btn-success">Создать чек</button>
+  </div>
 </form>
 </div>
 </div>
@@ -40,7 +42,7 @@
       div=document.getElementById("items");
       button=document.getElementById("add");
       items++;
-      newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <div style="display: inline-block; width: 90%"> <select style="float: left; width: 60%;" class="form-select" name="product_id" id="product_id" required>';
+      newitem='<div id="div_id_'+ items +'" class="input-group mb-3"> <div style="display: inline-block; width: 70%"> <select style="float: left; width: 60%;" class="form-select" name="product_id" id="product_id" required>';
       newitem+='{% for c in category %}';
       newitem+=' <optgroup style="color:blue" label="{{c}}">'
       newitem+='{% for sc in c.offlinesubcategory_set.all %}'

@@ -186,6 +186,7 @@
           <th scope="col">Кол-во</th>
           <th scope="col">Дата</th>
           <th scope="col">Заметка</th>
+          <th scope="col">Продавец</th>
       </tr>
   </thead>
   <tbody>
@@ -213,6 +214,7 @@
           {% else %}
           <td></td>
           {% endif %}
+          <td>{{ tq.user.first_name }} {{ tq.user.last_name }}</td>
       </tr>
       {% endfor %}
       </tr>

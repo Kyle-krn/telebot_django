@@ -54,6 +54,7 @@ class OfflineReceptionProduct(models.Model):
     liquidated = models.BooleanField(default=False, help_text='Ликвидация товара') # True для ликвидированного товара
 
     def save(self, *args, **kwargs):
+        print(kwargs)
         if self.count <= 0:
             return
         if self.liquidated:
@@ -99,9 +100,9 @@ class OfflineSoldProduct(models.Model):
         if new_count <= 0:
             self.product.count += self.count
             self.product.save()
-            order = OfflineOrderingProduct.objects.get(sold_product=self)
+            order = self.order
             super(OfflineSoldProduct, self).delete()
-            if order.sold_product.all().count() == 0:
+            if order.offlinesoldproduct_set.all().count() == 0:
                 return order.delete()
             
         else:
