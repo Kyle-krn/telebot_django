@@ -20,6 +20,7 @@ from django.utils.decorators import method_decorator
 from main_app.management.commands.handlers.handlers import bot
 from vape_shop.settings import TELEGRAM_GROUP_ID
 
+from django.contrib.auth.models import Group, Permission, User
 
 class CreateOrderView(LoginRequiredMixin, View):
     template_name = 'seller_site/offline_make_order.html'
@@ -60,7 +61,7 @@ class CreateOrderView(LoginRequiredMixin, View):
             total_price += product.price * item[1]
         order.price = total_price
         order.save()
-        bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
+        # bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
         messages.success(request, 'Чек успешно создан!')
         return redirect('all_product_offline')   
 
@@ -105,6 +106,12 @@ class RegisterUser(CreateView):
     form_class = RegisterUserForm
     template_name = 'seller_site/register.html'
     success_url = reverse_lazy('all_product_offline')
+
+    def form_valid(self, form, *args, **kwargs):
+        self.object = form.save()
+        seller_group = Group.objects.get_or_create(name='sellers')
+        seller_group[0].user_set.add(self.object)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -407,7 +414,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
 
     def post(self, request):
         '''Изменяет кол-во товара в чеке'''
-        if 'sold_id' not in request.POST and 'sold_count' not in request.POST:
+        if 'sold_id' not in request.POST and 'sold_count' not in request.POST and 'order_id':
             messages.error(request, 'Ошибка обработки заказа!')
             return redirect('all_product_offline')
 
@@ -415,6 +422,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
         sold_count = request.POST.getlist('sold_count')
 
         try:
+            order_id = int(request.POST.get('order_id'))
             res = [(int(sold_pk[i]), int(sold_count[i])) for i in range(len(sold_pk))]
         except (ValueError, TypeError):
             messages.error(request, 'Ошибка обработки заказа!')
@@ -422,9 +430,13 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
 
         for item in res:
             sold_product = get_object_or_404(OfflineSoldProduct, pk=item[0])
-            sold_product.return_in_product(request, item[1])
+            sold_product.return_in_product(item[1])
         
-        sold_product.order.set_order_price()
+        order = get_object_or_404(OfflineOrderingProduct, pk=order_id)
+        if order.offlinesoldproduct_set.all().count() == 0:
+            order.delete()
+        else:
+            sold_product.order.set_order_price()
         return redirect('list_order_offline')
 
     def seller_filter(self):

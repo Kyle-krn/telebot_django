@@ -39,6 +39,7 @@
                 <div class="text-center">
                 <form action="" method='post'>
                     {% csrf_token %}
+                    <input type="hidden" name="order_id" value="{{qs.pk}}">
                 <table class="table">
                     <thead>
                       <tr>

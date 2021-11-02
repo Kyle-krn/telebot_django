@@ -54,7 +54,7 @@ class OfflineReceptionProduct(models.Model):
     liquidated = models.BooleanField(default=False, help_text='Ликвидация товара') # True для ликвидированного товара
 
     def save(self, *args, **kwargs):
-        print(kwargs)
+        '''Обновляет кол-во товара в OfflineProduct'''
         if self.count <= 0:
             return
         if self.liquidated:
@@ -90,20 +90,19 @@ class OfflineSoldProduct(models.Model):
     order = models.ForeignKey('OfflineOrderingProduct', on_delete=models.CASCADE, help_text='Заказ')
 
     def save(self, *args, **kwargs):
+        '''Отнимает кол-во товара в OfflineProduct'''
         if self.count <= 0:
             return
         self.product.count -= self.count
         self.product.save()
         return super(OfflineSoldProduct, self).save(*args, **kwargs)
 
-    def return_in_product(self, request, new_count):
+    def return_in_product(self, new_count):
+        '''Изменяет кол-во товара при редактировании заказа'''
         if new_count <= 0:
             self.product.count += self.count
             self.product.save()
-            order = self.order
-            super(OfflineSoldProduct, self).delete()
-            if order.offlinesoldproduct_set.all().count() == 0:
-                return order.delete()
+            return super(OfflineSoldProduct, self).delete()
             
         else:
             self.product.count += (self.count - new_count)
@@ -127,12 +126,12 @@ class OfflineSoldProduct(models.Model):
 class OfflineOrderingProduct(models.Model):
     '''Модель заказа'''
     user = models.ForeignKey(User, on_delete=models.PROTECT, help_text='Продавец')
-    # sold_product = models.ManyToManyField(OfflineSoldProduct, help_text='Товары в заказе')  # <==== тут
     datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
     price = models.IntegerField(blank=True, null=True)
 
 
     def set_order_price(self):
+        '''Обновляет стоймость заказа при его изменении'''
         self.price = sum([x.price * x.count for x in self.offlinesoldproduct_set.all()])
         return self.save()
 
