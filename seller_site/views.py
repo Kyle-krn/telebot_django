@@ -61,7 +61,7 @@ class CreateOrderView(LoginRequiredMixin, View):
             total_price += product.price * item[1]
         order.price = total_price
         order.save()
-        # bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
+        bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
         messages.success(request, 'Чек успешно создан!')
         return redirect('all_product_offline')   
 
