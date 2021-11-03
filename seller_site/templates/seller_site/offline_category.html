@@ -75,7 +75,7 @@
                         <tbody>
                             {% for sc in c.offlinesubcategory_set.all %}
                             <tr>
-                                <th scope="row">{{sc.pk}}</th>
+                                <th scope="row">{{forloop.counter}}</th>
                                 <td>{{sc.name}}</td>
                                 <td>
                                     <div class="text-end">

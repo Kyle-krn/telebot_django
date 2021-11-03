@@ -11,10 +11,8 @@ from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from itertools import chain
 from collections import Counter
-from django.db.models import Sum
 from datetime import date
-from django.db.models import Q, F
-from django.contrib.auth.decorators import login_required
+from django.db.models import Q, F, Sum
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from main_app.management.commands.handlers.handlers import bot
@@ -78,19 +76,8 @@ class OfflineReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, Creat
     success_message = 'Количество товара успешно увеличено!'
 
     def form_valid(self, form):
-        if 'product_pk' not in self.request.POST:
-            messages.error(self.request, 'Ошибка приемки товара!')
-            return redirect('all_product_offline')
-        
-        try:
-            pk = int(self.request.POST['product_pk'])
-        except (ValueError, TypeError):
-            messages.error(self.request, 'Ошибка приемки товара!')
-            return('all_product_offline')
-
-        product = get_object_or_404(OfflineProduct, pk=pk)
+        product = get_object_or_404(OfflineProduct, pk=int(self.request.POST['product']))
         f = form.save(commit=False)
-        f.product = product
         f.price = product.purchase_price
         f.user = self.request.user
         return super().form_valid(form)
@@ -302,7 +289,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
         context['product'] = self.product
         context['title'] = self.product.title
         context['category'] = OfflineCategory.objects.all()
-        context['reception_form'] = OfflineReceptionForm()
+        context['reception_form'] = OfflineReceptionForProductViewForm()
         context['stat_dict'] = self.get_statistic()
         context['trade_queryset'] = self.filter_queryset()
         context['product_form'] = OfflineProductForm(initial={'title': self.product.title,
@@ -368,7 +355,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
             return redirect ('all_product_offline')
 
         elif 'reception' in request.POST:   # Приемка товара
-            form = OfflineReceptionForm(request.POST)
+            form = OfflineReceptionForProductViewForm(request.POST)
             if form.is_valid():
                 f = form.save(commit=False)
                 f.product = self.product
@@ -379,7 +366,7 @@ class OfflineProductAdminView(LoginRequiredMixin, View):
                 return redirect('product_detail_offline', pk=pk)
 
         elif 'liquidated' in request.POST:  # Ликвидация товара
-            form = OfflineReceptionForm(request.POST)
+            form = OfflineReceptionForProductViewForm(request.POST)
             if form.is_valid():
                 f = form.save(commit=False)
                 f.product = self.product

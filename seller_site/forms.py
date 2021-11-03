@@ -52,9 +52,15 @@ class OfflineSubcategoryForm(forms.ModelForm):
 
 class OfflineReceptionForm(forms.ModelForm):
       '''Форма создания приемки'''
-      count = forms.IntegerField(label='Кол-во товара', widget=forms.TextInput(attrs={'min': 1,'class': 'form-control', 'type': 'number'}))
-      note = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для заметки'}))
+      count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1,'class': 'form-control', 'type': 'number'}))
+      note = forms.CharField(required=False, label="Заметка:", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Поле для заметки'}))
 
+      class Meta:
+            model = OfflineReceptionProduct
+            fields = ['count', 'note', 'product']
+
+
+class OfflineReceptionForProductViewForm(OfflineReceptionForm):
       class Meta:
             model = OfflineReceptionProduct
             fields = ['count', 'note']

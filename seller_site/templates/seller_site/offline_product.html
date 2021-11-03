@@ -97,7 +97,14 @@
         <div class="modal-body">
             <form action="" method='POST'>
                 {% csrf_token %}
-                {{reception_form.as_p}}
+                <p>
+                  {{ reception_form.count.errors }}
+                  <label for="{{ reception_form.count.id_for_label }}">{{reception_form.count.label}}</label>
+                  {{ reception_form.count }}</p>
+                  <p>
+                  {{ reception_form.note.errors }}
+                  <label for="{{ reception_form.note.id_for_label }}">{{reception_form.note.label}}</label>
+                  {{ reception_form.note }}</p>
         </div>
 
         <div class="modal-footer">
@@ -120,7 +127,14 @@
         <div class="modal-body">
             <form action="" method='POST'>
                 {% csrf_token %}
-                {{reception_form.as_p}}
+                <p>
+                  {{ reception_form.count.errors }}
+                  <label for="{{ reception_form.count.id_for_label }}">{{reception_form.count.label}}</label>
+                  {{ reception_form.count }}</p>
+                  <p>
+                  {{ reception_form.note.errors }}
+                  <label for="{{ reception_form.note.id_for_label }}">{{reception_form.note.label}}</label>
+                  {{ reception_form.note }}</p>
         </div>
 
         <div class="modal-footer">

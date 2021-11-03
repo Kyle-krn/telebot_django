@@ -4,17 +4,17 @@
 <div class="container">
 <form action="{% url 'reception_offline' %}" method='POST'>
     {% csrf_token %}
-    {{form.as_p}}
-    <!-- <label for="count_reception" class="form-label">Кол-во товара:</label>
-    <input type="number" name="count_reception" min="1" value="1" class="form-control">
-    <br>
+    <p>
+    {{ form.count.errors }}
+    <label for="{{ form.count.id_for_label }}">{{form.count.label}}</label>
+    {{ form.count }}</p>
+    <p>
+    {{ form.note.errors }}
+    <label for="{{ form.note.id_for_label }}">{{form.note.label}}</label>
+    {{ form.note }}</p>
 
-    <label for="note_reception" class="form-label">Заметка:</label>
-    <input type="text" name="note_reception" class="form-control">
-    <br> -->
-
-    <label for="product_id" class="form-label">Товар:</label>
-    <select class="form-select" name="product_pk" id='product_id' required>
+    <label for="id_product" class="form-label">Товар:</label>
+    <select class="form-select" name="product" id='id_product' required>
       {% for c in category %}
       <optgroup style="color:blue" label="{{c}}">
           {% for sc in c.offlinesubcategory_set.all %}
