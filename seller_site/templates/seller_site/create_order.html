@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="container">
-    <form action="{% url 'order_offline' %}" method='post'>
+    <form action="{% url 'local_shop:create_order' %}" method='post'>
 <div class="input-group mb-3">
     
     {% csrf_token %}

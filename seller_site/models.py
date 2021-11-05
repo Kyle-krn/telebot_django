@@ -35,7 +35,7 @@ class OfflineProduct(models.Model):
     subcategory = models.ForeignKey(OfflineSubCategory, on_delete=models.CASCADE, help_text='Подкатегория товара')
 
     def get_absolute_url(self):
-        return reverse('product_detail_offline', kwargs={'pk': self.pk})
+        return reverse('local_shop:product_detail', kwargs={'pk': self.pk})
 
 
 
@@ -91,6 +91,7 @@ class OfflineSoldProduct(models.Model):
 
     def save(self, *args, **kwargs):
         '''Отнимает кол-во товара в OfflineProduct'''
+        print(args, kwargs)
         if self.count <= 0:
             return
         self.product.count -= self.count
@@ -99,16 +100,22 @@ class OfflineSoldProduct(models.Model):
 
     def return_in_product(self, new_count):
         '''Изменяет кол-во товара при редактировании заказа'''
-        if new_count <= 0:
-            self.product.count += self.count
-            self.product.save()
-            return super(OfflineSoldProduct, self).delete()
+        # if new_count <= 0:
+        #     self.product.count += self.count
+        #     self.product.save()
+        #     return super(OfflineSoldProduct, self).delete()
             
-        else:
-            self.product.count += (self.count - new_count)
-            self.product.save()
-            self.count = new_count
-            return super(OfflineSoldProduct, self).save()
+        # else:
+        print(self.count)
+        self.product.count += (self.count - new_count)
+        self.product.save()
+        self.count = new_count
+        return super(OfflineSoldProduct, self).save()
+
+    def delete(self, *args, **kwargs):
+        self.product.count += self.count
+        self.product.save()
+        return super(OfflineSoldProduct, self).delete()
 
 
     def get_datetime(self):

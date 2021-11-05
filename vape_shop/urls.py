@@ -26,7 +26,7 @@ urlpatterns = [
     path('login/', LoginUser.as_view(), name='login'),                                                                          # Логин
     path('logout/', logout_user, name='logout'),                                                                                # Разлогиниться
     path('', index, name='index_url'),                                                                                # Разлогиниться
-    path('seller/', include('seller_site.urls')),
+    path('seller/', include('seller_site.urls', namespace='local_shop')),
 ]
 
 

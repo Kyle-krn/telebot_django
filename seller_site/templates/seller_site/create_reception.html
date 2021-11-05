@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="container">
-<form action="{% url 'reception_offline' %}" method='POST'>
+<form action="{% url 'local_shop:create_reception' %}" method='POST'>
     {% csrf_token %}
     <p>
     {{ form.count.errors }}

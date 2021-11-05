@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 def index(request):
     if not request.user.is_authenticated:
         return redirect('login')
-    return redirect('all_product') if request.user.is_superuser else redirect('all_product_offline')
+    return redirect('all_product') if request.user.is_superuser else redirect('local_shop:list_product')
 
 
 class LoginUser(LoginView):
@@ -43,7 +43,7 @@ class LoginUser(LoginView):
         if user.is_superuser:
             return reverse_lazy('all_product')
         else:
-            return reverse_lazy('all_product_offline')
+            return reverse_lazy('local_shop:list_product')
 
 def logout_user(request):
     '''Выход'''

@@ -4,15 +4,15 @@
 
 <script>
     function changeCategory(pk, price_for_seller, title) {
-  document.getElementById('category_hidden_id').value = pk ;
-  document.getElementById('category_name').value = title;
-  document.getElementById('category_price_for_seller').value = price_for_seller;
+  document.getElementById('change_category_id').value = pk ;
+  document.getElementById('change_category_name').value = title;
+  document.getElementById('change_category_price_for_seller').value = price_for_seller;
   document.getElementById("cat_title_product").innerHTML = 'Вы уверенны что хотите изменить'+ ' ' + title + '?';
     }
 
     function changeSubategory(pk, title) {
-   document.getElementById('subcategory_hidden_id').value = pk ;
-   document.getElementById('subcategory_name').value = title;
+   document.getElementById('change_subcategory_id').value = pk ;
+   document.getElementById('change_subcategory_name').value = title;
    document.getElementById("subcat_title_product").innerHTML = 'Вы уверенны что хотите изменить'+ ' ' + title + '?';
     }
 
@@ -95,9 +95,8 @@
                                     <!-- <input class="form-control-sm" type="file" id="formFile"> -->
                                     <form action="" method='post' enctype="multipart/form-data">
                                         {% csrf_token %}
-                                        
                                         {{sc_form.name}}
-                                        <input type="hidden" name="category_id" value="{{c.pk}}">
+                                        <input type="hidden" name="category" id="id_category" value="{{c.pk}}">
                                 </div>
                             </div>
                         </div>
@@ -138,11 +137,11 @@
         <div class="modal-body">
             <form action="" method='POST'>
               {% csrf_token %}
-              <input name='category_pk' id='category_hidden_id' type="hidden">
+              {{change_category_form.id}}
               <div class="input-group mb-3">
                 <div id="div_block" style="display: inline-block">
-              <input style="float: left; width: 20%;" name='category_price_for_seller' id='category_price_for_seller' type="text" class="form-control">
-              <input style="float: right; width: 75%;" name='category_name' id='category_name' type="text" class="form-control">
+              {{change_category_form.price_for_seller}}
+              {{change_category_form.name}}
               </div>
             </div>
         </div>
@@ -160,6 +159,7 @@
   <!-- Модальное окно изменение конец  -->
 
 
+  
     <!-- Модальное окно подкатегории начало -->
     <div class="modal fade" id="subcatModal" tabindex="-1" aria-labelledby="subcatModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -170,9 +170,11 @@
             <div class="modal-body">
                 <form action="" method='POST'>
                   {% csrf_token %}
-                  <input name='subcategory_pk' id='subcategory_hidden_id' type="hidden">
+                  {{change_subcategory_form.id}}
+                  <!-- <input name='subcategory_pk' id='subcategory_hidden_id' type="hidden"> -->
                   <div class="input-group mb-3">
-                  <input name='subcategory_name' id='subcategory_name' type="text" class="form-control">
+                    {{change_subcategory_form.name}}
+                  <!-- <input name='subcategory_name' id='subcategory_name' type="text" class="form-control"> -->
                   </div>
                 </div>
       
@@ -186,5 +188,7 @@
         </div>
         </div>
       <!-- Модальное окно подкатегории конец  -->
+
+      
 
 {% endblock %}

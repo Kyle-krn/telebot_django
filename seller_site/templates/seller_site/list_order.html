@@ -37,9 +37,9 @@
             data-bs-parent="#accordionExample">
             <div class="accordion-body">
                 <div class="text-center">
-                <form action="" method='post'>
-                    {% csrf_token %}
-                    <input type="hidden" name="order_id" value="{{qs.pk}}">
+                <!-- <form action="" method='post'> -->
+                    <!-- {% csrf_token %} -->
+                    <!-- <input type="hidden" name="order_id" value="{{qs.pk}}"> -->
                 <table class="table">
                     <thead>
                       <tr>
@@ -52,13 +52,26 @@
                     </thead>
                     <tbody>
                         {% for product in qs.offlinesoldproduct_set.all %}
-                      <tr>
+                      <tr class=''>
                         <th scope="row">{{forloop.counter}}</th>
                         <td>{{product.title}}</td>
                         <td>{{product.price}} руб.</td>
-                        <td>
-                            <input type="hidden" name="sold_id" value="{{product.pk}}">
-                            <input style="width: 25%" type="number" id="user" name='sold_count' pattern="" value={{product.count}} required> шт.
+                        <td class="text-align:right;">
+                          <form action="{% url 'local_shop:change_order' product.pk %}" method="post">
+                            {% csrf_token %}
+                            <input style="width: 25%" type="number" id="id_count" name='count' pattern="" value={{product.count}} required> шт.
+                            <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Обновить">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                          </form>
+
+                          <!-- <form  action="{% url 'remove_item_in_order' product.pk %}" method="post"> -->
+                            <!-- {% csrf_token %} -->
+                            <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Удалить">
+                              <i class="far fa-trash-alt"></i>
+                          </button>
+                          <!-- </form> -->
+                            
 
                         </td>
                         <td>{% widthratio product.price 1 product.count %} руб.</td>
@@ -76,9 +89,10 @@
             </div>
                 <br>
                 <div class="text-end">
-                <button type="submit" class="btn btn-success" name='change_order'>Изменить заказ</button>
+                  <form action="{% url 'local_shop:delete_order' qs.pk %}">
+                <button type="submit" class="btn btn-danger" name='change_order'>Удалить заказ</button>
+              </form>
             </div>
-            </form>
             </div>
         </div>
     </div>

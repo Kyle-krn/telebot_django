@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap CSS -->
+  <script src="https://kit.fontawesome.com/c044e4f0d6.js" crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
@@ -38,59 +39,59 @@
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
 
-          {% url 'all_product_offline' as apo %}
+          {% url 'local_shop:list_product' as apo %}
           {% if request.path == apo %}
-          <li><a href="{% url 'all_product_offline' %}" class="nav-link px-2 disabled">Все товары</a></li>
+          <li><a href="{% url 'local_shop:list_product' %}" class="nav-link px-2 disabled">Все товары</a></li>
           {% else %}
-          <li><a href="{% url 'all_product_offline' %}" class="nav-link px-2 text-white">Все товары</a></li>
+          <li><a href="{% url 'local_shop:list_product' %}" class="nav-link px-2 text-white">Все товары</a></li>
           {% endif %}
 
-          {% url 'register' as r %}
+          {% url 'local_shop:register_seller' as r %}
           {% if request.user.is_superuser %}
           {% if request.path == r %}
-          <li><a href="{% url 'register' %}" class="nav-link px-2 disabled">Регистрация продовца</a></li>
+          <li><a href="{% url 'local_shop:register_seller' %}" class="nav-link px-2 disabled">Регистрация продовца</a></li>
           {% else %}
-          <li><a href="{% url 'register' %}" class="nav-link px-2 text-white">Регистрация продовца</a></li>
+          <li><a href="{% url 'local_shop:register_seller' %}" class="nav-link px-2 text-white">Регистрация продовца</a></li>
           {% endif %}
           {% endif %}
 
-          {% url 'list_order_offline' as loo %}
+          {% url 'local_shop:list_order' as loo %}
           {% if request.user.is_superuser %}
           {% if request.path == loo %}
-          <li><a href="{% url 'list_order_offline' %}" class="nav-link px-2 disabled">Заказы</a></li>
+          <li><a href="{% url 'local_shop:list_order' %}" class="nav-link px-2 disabled">Заказы</a></li>
           {% else %}
-          <li><a href="{% url 'list_order_offline' %}" class="nav-link px-2 text-white">Заказы</a></li>
+          <li><a href="{% url 'local_shop:list_order' %}" class="nav-link px-2 text-white">Заказы</a></li>
           {% endif %}
           {% endif %}
 
-          {% url 'stat_offline' as so %}
+          {% url 'local_shop:statistic' as so %}
           {% if request.user.is_superuser %}
           {% if request.path == so %}
-          <li><a href="{% url 'stat_offline' %}" class="nav-link px-2 disabled">Статистика</a></li>
+          <li><a href="{% url 'local_shop:statistic' %}" class="nav-link px-2 disabled">Статистика</a></li>
           {% else %}
-          <li><a href="{% url 'stat_offline' %}" class="nav-link px-2 text-white">Статистика</a></li>
+          <li><a href="{% url 'local_shop:statistic' %}" class="nav-link px-2 text-white">Статистика</a></li>
           {% endif %}
           {% endif %}
 
-          {% url 'my_sales_offline' as mso %}
+          {% url 'local_shop:my_sales' as mso %}
           {% if request.path == mso %}
-          <li><a href="{% url 'my_sales_offline' %}" class="nav-link px-2 disabled">Мои продажи</a></li>
+          <li><a href="{% url 'local_shop:my_sales' %}" class="nav-link px-2 disabled">Мои продажи</a></li>
           {% else %}
-          <li><a href="{% url 'my_sales_offline' %}" class="nav-link px-2 text-white">Мои продажи</a></li>
+          <li><a href="{% url 'local_shop:my_sales' %}" class="nav-link px-2 text-white">Мои продажи</a></li>
           {% endif %}
-          
+  
         </ul>
 
-        <a class="btn btn-outline-light me-2" href="{% url 'reception_offline' %}" role="button">+ Приемка</a>
-        <a class="btn btn-outline-light me-2" href="{% url 'order_offline' %}" role="button">+ Продажа</a>
+        <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_reception' %}" role="button">+ Приемка</a>
+        <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_order' %}" role="button">+ Продажа</a>
           <div class="btn-group">
 
             {% if request.user.is_superuser %}
-            <a class="btn btn-outline-light me-2" href="{% url 'category_offline' %}" role="button">+ Категория</a>
+            <a class="btn btn-outline-light me-2" href="{% url 'local_shop:list_category' %}" role="button">+ Категория</a>
           </div><!-- /btn-group -->
           <div class="btn-group">
             <div class="dropdown">
-              <a class="btn btn-outline-light me-2" href="{% url 'add_product_offline' %}" role="button">+ Товар</a>
+              <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_product' %}" role="button">+ Товар</a>
             </div>
           </div><!-- /btn-group -->
           {% endif %}

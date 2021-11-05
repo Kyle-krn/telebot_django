@@ -1,3 +1,4 @@
+from django.db.models import fields
 from .models import *
 from django import forms
 from django.contrib.auth.forms import  UserCreationForm
@@ -28,18 +29,22 @@ class OfflineProductForm(forms.ModelForm):
 
 class OffilneCategoryForm(forms.ModelForm):
       '''Форма создания категории'''
-      id = forms.CharField(widget=forms.HiddenInput())
       name = forms.CharField(widget=forms.TextInput(attrs={'style': 'float: left; width: 60%;', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       price_for_seller = forms.IntegerField(widget=forms.TextInput(attrs={'min': 0,'class': 'form-control', 'type': 'number', 'placeholder': 'Сумма для продовца'}))
 
       class Meta:
             model = OfflineCategory
-            fields = ['id', 'name', 'price_for_seller']
+            fields = ['name', 'price_for_seller']
 
 class OffilneChangeCategoryForm(OffilneCategoryForm):
       '''Форма изменения категории'''
-      name = forms.CharField(widget=forms.TextInput(attrs={'id': 'category_name', 'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
+      id = forms.CharField(widget=forms.HiddenInput())
+      price_for_seller = forms.IntegerField(widget=forms.TextInput(attrs={'min': 0,'class': 'form-control', 'type': 'number', 'placeholder': 'Сумма для продовца', 'style': 'float: left; width: 20%;'}))
+      name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории', 'style': 'float: right; width: 75%;'}))
 
+      class Meta:
+            model = OfflineCategory
+            fields = ['id', 'name', 'price_for_seller']
 
 class OfflineSubcategoryForm(forms.ModelForm):
       '''Форма создаения подкатегории'''
@@ -47,8 +52,14 @@ class OfflineSubcategoryForm(forms.ModelForm):
 
       class Meta:
             model = OfflineSubCategory
-            fields = ['name']
+            fields = ['name', 'category']
 
+class OfflineChangeSubcategoryForm(OfflineSubcategoryForm):
+      id = forms.CharField(widget=forms.HiddenInput())
+
+      class Meta:
+            model = OfflineSubCategory
+            fields = ['id', 'name']
 
 class OfflineReceptionForm(forms.ModelForm):
       '''Форма создания приемки'''
@@ -64,3 +75,12 @@ class OfflineReceptionForProductViewForm(OfflineReceptionForm):
       class Meta:
             model = OfflineReceptionProduct
             fields = ['count', 'note']
+
+
+class OrderChangeForm(forms.ModelForm):
+      # id = forms.CharField(widget=forms.HiddenInput())
+      count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1 , 'type': 'number', 'style': 'width: 25%'}))
+
+      class Meta:
+            model = OfflineSoldProduct
+            fields = ['count']
