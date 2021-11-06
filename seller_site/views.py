@@ -18,6 +18,7 @@ from django.utils.decorators import method_decorator
 from main_app.management.commands.handlers.handlers import bot
 from vape_shop.settings import TELEGRAM_GROUP_ID
 from django.contrib.auth.models import Group, User
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 class CreateOrderView(LoginRequiredMixin, View):
@@ -378,33 +379,6 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
         context['title'] = 'Заказы'
         return context
 
-    def post(self, request):
-        '''Изменяет кол-во товара в чеке'''
-        if 'sold_id' not in request.POST and 'sold_count' not in request.POST and 'order_id':
-            messages.error(request, 'Ошибка обработки заказа!')
-            return redirect('local_shop:list_product')
-
-        sold_pk = request.POST.getlist('sold_id')
-        sold_count = request.POST.getlist('sold_count')
-
-        try:
-            order_id = int(request.POST.get('order_id'))
-            res = [(int(sold_pk[i]), int(sold_count[i])) for i in range(len(sold_pk))]
-        except (ValueError, TypeError):
-            messages.error(request, 'Ошибка обработки заказа!')
-            return redirect('local_shop:list_product')
-
-        for item in res:
-            sold_product = get_object_or_404(OfflineSoldProduct, pk=item[0])
-            sold_product.return_in_product(item[1])
-        
-        order = get_object_or_404(OfflineOrderingProduct, pk=order_id)
-        if order.offlinesoldproduct_set.all().count() == 0:
-            order.delete()
-        else:
-            sold_product.order.set_order_price()
-        return redirect('local_shop:list_order')
-
     def seller_filter(self):
         '''Вывод чеков продавца из списка и сумму заработанного за день '''
         try:
@@ -498,7 +472,6 @@ class OfflineSellerPage(LoginRequiredMixin, View):
         queryset = OfflineSoldProduct.objects.filter(Q(user=self.request.user) & Q(date__gte=date.today()))
         return sum([x.price_for_seller * x.count for x in queryset])
 
-
     def get_queryset(self):
         return OfflineOrderingProduct.objects.filter(Q(user=self.request.user) & Q(datetime__gte=date.today())).order_by('-datetime')
 
@@ -506,7 +479,7 @@ class OfflineSellerPage(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-
+@staff_member_required
 def change_item_order(request, sold_pk):
     instance = OfflineSoldProduct.objects.get(pk=sold_pk)
     form = OrderChangeForm(request.POST)
@@ -516,7 +489,7 @@ def change_item_order(request, sold_pk):
     instance.order.set_order_price()
     return redirect('local_shop:list_order')
 
-
+@staff_member_required
 def remove_item_order(request, sold_pk):
     instance = OfflineSoldProduct.objects.get(pk=sold_pk)
     order = instance.order
@@ -524,6 +497,8 @@ def remove_item_order(request, sold_pk):
     order.set_order_price()
     return redirect('local_shop:list_order')
 
+
+@staff_member_required
 def delete_order(request, order_pk):
     order = OfflineOrderingProduct.objects.get(pk=order_pk)
     for item in order.offlinesoldproduct_set.all():

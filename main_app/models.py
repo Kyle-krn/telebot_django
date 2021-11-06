@@ -2,17 +2,20 @@ from django.db import models
 from django.urls import reverse
 from django.utils.timezone import pytz
 import vape_shop.settings as settings
+from pytils.translit import slugify
 
 class Category(models.Model):
     '''Модель категорий'''
     name = models.CharField(max_length=255, help_text='Имя категории')
     photo = models.ImageField(upload_to='category_img/', help_text='Фото категории')
-    slug = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Используется в боте для поиска категории')
+    slug = models.SlugField(max_length=100, unique=True)
+    pk_for_telegram = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Используется в боте для поиска категории')
     max_count_product = models.IntegerField()
 
     def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
         super(Category, self).save(*args, **kwargs)
-        self.slug = f'c||{self.pk}' # Слаг id из за ограничений телеграма в callback_data
+        self.pk_for_telegram = f'c||{self.pk}' # Слаг id из за ограничений телеграма в callback_data
         super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -24,12 +27,17 @@ class SubCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, help_text='Категория подкатегории')
     name = models.CharField(max_length=150, db_index=True, help_text='Имя подкатегории')
     photo = models.ImageField(upload_to='subcategory_img/', help_text='Фотоподкатегории')
-    slug = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Слаг подкатегории')
+    slug = models.SlugField(max_length=100, unique=True)
+    pk_for_telegram = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Используется в боте для поиска категории')
+
+    def get_absolute_url(self):
+        return reverse('online_shop:product_list_by_category', kwargs={'subcategory_slug': self.slug})
 
 
     def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
         super(SubCategory, self).save(*args, **kwargs)
-        self.slug = f'sc||{self.pk}'
+        self.pk_for_telegram = f'sc||{self.pk}'
         super(SubCategory, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -43,17 +51,27 @@ class Product(models.Model):
     description = models.TextField(help_text='Описание товара')
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена товара')
     count = models.IntegerField(default=0, help_text='Остаток на складе')
-    slug = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Слаг товара')
+    slug = models.SlugField(max_length=100, unique=True)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, help_text='Подкатегория товара')
     weight = models.IntegerField(help_text='Вес товара')
+    pk_for_telegram = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Используется в боте для поиска категории')
+
+    def get_average_review_score(self):
+        average_score = 0.0
+        if self.reviews.count() > 0:
+            total_score = sum([review.rating for review in self.reviews.all()])
+            average_score = total_score / self.reviews.count()
+            return round(average_score, 1)
+
 
     def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
         super(Product, self).save(*args, **kwargs)
-        self.slug = f'p||{self.pk}' # Короткий слаг из id для индентификации товара в боте
+        self.pk_for_telegram = f'p||{self.pk}' # Короткий слаг из id для индентификации товара в боте
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('productdetail', kwargs={'pk': self.pk})
+        return reverse('online_shop:product_detail', kwargs={'subcategory_slug': self.subcategory.slug, 'product_slug': self.slug})
 
     def __str__(self):
         return self.title

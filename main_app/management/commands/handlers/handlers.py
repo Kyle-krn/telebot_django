@@ -9,17 +9,17 @@ cat_photo = 'https://i.ytimg.com/vi/2QvOxa_7wEw/maxresdefault.jpg'
 subcat_photo = 'https://i.ytimg.com/vi/jaRANdL5qrE/maxresdefault.jpg'
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-category_list = [x.slug for x in Category.objects.all()]
-subcategory_list = [x.slug for x in SubCategory.objects.all()]
-product_list = [x.slug for x in Product.objects.all()]
+category_list = [x.pk_for_telegram for x in Category.objects.all()]
+subcategory_list = [x.pk_for_telegram for x in SubCategory.objects.all()]
+product_list = [x.pk_for_telegram for x in Product.objects.all()]
 
 
 def update_lists():
     '''Каждый раз обновляет список для отлова хендлреов'''
     global category_list, subcategory_list, product_list
-    category_list = [x.slug for x in Category.objects.all()]
-    subcategory_list = [x.slug for x in SubCategory.objects.all()]
-    product_list = [x.slug for x in Product.objects.all()]
+    category_list = [x.pk_for_telegram for x in Category.objects.all()]
+    subcategory_list = [x.pk_for_telegram for x in SubCategory.objects.all()]
+    product_list = [x.pk_for_telegram for x in Product.objects.all()]
 
 
 
@@ -58,7 +58,7 @@ def category(call):
     '''Вывод подкатегорий'''
     update_lists()
     try:
-        category = Category.objects.get(slug=call.data)
+        category = Category.objects.get(pk_for_telegram=call.data)
     except:
         return bot.send_message(call.message.chat.id, 'Упс! Что то пошло не так')
     subcategory = category.subcategory_set.filter(product__count__gte=1).distinct() # Только подкатегории где есть товар
@@ -73,12 +73,12 @@ def subcategory(call):
     update_lists()
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=call.message.chat.id) & Q(counter=True)).delete() # Удаляем каунтер если юзер перешел по кнопке назад
     try:
-        subcategory = SubCategory.objects.get(slug=call.data)
+        subcategory = SubCategory.objects.get(pk_for_telegram=call.data)
     except:
         return bot.send_message(call.message.chat.id, 'Упс, что то пошло не так')
 
     products = subcategory.product_set.filter(count__gte=1).distinct()  # Товар у которого 1 или больше остатка
-    category_slug = subcategory.category.slug
+    category_slug = subcategory.category.pk_for_telegram
     photo = open(subcategory.photo.path, 'rb')
     bot.edit_message_media(chat_id=call.message.chat.id, media=types.InputMediaPhoto(media=photo, 
                                                          caption=f'***Категория - {subcategory.category.name}\nПодкатеогрия - {subcategory.name}***\n\nВыберите товар:', parse_mode='markdown'),   
@@ -97,7 +97,7 @@ def product(call):
     else:
         slug=call.data
     try:
-        product=Product.objects.get(slug=slug)
+        product=Product.objects.get(pk_for_telegram=slug)
         if product.count <= 0:  # Если юзер на странице товара, но он закончился
             bot.delete_message(call.message.chat.id, call.message.message_id)
             return bot.send_message(chat_id=call.message.chat.id, text='К сожалению данный товар только что закончился.')
@@ -128,7 +128,7 @@ def product(call):
                 bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=f'Максимальное количество товара: {product.subcategory.category.max_count_product} шт.')
                 counter[0].count=product.subcategory.category.max_count_product
         counter[0].save()   # Сохраняем каунтер после всех веток 
-    keyboard=buy_keyboard(subcat_slug=product.subcategory.slug,
+    keyboard=buy_keyboard(subcat_slug=product.subcategory.pk_for_telegram,
                             slug=slug,
                             count=counter[0].count)
     photo = open(product.photo.path, 'rb')

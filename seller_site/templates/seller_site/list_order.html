@@ -65,12 +65,12 @@
                         </button>
                           </form>
 
-                          <!-- <form  action="{% url 'remove_item_in_order' product.pk %}" method="post"> -->
-                            <!-- {% csrf_token %} -->
+                          <form  action="{% url 'local_shop:remove_item_in_order' product.pk %}" method="post">
+                            {% csrf_token %}
                             <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Удалить">
                               <i class="far fa-trash-alt"></i>
                           </button>
-                          <!-- </form> -->
+                          </form>
                             
 
                         </td>

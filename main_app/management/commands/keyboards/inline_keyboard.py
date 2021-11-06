@@ -7,7 +7,7 @@ def category_keyboard(categories, back=False):
     """Генерит клавиатуры категорий/подкатегорий"""
     keyboard = types.InlineKeyboardMarkup()
     for category in categories:
-        keyboard.add(types.InlineKeyboardButton(text=category.name, callback_data=category.slug))
+        keyboard.add(types.InlineKeyboardButton(text=category.name, callback_data=category.pk_for_telegram))
     if back:
         keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'back_cat~'))
     return keyboard
@@ -19,9 +19,9 @@ def product_keyboard(sub_slug, products, search=False, back=True):
     keyboard = types.InlineKeyboardMarkup()
     for product in products:
         if not search:
-            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.slug))
+            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=product.pk_for_telegram))
         else:
-            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=f"search_p~{product.slug}"))
+            keyboard.add(types.InlineKeyboardButton(text=product.title, callback_data=f"search_p~{product.pk_for_telegram}"))
 
     keyboard.add(types.InlineKeyboardButton(text='Назад', callback_data=f'{sub_slug}'))
     return keyboard
@@ -58,7 +58,7 @@ def cart_keyboard(pay=None):
 def change_cart_keyboard(cart):
     keyboard = types.InlineKeyboardMarkup()
     for item in cart:
-        keyboard.add(types.InlineKeyboardButton(text=f'{item.product.title}', callback_data=f'del~{item.product.slug}'))
+        keyboard.add(types.InlineKeyboardButton(text=f'{item.product.title}', callback_data=f'del~{item.product.pk_for_telegram}'))
     keyboard.add(types.InlineKeyboardButton(text=f'Удалить все', callback_data=f'del_all~'))
     keyboard.add(types.InlineKeyboardButton(text=f'Назад', callback_data=f'back_cart'))
     return keyboard
@@ -83,7 +83,7 @@ def edit_delivery_data_keyboard():
 def search_category_keyboard(categories):
     keyboard = types.InlineKeyboardMarkup()
     for item in categories:
-        keyboard.add(types.InlineKeyboardButton(text=item.name, callback_data=f'search~{item.slug}'))
+        keyboard.add(types.InlineKeyboardButton(text=item.name, callback_data=f'search~{item.pk_for_telegram}'))
     return keyboard
 
 
