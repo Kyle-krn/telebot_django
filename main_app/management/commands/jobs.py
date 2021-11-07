@@ -14,3 +14,4 @@ class Command(BaseCommand):
             time_passed = abs(int((item.datetime - timenow).total_seconds() / 60))
             if time_passed >= 15:
                 item.delete()
+                # Сделать возврат удаленных товаров обратно 

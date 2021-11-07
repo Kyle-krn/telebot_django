@@ -91,7 +91,6 @@ class OfflineSoldProduct(models.Model):
 
     def save(self, *args, **kwargs):
         '''Отнимает кол-во товара в OfflineProduct'''
-        print(args, kwargs)
         if self.count <= 0:
             return
         self.product.count -= self.count
@@ -106,7 +105,6 @@ class OfflineSoldProduct(models.Model):
         #     return super(OfflineSoldProduct, self).delete()
             
         # else:
-        print(self.count)
         self.product.count += (self.count - new_count)
         self.product.save()
         self.count = new_count

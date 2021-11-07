@@ -58,7 +58,7 @@
                         <span id="minus" class="input-group-text button_minus px-4">
                             -
                         </span>
-                        {{ cart_product_form.quantity }}
+                        <input type="number" name="quantity" class="form-control text-center px-3" value="1" max="{{product.count}}" min="1" required="" id="id_quantity">
                         <span id="plus" class="input-group-text button_plus px-4">
                             +
                         </span>
@@ -74,7 +74,15 @@
         </div>
     </div>
 </div>
+<br>
+
+
+
 </div>
+
+
+
+
 <hr class="col-7 mx-auto">
 <div class="card shadow-custom border-0 col-lg-8 mx-auto mb-3">
     <h3 class="py-2 text-grey">Reviews:</h3>
@@ -147,4 +155,6 @@
         </div>
     </div>
 </div>
+
+
 {% endblock content %}

@@ -226,7 +226,7 @@
     border-radius: 0;
     border: none;
     background: none;
-    border-bottom: 2px solid grey;
+    border-bottom: 2px solid grey; /* здесь */
     padding: 10px 5px;
     margin-bottom: 30px;
     width: 100%;
@@ -248,10 +248,9 @@
     transition: 0.5s;
   }
   
-  .form-control:focus {
-    box-shadow: none;
-    border-bottom-color: #ffc107;
-  }
+
+
+
   
   .form-group label {
     font-size: 0.8rem;
@@ -716,3 +715,5 @@
     margin-right: 0px;
     margin-left: 0px;
   }
+
+  

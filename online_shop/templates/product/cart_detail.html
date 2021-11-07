@@ -39,7 +39,7 @@ col-lg-2 align-self-center text-center">
             {{ product.title }}
         </div>
         <div class="cart-item col-12 col-lg-2 align-self-center">
-            {% if product.available %}
+            {% if product.count > 0 %}
             <div class="text-green mb-0 text-center">
                 Available
             </div>
@@ -113,7 +113,7 @@ align-self-center">
                 <a href="{% url 'online_shop:product_list' %}" class="btn btn-warning shadow-custom col">
                     Back to shop
                 </a>
-                <a href="" class="btn btn-danger shadow-custom col">
+                <a href="{% url 'online_shop:order_create' %}" class="btn btn-danger shadow-custom col">
                     Checkout
                 </a>
             </div>

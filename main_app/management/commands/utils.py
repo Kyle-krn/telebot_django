@@ -12,14 +12,33 @@ from email.mime.image import MIMEImage              # Изображения
 def check_price_delivery(post_index, weight):
     '''Расчет стоймости доставки'''
     url = 'https://postprice.ru/engine/russia/api.php'
+    post_index = int(post_index)
     data = {
         'from': 610002,
         'to': post_index,
         'mass': weight,
     }
+    
     req = requests.get(url, data).json()
-    delibery_pay = sorted([req['pkg'], req['pkg_1class']])[0]
-    return int(float(delibery_pay))
+    if weight <= 200:
+        return int(float(req['pkg_1class']))
+    elif weight <= 20000:
+        return int(float(req['pkg']))
+    else:
+        total_sum = 0
+        x = weight // 20000
+        for i in range(x):
+            data['mass'] = 20000
+            req = requests.get(url, data).json()
+            total_sum += int(float(req['pkg']))
+        
+        if weight % 20000 != 0:
+            y = weight % 20000
+            data['mass'] = y
+            req = requests.get(url, data).json()
+            total_sum += int(float(req['pkg']))
+        return total_sum
+    
 
 
 def check_time_delivery(post_index, weight):
