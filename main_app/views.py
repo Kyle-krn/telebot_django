@@ -445,7 +445,7 @@ class ProductView(LoginRequiredMixin, View):
         context['product'] = self.product
         context['title'] = self.product.title
         context['category'] = Category.objects.all()
-        context['reception_form'] = ReceptionForm()
+        context['reception_form'] = ReceptionForProductViewForm()
         context['stat_dict'] = self.get_statistic()
         context['trade_queryset'] = self.filter_queryset()
         context['product_form'] = Product_reqForm(initial={'title': self.product.title,
@@ -472,10 +472,8 @@ class ProductView(LoginRequiredMixin, View):
             return redirect ('all_product')
 
         elif 'reception' in request.POST:
-            form = ReceptionForm(request.POST)
+            form = ReceptionForProductViewForm(request.POST)
             if form.is_valid():
-                self.product.count += form.cleaned_data['count']
-                self.product.save()
                 f = form.save(commit=False)
                 f.product = self.product
                 f.save()
@@ -483,10 +481,8 @@ class ProductView(LoginRequiredMixin, View):
                 return redirect('productdetail', pk=pk)           
 
         elif 'liquidated' in request.POST:
-            form = ReceptionForm(request.POST)
+            form = ReceptionForProductViewForm(request.POST)
             if form.is_valid():
-                self.product.count -= form.cleaned_data['count']
-                self.product.save()
                 f = form.save(commit=False)
                 f.product = self.product
                 f.liquidated = True

@@ -50,6 +50,10 @@ class SubcategoryForm(forms.ModelForm):
 class Subcategory_reqForm(SubcategoryForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
+      class Meta:
+            model = SubCategory
+            fields = ['name', 'photo']
+
 
 class ReceptionForm(forms.ModelForm):
       price = forms.IntegerField(label='Закупочная цена', widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number'}))
@@ -59,6 +63,12 @@ class ReceptionForm(forms.ModelForm):
       class Meta:
             model = ReceptionProduct
             fields = ['price', 'count', 'note', 'product']
+
+
+class ReceptionForProductViewForm(ReceptionForm):
+      class Meta:
+            model = ReceptionProduct
+            fields = ['price', 'count', 'note']
 
 
 class QiwiTokenForm(forms.ModelForm):

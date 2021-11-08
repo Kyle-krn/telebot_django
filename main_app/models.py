@@ -94,7 +94,7 @@ class ReceptionProduct(models.Model):
         else:
             self.product.count += self.count
         self.product.save()
-        return super(OfflineReceptionProduct, self).save(*args, **kwargs)
+        return super(ReceptionProduct, self).save(*args, **kwargs)
 
     def get_datetime(self):
         '''Возвращает московское время'''
