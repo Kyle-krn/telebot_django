@@ -6,18 +6,34 @@
 
 <form action="" method='POST'>
     {% csrf_token %}
-    {{form.as_p}}
-    
-    <label for="{{ form.subcategory.id_for_label }}">Товар:</label>
-    <select class="form-select" name="product_pk">
-        {% for sc in subcategory %}
-        <optgroup label="{{sc.name}}">
+    <p>
+        {{ form.price.errors }}
+        <label for="{{ form.count.id_for_label }}">{{form.price.label}}</label>
+        {{ form.price }}</p>
+    <p>
+    {{ form.count.errors }}
+    <label for="{{ form.count.id_for_label }}">{{form.count.label}}</label>
+    {{ form.count }}</p>
+    <p>
+    {{ form.note.errors }}
+    <label for="{{ form.note.id_for_label }}">{{form.note.label}}</label>
+    {{ form.note }}</p>
+
+
+    <label for="id_product" class="form-label">Товар:</label>
+    <select class="form-select" name="product" id='id_product' required>
+      {% for c in category %}
+      <optgroup style="color:blue" label="{{c}}">
+          {% for sc in c.subcategory_set.all %}
+          <optgroup style="color:red" label="&nbsp;&nbsp;&nbsp;&nbsp;{{sc}}">
             {% for p in sc.product_set.all %}
-            <option selected value="{{p.pk}}">{{p.title}}</option>
-            {% endfor %}
-        </optgroup>
-        {% endfor %}
+            <option style="color:black" value="{{p.pk}}">&nbsp;&nbsp;&nbsp;&nbsp;{{p.title}}</option>
+          {% endfor %}
+          {% endfor %}
+      </optgroup>
+      {% endfor %}
     </select>
+
 <br>
     <div class='text-end'>
         <button type="submit" class="btn btn-success">Добавить </button>

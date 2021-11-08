@@ -74,26 +74,18 @@ class IndexView(LoginRequiredMixin, ListView):
 
 
     def post(self, request):
-        if 'delete_product' in request.POST:
-            if 'pk_p' not in request.POST:
-                messages.error(request, 'Ошибка удаления товара!')
-                return redirect('all_product')
-
-            try:
-                pk_product = int(request.POST.get('pk_p'))
-            except (ValueError, TypeError):
-                messages.error(request, 'Ошибка удаления товара!')
-                return redirect('all_product')
-
-            get_object_or_404(Product, pk=pk_product).delete()
-            # OfflineProduct.objects.get(pk=pk_product).delete()
-            return redirect('all_product')
+        form = ProductDeleteForm(request.POST)
+        if form.is_valid():
+            cf = form.cleaned_data
+            Product.objects.get(pk=cf['id']).delete()
+        return redirect('all_product')
 
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Все товары'
         context['category'] = Category.objects.all()
+        context['delete_form'] = ProductDeleteForm()
         return context
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -109,6 +101,7 @@ class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         context['category'] = Category.objects.all()
         return context
 
+
 @method_decorator(staff_member_required, name='dispatch')
 class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
@@ -117,29 +110,11 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('reception')
     success_message = 'Количество товара успешно увеличено!'
 
-    def form_valid(self, form):
-        if 'product_pk' not in self.request.POST:
-            messages.error(self.request, 'Ошибка приемки товара!')
-            return redirect('all_product')
-        
-        try:
-            pk = int(self.request.POST['product_pk'])
-        except (ValueError, TypeError):
-            messages.error(self.request, 'Ошибка приемки товара!')
-            return('all_product')
-
-        product = get_object_or_404(Product, pk=pk)
-        product.count += form.cleaned_data['count']
-        product.save()
-        f = form.save(commit=False)
-        f.product = product
-        f.save()
-        return super().form_valid(form)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Приемка товара'
-        context['subcategory'] = SubCategory.objects.all()
+        context['category'] = Category.objects.all()
         return context
 
 
@@ -185,23 +160,26 @@ class CategoriesView(LoginRequiredMixin, View):
                 category_form.save()
                 messages.success(request, 'Новая категория успешно создана!')
                 return redirect('add_category')
+
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = SubcategoryForm(request.POST, files=request.FILES)
-            if sc_form.is_valid():
-                if 'category_id' not in request.POST:
-                    return redirect('all_product')
+            print(sc_form.is_valid())
+            print(sc_form.errors)
+            # if sc_form.is_valid():
+            #     if 'category_id' not in request.POST:
+            #         return redirect('all_product')
 
-                try:
-                    pk = int(request.POST['category_id'])
-                except (ValueError, TypeError):
-                    messages.error(request, 'Ошибка создания подкатегории!')
-                    return redirect('all_product')
+            #     try:
+            #         pk = int(request.POST['category_id'])
+            #     except (ValueError, TypeError):
+            #         messages.error(request, 'Ошибка создания подкатегории!')
+            #         return redirect('all_product')
 
-                f = sc_form.save(commit=False)
-                f.category = get_object_or_404(Category, pk=pk)
-                f.save()
-                messages.success(request, 'Новая подкатегория успешно создана!')
-                return redirect('add_category')
+            #     f = sc_form.save(commit=False)
+            #     f.category = get_object_or_404(Category, pk=pk)
+            #     f.save()
+            #     messages.success(request, 'Новая подкатегория успешно создана!')
+            return redirect('add_category')
 
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
@@ -210,6 +188,36 @@ class CategoriesView(LoginRequiredMixin, View):
 class QiwiOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/order.html'
     queryset = OrderingProduct.objects.filter(qiwi_bool=True).order_by('-datetime')
+    context_object_name = 'queryset'
+
+    def post(self, request):
+        if 'order_id' not in request.POST and 'track_code' not in request.POST:
+            messages.error(request, 'Ошибка добавления трек-кода!')
+            return redirect('all_product')
+
+        try:
+            order_id = int(request.POST['order_id'])
+            track_code = request.POST['track_code']
+        except (ValueError, TypeError):
+            messages.error(request, 'Ошибка добавления трек-кода!')
+            return redirect('all_product')
+
+        order = get_object_or_404(OrderingProduct, pk=order_id)
+        # order = OrderingProduct.objects.get(pk=order_id)
+        order.track_code = track_code
+        order.save()
+        messages.success(request, 'Трек-номер успешно добавлен!')
+        return redirect('qiwi_order')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'QIWI заказы'
+        return context
+
+
+class SiteOrderView(LoginRequiredMixin, ListView):
+    template_name = 'main_app/site_order.html'
+    queryset = OrderSiteProduct.objects.all().order_by('-created')
     context_object_name = 'queryset'
 
     def post(self, request):

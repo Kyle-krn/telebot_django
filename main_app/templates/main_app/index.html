@@ -143,7 +143,8 @@
       <div class="modal-body">
           <form action="" method='POST'>
             {% csrf_token %}
-            <input name='pk_p' id='del_hidden' type="hidden">
+            {{delete_form.id}}
+            
       </div>
 
       <div class="modal-footer">
@@ -158,7 +159,7 @@
 
 <script>
   function delProduct(pk, title) {
-document.getElementById('del_hidden').value = pk ;
+document.getElementById('id_id').value = pk ;
 document.getElementById("title_product").innerHTML = 'Вы уверенны что хотите удалить'+ ' ' + title + '?';
   }
 </script>

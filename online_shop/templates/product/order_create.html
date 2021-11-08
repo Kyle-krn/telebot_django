@@ -51,7 +51,7 @@
                 <script>
                     $('#id_postal_code').bind('input', function () {
                         $.ajax({
-                            url: "{% url 'online_shop:validate_username' %}",
+                            url: "{% url 'online_shop:validate_postal_code' %}",
                             method: 'get',
                             dataType: 'html',
                             data: { id_postal_code: $('#id_postal_code').val() },

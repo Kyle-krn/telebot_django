@@ -86,6 +86,17 @@ class ReceptionProduct(models.Model):
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время приемки')
     liquidated = models.BooleanField(default=False, help_text='Ликвидация товара') # True для ликвидированного товара
 
+    def save(self, *args, **kwargs):
+        '''Обновляет кол-во товара в OfflineProduct'''
+        if self.count <= 0:
+            return
+        if self.liquidated:
+            self.product.count -= self.count
+        else:
+            self.product.count += self.count
+        self.product.save()
+        return super(ReceptionProduct, self).save(*args, **kwargs)
+
     def get_datetime(self):
         '''Возвращает московское время'''
         user_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -191,8 +202,6 @@ class OrderingProduct(models.Model):
         return datetime.strftime('%m/%d/%Y %H:%M')
 
 
-
-
 class SoldSiteProduct(models.Model):
     '''Проданные товары через сайт'''
     product = models.ForeignKey(Product, on_delete=models.CASCADE, help_text='Продукт')
@@ -212,6 +221,7 @@ class SoldSiteProduct(models.Model):
     def __str__(self) -> str:
         return f"{self.product.title} - {self.count} в заказе #{self.order.pk}"
 
+
 class OrderSiteProduct(models.Model):
     '''Заказы через сайт'''
     first_name = models.CharField(max_length=50)
@@ -226,6 +236,18 @@ class OrderSiteProduct(models.Model):
     track_code = models.BigIntegerField(blank=True, null=True, help_text='Трек-код заказа')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    price = models.IntegerField(blank=True, null=True)
+
+    def set_order_price(self):
+        '''Обновляет стоймость заказа при его изменении'''
+        self.price = sum([x.price * x.count for x in self.soldsiteproduct_set.all()])
+        return self.save()
+
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.created.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
 
     def __str__(self) -> str:
         return f'Заказ #{self.id}'

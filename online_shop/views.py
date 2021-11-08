@@ -7,6 +7,7 @@ from django.conf import settings
 
 
 def product_list(request, subcategory_slug=None):
+    '''Представление каталога товаров'''
     categories = Category.objects.all()
     if subcategory_slug:
         requested_category = get_object_or_404(SubCategory, slug=subcategory_slug)
@@ -18,6 +19,7 @@ def product_list(request, subcategory_slug=None):
 
 
 def product_detail(request, subcategory_slug, product_slug):
+    '''Детальное представление товара'''
     product = get_object_or_404(Product, slug=product_slug)
     if request.method == 'POST':
         review_form = ReviewForm(request.POST)
@@ -33,6 +35,7 @@ def product_detail(request, subcategory_slug, product_slug):
 
 
 def get_cart(request):
+    '''Получить корзину'''
     cart = request.session.get(settings.CART_ID)
     if not cart:
         cart = request.session[settings.CART_ID] = {}
@@ -40,6 +43,7 @@ def get_cart(request):
 
 
 def cart_add(request, product_id):
+    '''Добавление товара в корзину'''
     cart = get_cart(request)
     product = get_object_or_404(Product, pk=product_id)
     product_id = str(product.id)
@@ -64,6 +68,7 @@ def cart_add(request, product_id):
 
 
 def cart_detail(request):
+    '''Детальное представление корзины'''
     cart = get_cart(request)
     print(cart)
     product_ids = cart.keys()
@@ -71,12 +76,6 @@ def cart_detail(request):
     temp_cart = cart.copy()
 
     for product in products:
-
-        # if product.count <= 0:
-        #     # cart_remove(request, product.pk)
-        #     # request.session.modified = True
-        #     del temp_cart[str(product.pk)]
-        #     continue
 
         cart_item = temp_cart[str(product.pk)]
 
@@ -88,18 +87,13 @@ def cart_detail(request):
         cart_item['total_price'] = (Decimal(cart_item['price']) * cart_item['quantity'])
         cart_item['update_quantity_form'] = CartAddProductForm(initial={'quantity': cart_item['quantity']})
 
-        # if product.count <= 0:
-        #     cart_remove(request, product.pk)
-            # request.session.modified = True
-            # del temp_cart[str(product.pk)]
-            # continue
-
 
     cart_total_price = sum(Decimal(item['price']) * item['quantity'] for item in temp_cart.values())
     return render(request, 'product/cart_detail.html', {'cart': temp_cart.values(), 'cart_total_price': cart_total_price})
 
 
 def cart_remove(request, product_id):
+    '''Удаление товара из корзины'''
     cart = get_cart(request)
     product_id = str(product_id)
     if product_id in cart:
@@ -110,13 +104,14 @@ def cart_remove(request, product_id):
 
 
 def cart_clean(request):
+    '''Отчистить корзину'''
     del request.session[settings.CART_ID]
 
 
 def order_create(request):
+    '''Представление создания заказа'''
     cart = get_cart(request)
     weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
-    # delivery = check_price_delivery(request.GET['id_postal_code'], weight)
 
     if request.method == 'POST':
         order_form = OrderCreateForm(request.POST)
@@ -133,11 +128,10 @@ def order_create(request):
             for product in products:
                 cart_item =cart[str(product.id)]
                 SoldSiteProduct.objects.create(product=product, price=product.price, count=cart_item['quantity'], order=order)
+            order.set_order_price()
             cart_clean(request)
-            # # order_created.delay(order.pk)
-            return render( request, 'order_created.html', {'order': order})
+            return render( request, 'product/order_created.html', {'order': order})
 
-            return redirect('online_shop:cart_detail')
         else:
             return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
     else:
@@ -145,9 +139,12 @@ def order_create(request):
         return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
 
 
+
+
 from django.http import JsonResponse
 from main_app.management.commands.utils import check_price_delivery
-def validate_username(request):
+def validate_postal_code(request):
+    """Валидация почтового идекса для AJAX"""
     postal_code = request.GET['id_postal_code']
     if len(postal_code) != 6:
         return JsonResponse({'error': 'error'}, status=403)

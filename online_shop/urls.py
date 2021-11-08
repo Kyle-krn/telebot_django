@@ -15,6 +15,6 @@ urlpatterns = [
     path('cart/remove/<int:product_id>', cart_remove, name='cart_remove'),
     
 
-    path('validate/', validate_username, name='validate_username')
+    path('validate/', validate_postal_code, name='validate_postal_code')
 
 ]

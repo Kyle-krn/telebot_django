@@ -20,6 +20,7 @@ urlpatterns = [
     path('old_order/', PaidOrderView.as_view(), name='old_order'),                                                               # Оплаченные заказы
     path('qiwi_order/', QiwiOrderView.as_view(), name='qiwi_order'),                                                               # Оплаченные заказы
     path('qiwi/', control_qiwi, name='qiwi'),                                       # Добавить, удалить токен для QIWI    
+    path('site_order/', SiteOrderView.as_view(), name='site_order'),                                       # Добавить, удалить токен для QIWI    
     ]
 
 

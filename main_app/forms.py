@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import fields
 from .models import *
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
@@ -27,6 +28,7 @@ class CategoryForm(forms.ModelForm):
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой категории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
       max_count_product = forms.IntegerField( widget=forms.TextInput(attrs={'placeholder': 'Кол-во макс. товара', 'type': 'number'}))
+      
 
       class Meta:
             model = Category
@@ -37,12 +39,13 @@ class Category_reqForm(CategoryForm):
 
 
 class SubcategoryForm(forms.ModelForm):
+      category_id = forms.CharField(widget=forms.HiddenInput())
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
 
       class Meta:
             model = SubCategory
-            fields = ['name', 'photo']
+            fields = ['name', 'photo', 'category_id']
 
 class Subcategory_reqForm(SubcategoryForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
@@ -55,7 +58,7 @@ class ReceptionForm(forms.ModelForm):
 
       class Meta:
             model = ReceptionProduct
-            fields = ['price', 'count', 'note']
+            fields = ['price', 'count', 'note', 'product']
 
 
 class QiwiTokenForm(forms.ModelForm):
@@ -78,4 +81,17 @@ class LoginUserForm(AuthenticationForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input'}))
 
 
+class ProductDeleteForm(forms.ModelForm):
+      id = forms.CharField(widget=forms.HiddenInput())
 
+      class Meta:
+            model = Product
+            fields = ['id']
+
+      def clean_id(self):
+            data = self.cleaned_data['id']
+            try:
+                  Product.objects.get(pk=data)
+                  return data
+            except:
+                  raise forms.ValidationError("Не верный id товара!")
