@@ -39,13 +39,13 @@ class Category_reqForm(CategoryForm):
 
 
 class SubcategoryForm(forms.ModelForm):
-      category_id = forms.CharField(widget=forms.HiddenInput())
       name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя новой подкатегории'}))
       photo = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
 
       class Meta:
             model = SubCategory
-            fields = ['name', 'photo', 'category_id']
+            fields = ['category' ,'name', 'photo']
+            
 
 class Subcategory_reqForm(SubcategoryForm):
       photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))

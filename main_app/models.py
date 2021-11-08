@@ -30,8 +30,7 @@ class SubCategory(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     pk_for_telegram = models.CharField(max_length=255, unique=True, blank=True, null=True, help_text='Используется в боте для поиска категории')
 
-    def get_absolute_url(self):
-        return reverse('online_shop:product_list_by_category', kwargs={'subcategory_slug': self.slug})
+
 
 
     def save(self, *args, **kwargs):
@@ -71,7 +70,7 @@ class Product(models.Model):
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('productdetail', kwargs={'subcategory_slug': self.subcategory.slug, 'product_slug': self.slug})
+        return reverse('productdetail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return self.title
@@ -95,7 +94,7 @@ class ReceptionProduct(models.Model):
         else:
             self.product.count += self.count
         self.product.save()
-        return super(ReceptionProduct, self).save(*args, **kwargs)
+        return super(OfflineReceptionProduct, self).save(*args, **kwargs)
 
     def get_datetime(self):
         '''Возвращает московское время'''

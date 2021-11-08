@@ -163,8 +163,8 @@ class CategoriesView(LoginRequiredMixin, View):
 
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = SubcategoryForm(request.POST, files=request.FILES)
-            print(sc_form.is_valid())
-            print(sc_form.errors)
+            if sc_form.is_valid():
+                sc_form.save()
             # if sc_form.is_valid():
             #     if 'category_id' not in request.POST:
             #         return redirect('all_product')
@@ -178,8 +178,8 @@ class CategoriesView(LoginRequiredMixin, View):
             #     f = sc_form.save(commit=False)
             #     f.category = get_object_or_404(Category, pk=pk)
             #     f.save()
-            #     messages.success(request, 'Новая подкатегория успешно создана!')
-            return redirect('add_category')
+                messages.success(request, 'Новая подкатегория успешно создана!')
+                return redirect('add_category')
 
     def get(self, request):
         return render(request, self.template_name, context=self.get_context_data())
