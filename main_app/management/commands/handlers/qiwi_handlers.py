@@ -143,7 +143,7 @@ def sold_product(user, pay_data):
     '''Успешная оплата'''
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
     # send_email(f'У вас новый заказ на сумму {pay_data.product_pay+pay_data.delivery_pay} руб.')
-    # bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через QIWI на сумму {pay_data.delivery_pay+pay_data.product_pay} руб.')
+    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через QIWI на сумму {pay_data.delivery_pay+pay_data.product_pay} руб.')
     order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index, payment_bool=True, qiwi_bool=True)
     for item in cart:
         sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True)

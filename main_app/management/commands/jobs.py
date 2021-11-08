@@ -13,7 +13,7 @@ class Command(BaseCommand):
         queryset = PayProduct.objects.all()
         for item in queryset:
             time_passed = abs(int((item.datetime - timenow).total_seconds() / 60))
-            if time_passed >= 1:
+            if time_passed >= 15:
                 user = item.user
                 cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
                 for product_cart in cart:
