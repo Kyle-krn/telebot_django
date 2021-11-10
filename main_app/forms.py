@@ -105,3 +105,29 @@ class ProductDeleteForm(forms.ModelForm):
                   return data
             except:
                   raise forms.ValidationError("Не верный id товара!")
+
+
+class OrderChangeForm(forms.ModelForm):
+      # id = forms.CharField(widget=forms.HiddenInput())
+      count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1 , 'type': 'number', 'style': 'width: 25%'}))
+
+      class Meta:
+            model = SoldProduct
+            fields = ['count']
+
+class HiddenOrderIdForm(forms.Form):
+      id = forms.CharField(widget=forms.HiddenInput())
+      
+
+      def clean_id(self):
+            data = self.cleaned_data['id']
+            try:
+                  OrderingProduct.objects.get(pk=data)
+                  return data
+            except:
+                  raise forms.ValidationError("Не верный id заказа!")
+
+
+class TrackCodeOrderForm(HiddenOrderIdForm):
+      track_code = forms.CharField()
+

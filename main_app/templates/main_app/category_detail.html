@@ -10,7 +10,8 @@
 
     <div class="col">
         <div class='text-center'>
-            {% if request.resolver_match.url_name == 'category_detail' %}
+            {% if request.resolver_match.url_name == 'categorydetail' %}
+            
             <img id="myImg" src="{{category.photo.url}}" alt="{{category.name}}" style="width:100%;max-width:300px">
             {% else %}
             <img id="myImg" src="{{subcategory.photo.url}}" alt="{{subcategory.name}}" style="width:100%;max-width:300px">
@@ -52,7 +53,7 @@
 
 <div class='text-center'>
         <button type='button' class='btn btn-danger btn-lg' data-bs-toggle="modal" data-bs-target="#exampleModal" >
-            {% if request.resolver_match.url_name == 'category_detail' %}
+            {% if request.resolver_match.url_name == 'admin_panel:categorydetail' %}
             Удалить категорию
             {% else %}
             Удалить подкатегорию

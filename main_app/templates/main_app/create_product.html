@@ -7,7 +7,7 @@
 <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row align-items-center">
-        <div class="col-8">
+        <div class="col">
             <div class="fieldWrapper">
                 {{ form.title.errors }}
                 <label for="{{ form.title.id_for_label }}">Название товара:</label>
@@ -21,17 +21,6 @@
             </div>
             <br>
         </div>
-        <div class="col-4 ">
-            <img id="myImg" src="{{product.photo.url}}" alt="{{product.title}}" style="width:100%;max-width:500px">
-            <!-- Модальное окно -->
-            <div id="myModal" class="modal">
-                <span class="close">&times;</span>
-                <img class="modal-content" id="img01">
-                <div id="caption"></div>
-            </div>
-            <script src="{% static 'js/modal.js' %}"></script>
-        </div>
-    </div>
 
     {{ form.non_field_errors }}
 
@@ -83,7 +72,7 @@
     <br>
     <div class='text-end'>
         <input type="submit" class='btn btn-success btn-lg' name='update' value="Создать">
-        {% url 'add_product' as ap %}
+        {% url 'admin_panel:create_product' as ap %}
         {% if request.path == ap %}
         {% else %}
         <input type="submit" class='btn btn-danger btn-lg' name='delete' value="Удалить">

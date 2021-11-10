@@ -70,7 +70,7 @@ class Product(models.Model):
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('productdetail', kwargs={'pk': self.pk})
+        return reverse('admin_panel:productdetail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return self.title
@@ -162,6 +162,14 @@ class SoldProduct(models.Model):
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
     payment_bool = models.BooleanField(default=False, help_text='Произведена ли оплата')
+    order = models.ForeignKey('OrderingProduct', on_delete=models.CASCADE, help_text='Заказ')
+
+    def return_in_product(self, new_count):
+        '''Изменяет кол-во товара при редактировании заказа'''
+        self.product.count += (self.count - new_count)
+        self.product.save()
+        self.count = new_count
+        return super(SoldProduct, self).save()
     
 
     def get_datetime(self):
@@ -180,7 +188,7 @@ class OrderingProduct(models.Model):
     '''Модель заказа'''
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE, help_text='Юзер')
     delivery_pay = models.IntegerField(help_text='Стоимость доставки')
-    sold_product = models.ManyToManyField(SoldProduct, help_text='Товары в заказе')  # <==== тут
+    # sold_product = models.ManyToManyField(SoldProduct, help_text='Товары в заказе')  # <==== тут
     track_code = models.BigIntegerField(blank=True, null=True, help_text='Трек-код заказа')
     check_admin = models.BooleanField(default=False) # Использовалось для qiwi, что то с этим сделать
     datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
@@ -190,15 +198,20 @@ class OrderingProduct(models.Model):
     post_index = models.BigIntegerField(blank=True, null=True, help_text='Почтовый индекс')
     payment_bool = models.BooleanField(default=False, help_text='Оплачен ли заказ') # что то с этим сделать
     qiwi_bool = models.BooleanField(default=False, help_text='Способ оплаты - киви')
+    price = models.IntegerField(blank=True, null=True)
 
+    def set_order_price(self):
+        '''Обновляет стоймость заказа при его изменении'''
+        self.price = sum([x.price * x.count for x in self.soldproduct_set.all()])
+        return self.save()
 
-    def get_order_price(self):
-        return sum([x.count * x.price for x in self.sold_product.all()]) + self.delivery_pay
 
     def get_datetime(self):
         user_timezone = pytz.timezone(settings.TIME_ZONE)
         datetime = self.datetime.astimezone(user_timezone)
         return datetime.strftime('%m/%d/%Y %H:%M')
+
+
 
 
 class SoldSiteProduct(models.Model):

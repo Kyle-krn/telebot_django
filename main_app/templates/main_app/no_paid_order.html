@@ -1,0 +1,257 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid">
+
+
+    <div class="accordion" id="accordionExample">
+        {% for qs in queryset %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{qs.pk}}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{qs.pk}}" aria-expanded="true" aria-controls="collapse-{{qs.pk}}">
+                    Заказ #{{qs.pk}} от {{qs.get_datetime}} на сумму {{qs.price}} руб.
+
+                </button>
+            </h2>
+            <div id="collapse-{{qs.pk}}" class="accordion-collapse collapse" aria-labelledby="heading-{{qs.pk}}"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+                    <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Товар</th>
+                            <th scope="col">Цена за 1 шт.</th>
+                            <th scope="col">Кол-во</th>
+                            <th scope="col">Общая сумма</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          
+                              {% for item in qs.soldproduct_set.all %}
+                              <tr {% if item.product.count < item.count %} class="table-danger" {% endif %}>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{item.product.title}}</td>
+                            <td>{{item.price}} руб.</td>
+                            <td>
+                            <form style="display:inline;" action="{% url 'admin_panel:change_item_order' item.pk %}" method="post">
+                            {% csrf_token %}
+                            <input style="width: 50%" type="number" id="id_count" name='count' pattern="" value={{item.count}} required> шт.
+                            <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Обновить">
+                            <i class="fas fa-edit"></i>
+                            </button>
+                          </form>
+                          <form style="display:inline;" action="{% url 'admin_panel:remove_item_order' item.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Удалить">
+                              <i class="fas fa-trash-restore-alt"></i>
+                            </button>
+                          </form>
+                            </td>
+                            <td>{% widthratio item.price 1 item.count %} руб.</td>
+                        </tr>
+                            {% endfor %}
+                            <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>Сумма доставки - {{qs.delivery_pay}} руб.</td>
+                              </tr>
+                              <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>Общая сумма - {{qs.price|add:qs.delivery_pay}} руб.</td>
+                              </tr>
+                            
+                          
+                        </tbody>
+                      </table>
+                      <div class='container'>
+                      <div class="text-end">
+                          <div style='display: inline-block;'>
+                        <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.fio}}" data-address="{{qs.address}}" data-postal="{{qs.post_index}}" data-phone="{{qs.number}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %}  type="button" class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            <i class="far fa-address-card"></i>
+                          </button>
+
+                        <form style="display:inline;" action="{% url 'admin_panel:delete_order' qs.pk %}" method="post">
+                            {% csrf_token %}
+                            <button class='btn btn-danger'>Удалить</button>
+                        </form>
+
+                        <form style="display:inline;" action="" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name='id' id="id_id" value={{qs.pk}}>
+                            <button class='btn btn-success' type='submit'>Оплачено</button>
+                        </form>
+                    </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Информация о заказе #</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <table class="table">
+                <tbody>
+                  <tr>
+                    <td>Имя:</td>
+                    <td id='name'>Егоров Егор</td>
+                  </tr>
+                  <tr>
+                    <td>Адрес:</td>
+                    <td id='address'>Пихтулино дом 33</td>
+                  </tr>
+                  <tr>
+                    <td>Индекс:</td>
+                    <td id='postal_code'>429950</td>
+                  </tr>
+                  <tr>
+                    <td>Телефон:</td>
+                    <td id='phone_number'>+79006292609</td>
+                  </tr>
+                  <tr>
+                    <td>Телеграм:</td>
+                    <td id='telegram'></td>
+                  </tr>
+
+                </tbody>
+              </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+  <script>
+      $('#test').on('click', function() {
+    
+  // действия, которые будут выполнены при наступлении события...
+  $('#name').html($(this).attr("data-name"));
+  var qs_id = $(this).attr("data-pk")
+  $('#exampleModalLabel').html('Информация о заказе #'+qs_id);
+  $('#address').html($(this).attr("data-address"));
+  $('#postal_code').html($(this).attr("data-postal"));
+  $('#phone_number').html($(this).attr("data-phone"));
+    var DataUsername = ($(this).attr("data-username"));
+    if (DataUsername !==undefined) {
+        str = '<a id="href_id" href="https://t.me/'+ DataUsername +'">@'+ DataUsername +'</a>';
+        html = $.parseHTML(str);
+        $
+        $('#href_id').remove();
+        $('#telegram').append(html);
+    } else {
+        $('#telegram').html('Пользователь скрыл юзернейм');;
+    }
+});
+  </script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+<div class="row">
+    <div class="col-sm align-self-center">
+        Имя - {{qs.fio}} <br>
+        адрес - {{qs.address}} <br>
+        Индекс - {{qs.post_index}} <br>
+        Телефон - {{qs.number}} <br>
+        {% if qs.user.username %}
+        Телеграм - <a href="https://t.me/{{qs.user.username}}">@{{qs.user.username}}</a>
+        {% else %}
+        Пользователь скрыл свой юзернейм
+        {% endif %}
+    </div>
+    <div class="col-sm align-self-center">
+
+        <div class='text-primary'> Доставка - {{qs.delivery_pay}} руб. </div>
+        <form action="" method='post'>
+            {% csrf_token %}
+            {% for item in qs.sold_product.all %}
+            <label for="count" class="col-form-label">{% if item.product.count < item.count %}<div
+                    class='text-danger'> {{item.product.title}}
+    </div> {% else %} {{item.product.title}} {% endif %}</label><br>
+    <style>
+        #user {
+            width: 50px;
+            /* Ширина поля в пикселах */
+        }
+    </style>
+    <input type="hidden" name="product_id" value="{{item.pk}}">
+    <input type="number" id="user" name='product_count' pattern="" value={{item.count}}> шт. - {% widthratio item.price 1 item.count %} руб.
+    <br>
+    {% endfor %}
+    <br>
+    <button type="submit" class="btn btn-success" name='change_order'>Изменить заказ</button>
+    </form>
+
+</div>
+<div class="col-sm align-self-center">
+    <div class='text-center'>
+        <form action="" method='post'>
+            {% csrf_token %}
+            <input type="hidden" name="order_id" value="{{qs.pk}}">
+
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="payment" id="inlineRadio1"
+                    value="paid">
+                <label class="form-check-label" for="inlineRadio1">Оплачено</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="payment" id="inlineRadio2"
+                    value="not_paid">
+                <label class="form-check-label" for="inlineRadio2">Не оплачено</label>
+            </div>
+
+            <button type="sumbit" class="btn btn-success" name='paid_status'>Отметить</button>
+        </form>
+
+    </div>
+</div>
+</div> -->

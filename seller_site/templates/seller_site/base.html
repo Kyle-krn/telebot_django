@@ -10,6 +10,7 @@
   <script src="https://kit.fontawesome.com/c044e4f0d6.js" crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/c044e4f0d6.js" crossorigin="anonymous"></script>
 
 
   <title>{{title}}</title>
@@ -29,7 +30,7 @@
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
 
         {% if request.user.is_superuser %}
-        <a style="color: white;" href="{% url 'all_product' %}"> 
+        <a style="color: white;" href="{% url 'admin_panel:list_product' %}"> 
           <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-door-open" viewBox="0 0 16 16">
             <path d="M8.5 10c-.276 0-.5-.448-.5-1s.224-1 .5-1 .5.448.5 1-.224 1-.5 1z"/>
             <path d="M10.828.122A.5.5 0 0 1 11 .5V1h.5A1.5 1.5 0 0 1 13 2.5V15h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3V1.5a.5.5 0 0 1 .43-.495l7-1a.5.5 0 0 1 .398.117zM11.5 2H11v13h1V2.5a.5.5 0 0 0-.5-.5zM4 1.934V15h6V1.077l-6 .857z"/>
@@ -82,19 +83,33 @@
   
         </ul>
 
-        <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_reception' %}" role="button">+ Приемка</a>
-        <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_order' %}" role="button">+ Продажа</a>
-          <div class="btn-group">
 
-            {% if request.user.is_superuser %}
-            <a class="btn btn-outline-light me-2" href="{% url 'local_shop:list_category' %}" role="button">+ Категория</a>
-          </div><!-- /btn-group -->
-          <div class="btn-group">
+          <div class='text-center'>
             <div class="dropdown">
-              <a class="btn btn-outline-light me-2" href="{% url 'local_shop:create_product' %}" role="button">+ Товар</a>
+              <a class="btn btn-outline-light dropdown-toggle me-3" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-plus"></i>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                {% url 'local_shop:create_reception' as no %}
+                <li><a class="dropdown-item {% if request.path == no %} disabled {% else %} {% endif %} " href="{% url 'local_shop:create_reception' %}">+ приемка</a></li>
+                {% url 'local_shop:create_order' as oo %}
+                <li><a href="{% url 'local_shop:create_order' %}" class="dropdown-item {% if request.path == oo %} disabled {% else %} {% endif %}">+ продажа</a></li>
+
+                {% if request.user.is_superuser %}
+                
+                {% url 'local_shop:list_category' as qo %}
+                
+                <li><a class="dropdown-item {% if request.path == qo %} disabled {% else %} {% endif %}" href="{% url 'local_shop:list_category' %}">+ категория</a></li>
+                
+                {% url 'local_shop:create_product' as cp %}
+                <li><a class="dropdown-item {% if request.path == cp %} disabled {% else %} {% endif %}" href="{% url 'local_shop:create_product' %}">+ товар</a></li>
+
+
+                {% endif %}
+              </ul>
             </div>
-          </div><!-- /btn-group -->
-          {% endif %}
+          </div>
+
           <a class="btn btn-danger " href="{% url 'logout' %}" role="button">Выход</a>
       </div>
     </div>

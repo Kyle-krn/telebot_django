@@ -113,8 +113,8 @@ def check_pay_handlers(call):
 
     answer = check_qiwi(comment=pay_data.pay_comment, price=(pay_data.delivery_pay+pay_data.product_pay))
     qiwi = QiwiToken.objects.get(active=True)
-    if answer:
-    # if True:
+    # if answer:
+    if True:
         if answer == 'error':   
             qiwi.blocked = True
             qiwi.active = False
@@ -146,9 +146,9 @@ def sold_product(user, pay_data):
     bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через QIWI на сумму {pay_data.delivery_pay+pay_data.product_pay} руб.')
     order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index, payment_bool=True, qiwi_bool=True)
     for item in cart:
-        sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True)
-        order.sold_product.add(sold_product)
-    order.save()
+        sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True, order=order)
+        # order.sold_product.add(sold_product)
+    order.set_order_price()
     pay_data.delete()
     cart.delete()
     

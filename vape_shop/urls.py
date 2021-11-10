@@ -22,7 +22,7 @@ import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('main/', include('main_app.urls')),
+    path('main/', include('main_app.urls', namespace='admin_panel')),
     path('login/', LoginUser.as_view(), name='login'),                                                                          # Логин
     path('logout/', logout_user, name='logout'),                                                                                # Разлогиниться
     path('', index, name='index_url'),                                                                                # Разлогиниться

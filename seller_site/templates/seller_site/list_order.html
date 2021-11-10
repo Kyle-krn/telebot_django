@@ -57,7 +57,8 @@
                         <td>{{product.title}}</td>
                         <td>{{product.price}} руб.</td>
                         <td class="text-align:right;">
-                          <form action="{% url 'local_shop:change_order' product.pk %}" method="post">
+                          
+                          <form style="display:inline;" action="{% url 'local_shop:change_order' product.pk %}" method="post">
                             {% csrf_token %}
                             <input style="width: 25%" type="number" id="id_count" name='count' pattern="" value={{product.count}} required> шт.
                             <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Обновить">
@@ -65,7 +66,7 @@
                         </button>
                           </form>
 
-                          <form  action="{% url 'local_shop:remove_item_in_order' product.pk %}" method="post">
+                          <form style="display:inline;"  action="{% url 'local_shop:remove_item_in_order' product.pk %}" method="post">
                             {% csrf_token %}
                             <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Удалить">
                               <i class="far fa-trash-alt"></i>

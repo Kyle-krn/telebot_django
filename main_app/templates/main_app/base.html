@@ -4,12 +4,13 @@
 <head>
   <!-- Обязательные метатеги -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
+    <script src="https://kit.fontawesome.com/c044e4f0d6.js" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
   <title>{{title}}</title>
 </head>
@@ -31,32 +32,32 @@
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
 
-          {% url 'all_product' as ap %}
+          {% url 'admin_panel:list_product' as ap %}
           {% if request.path == ap %}
-          <li><a href="{% url 'all_product' %}" class="nav-link px-2 disabled">Список товаров</a></li>
+          <li><a href="{% url 'admin_panel:list_product' %}" class="nav-link px-2 disabled">Список товаров</a></li>
           {% else %}
-          <li><a href="{% url 'all_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
+          <li><a href="{% url 'admin_panel:list_product' %}" class="nav-link px-2 text-white">Список товаров</a></li>
           {% endif %}
 
-          {% url 'user_stat' as us %}
+          {% url 'admin_panel:statistic' as us %}
           {% if request.path == us %}
-          <li><a href="{% url 'user_stat' %}" class="nav-link px-2 disabled">Общая статистика</a></li>
+          <li><a href="{% url 'admin_panel:statistic' %}" class="nav-link px-2 disabled">Общая статистика</a></li>
           {% else %}
-          <li><a href="{% url 'user_stat' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
+          <li><a href="{% url 'admin_panel:statistic' %}" class="nav-link px-2 text-white">Общая статистика</a></li>
           {% endif %}
 
-          {% url 'reception' as r %}
+          {% url 'admin_panel:reception' as r %}
           {% if request.path == r %}
-          <li><a href="{% url 'reception' %}" class="nav-link px-2 disabled">Прием товаров</a></li>
+          <li><a href="{% url 'admin_panel:reception' %}" class="nav-link px-2 disabled">Прием товаров</a></li>
           {% else %}
-          <li><a href="{% url 'reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
+          <li><a href="{% url 'admin_panel:reception' %}" class="nav-link px-2 text-white">Прием товаров</a></li>
           {% endif %}
 
-          {% url 'qiwi' as q %}
+          {% url 'admin_panel:control_qiwi' as q %}
           {% if request.path == q %}
-          <li><a href="{% url 'qiwi' %}" class="nav-link px-2 disabled">Управление киви</a></li>
+          <li><a href="{% url 'admin_panel:control_qiwi' %}" class="nav-link px-2 disabled">Управление киви</a></li>
           {% else %}
-          <li><a href="{% url 'qiwi' %}" class="nav-link px-2 text-white">Управление киви</a></li>
+          <li><a href="{% url 'admin_panel:control_qiwi' %}" class="nav-link px-2 text-white">Управление киви</a></li>
           {% endif %}
 
           <div class="dropdown">
@@ -64,25 +65,25 @@
               Заказы
             </a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              {% url 'new_order' as no %}
+              {% url 'admin_panel:no_paid_order' as no %}
               {% if request.path == no %}
-              <li><a class="dropdown-item disabled" href="{% url 'new_order' %}">Неоплаченные заказы</a></li>
+              <li><a class="dropdown-item disabled" href="{% url 'admin_panel:no_paid_order' %}">Неоплаченные заказы</a></li>
               {% else %}
-              <li><a class="dropdown-item" href="{% url 'new_order' %}">Неоплаченные заказы</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin_panel:no_paid_order' %}">Неоплаченные заказы</a></li>
               {% endif %}
 
-              {% url 'old_order' as oo %}
+              {% url 'admin_panel:paid_order' as oo %}
               {% if request.path == oo %}
-              <li><a href="{% url 'old_order' %}" class="dropdown-item disabled">Оплаченные заказы</a></li>
+              <li><a href="{% url 'admin_panel:paid_order' %}" class="dropdown-item disabled">Оплаченные заказы</a></li>
               {% else %}
-              <li><a href="{% url 'old_order' %}" class="dropdown-item">Оплаченные заказы</a></li>
+              <li><a href="{% url 'admin_panel:paid_order' %}" class="dropdown-item">Оплаченные заказы</a></li>
               {% endif %}
 
-              {% url 'qiwi_order' as qo %}
+              {% url 'admin_panel:qiwi_order' as qo %}
               {% if request.path == qo %}
-              <li><a class="dropdown-item disabled" href="{% url 'qiwi_order' %}">Qiwi заказы</a></li>
+              <li><a class="dropdown-item disabled" href="{% url 'admin_panel:qiwi_order' %}">Qiwi заказы</a></li>
               {% else %}
-              <li><a class="dropdown-item" href="{% url 'qiwi_order' %}">Qiwi заказы</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin_panel:qiwi_order' %}">Qiwi заказы</a></li>
               {% endif %}
             </ul>
           </div>
@@ -93,10 +94,10 @@
 
         <div class="text-end">
           <div class="btn-group">
-            <a class="btn btn-outline-light me-2" href="{% url 'add_category' %}" role="button">+ Категория</a>
+            <a class="btn btn-outline-light me-2" href="{% url 'admin_panel:create_category' %}" role="button">+ Категория</a>
           </div><!-- /btn-group -->
           <div class="btn-group">
-            <a class="btn btn-outline-light me-2" href="{% url 'add_product' %}" role="button">+ Товар</a>
+            <a class="btn btn-outline-light me-2" href="{% url 'admin_panel:create_product' %}" role="button">+ Товар</a>
           </div><!-- /btn-group -->
           <a class="btn btn-danger " href="{% url 'logout' %}" role="button">Выход</a>
         </div>

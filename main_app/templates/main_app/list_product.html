@@ -91,14 +91,15 @@
   </div>
   </div>
 </div>
-  <table class="table">
+<div class="table-responsive">
+  <table class="table table-sm">
     <thead>
       <tr>
         <th scope="col">#</th>
         <th scope="col">Название</th>
         <th scope="col">Цена</th>
-        <th scope="col">Кат.</th>
-        <th scope="col">Подкат.</th>
+        <th scope="col">Категория</th>
+        <th scope="col">Подкатегория</th>
         <th scope="col">Остаток</th>
         <th scope="col">#</th>
       </tr>
@@ -108,12 +109,12 @@
       <tr>
         <th scope="row">{{ forloop.counter }}</th>
         <td>{{p.title}}</td>
-        <td>{{p.price}}</td>
+        <td>{{p.price}} руб.</td>
         <td>{{p.subcategory.category}}</td>
         <td>{{p.subcategory}}</td>
-        <td>{{p.count}}</td>
+        <td>{{p.count}} шт.</td>
           <td><div class="btn-group">
-            <a class="btn btn-outline-dark" href="{% url 'productdetail' pk=p.pk %}" role="button">
+            <a class="btn btn-outline-dark" href="{% url 'admin_panel:productdetail' pk=p.pk %}" role="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
                 <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
               </svg>
@@ -125,13 +126,13 @@
               </svg>
             </button>
           </div></td>
-        <!-- <td><a class="btn btn-primary btn-warning" href="{% url 'productdetail' pk=p.pk %}" role="button">#</a> -->
+        
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
+</div>
  <!-- Модальное окно удаление начало -->
  <div class="modal fade" id="deletedModal" tabindex="-1" aria-labelledby="deletedModalLabel" aria-hidden="true">
   <div class="modal-dialog">
