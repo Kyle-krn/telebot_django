@@ -27,7 +27,7 @@ urlpatterns = [
     path('logout/', logout_user, name='logout'),                                                                                # Разлогиниться
     path('', index, name='index_url'),                                                                                # Разлогиниться
     path('seller/', include('seller_site.urls', namespace='local_shop')),
-    # path('', include('online_shop.urls', namespace='online_shop')),
+    path('shop/', include('online_shop.urls', namespace='online_shop')),
 ]
 
 

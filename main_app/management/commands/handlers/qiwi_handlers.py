@@ -16,10 +16,12 @@ def cancel_pay_handlers(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     bot.clear_step_handler_by_chat_id(chat_id=call.message.chat.id)
     cart = TelegramProductCartCounter.objects.filter(Q(user__chat_id=call.message.chat.id) & Q(counter=False))
-    if PayProduct.objects.filter(user__chat_id=call.message.chat.id).delete()[0]:    # Добавляем забронированные товары обратно
-        for item in cart:
-            item.product.count += item.count
-            item.product.save()
+    # if PayProduct.objects.filter(user__chat_id=call.message.chat.id).delete()[0]:    # Добавляем забронированные товары обратно
+    #     for item in cart:
+    #         item.product.count += item.count
+    #         item.product.save()
+    pay_data = PayProduct.objects.get(user__chat_id=call.message.chat.id)
+    pay_data.cancel_reservation()
     bot.send_message(chat_id=call.message.chat.id, text='Бронь отменена')
 
 
@@ -50,10 +52,11 @@ def pay_handlers(call):
     user = TelegramUser.objects.get(chat_id=call.message.chat.id)
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))   # Получаем корзину юзера
     product_pay = sum([x.count * x.product.price for x in cart])    # Стоймость товара
+
     pay_data = PayProduct.objects.create(user=user, pay_comment=pay_word, delivery_pay=delivery_pay, product_pay=product_pay)   # Создаем модель оплаты
-    for item in cart: # бронируем товар в каталоге
-        item.product.count -= item.count
-        item.product.save()
+    # for item in cart: # бронируем товар в каталоге
+    #     item.product.count -= item.count
+    #     item.product.save()
     text = f'Переведите на кошелек +{qiwi.number} {delivery_pay+product_pay} руб.\nОБЯЗАТЕЛЬНО УКАЖИТЕ В КОМЕНТАРИИ\n{pay_word}\n\nТовар забронирован на 15 минут для оплаты, если вы хотите отменить заявку, перейдите снова в корзину'
     message = bot.send_message(chat_id=call.message.chat.id,
                           text=text, reply_markup=check_pay_keyboard())
@@ -113,8 +116,8 @@ def check_pay_handlers(call):
 
     answer = check_qiwi(comment=pay_data.pay_comment, price=(pay_data.delivery_pay+pay_data.product_pay))
     qiwi = QiwiToken.objects.get(active=True)
-    # if answer:
-    if True:
+    if answer:
+    # if True:
         if answer == 'error':   
             qiwi.blocked = True
             qiwi.active = False
@@ -149,6 +152,6 @@ def sold_product(user, pay_data):
         sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True, order=order)
         # order.sold_product.add(sold_product)
     order.set_order_price()
-    pay_data.delete()
+    pay_data.delete()           #
     cart.delete()
     

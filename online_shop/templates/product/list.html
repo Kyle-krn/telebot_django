@@ -5,29 +5,33 @@
     <div class="col-lg-3">
         <div class="card shadow-custom border-0">
             <h4 class="p-3 font-weight-bold text-grey">
-                Categories
+                Категории
             </h4>
             <ul class="list-group border-0 categories_list">
-                {% if not requested_category %}
-                <li class="list-group-item border-0 p-0 selected">
-                    {% else %}
-                <li class="list-group-item border-0 p-0 unselected">
-                    {% endif %}
-                    <a href="{% url 'online_shop:product_list' %}" class="btn btn-block text-left">All</a>
+                {% if not requested_category and not requested_subcategory %}
+                    <li class="list-group-item border-0 p-0 selected">
+                {% else %}
+                    <li class="list-group-item border-0 p-0 unselected">
+                {% endif %}
+                    <a href="{% url 'online_shop:product_list' %}" class="btn btn-block text-left">Все товары</a>
                 </li>
                 {% for category in categories %}
-                <li class="list-group-item border-0 p-0 unselected">
-                    <a href="" class="btn btn-block text-left">
+                    {% if category.slug == requested_category.slug %}
+                    <li class="list-group-item border-0 p-0 selected">
+                    {% else %}
+                    <li class="list-group-item border-0 p-0 unselected">
+                    {% endif %}
+                    <a href="{{ category.get_absolute_url_for_shop }}" class="btn btn-block text-left">
                         {{ category.name }}
                     </a>
                     <ul>
                         {% for subcategory in category.subcategory_set.all %}
-                        {% if subcategory.slug == requested_category.slug %}
+                        {% if subcategory.slug == requested_subcategory.slug %}
                         <li class="list-group-item border-0 p-0 selected">
                         {% else %}
                         <li class="list-group-item border-0 p-0 unselected">
                         {% endif %}
-                            <a href="{{ subcategory.get_absolute_url }}" class="btn btn-block text-left">
+                            <a href="{{ subcategory.get_absolute_url_for_shop }}" class="btn btn-block text-left">
                             {{ subcategory.name }}
                         </a>
                         {% endfor %}
@@ -41,10 +45,12 @@
         <div class="card shadow-custom border-0 mb-4">
             <div class="card-body text-center">
                 <h2 class="font-weight-bold text-grey">
-                    {% if requested_category %}
-                    {{ requested_category.name }}
+                    {% if requested_category and requested_subcategory %}
+                        {{ requested_subcategory.name }}
+                    {% elif requested_category %}
+                        {{ requested_category.name }}
                     {% else %}
-                    Our products
+                        Все товары
                     {% endif %}
                 </h2>
                 <div class="bottom_line"></div>
@@ -60,7 +66,7 @@
                         </div>
                         <div class="item-text">
                             <div class="item-text-wrap">
-                                <a href="{{ product.get_absolute_url }}" 
+                                <a href="{{ product.get_absolute_url_for_shop }}" 
                   class="h2 text-white text-decoration-none">
                   <i class="fas fa-search-plus"></i>
                                 </a>
@@ -69,7 +75,7 @@
                         <div class="card-body text-center">
                             {{ product.title }}
                             <hr>
-                            <span>${{ product.price }}</span>
+                            <span>{{ product.price }} руб.</span>
                             <div>
                                 <!-- <i class="fas fa-fire"></i> {{ product.shu }} SHU -->
                             </div>

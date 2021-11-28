@@ -5,6 +5,7 @@
 <div class="text-center">
     <h1>{{title}}</h1>
     <h4>Остаток на складе: {{product.count}} шт.</h4>
+    <h6>Забронированно: {{reservation_count}} шт.</h6>
 </div>
 
 <!-- <link rel="stylesheet" href="magnific-popup/magnific-popup.css"> -->
@@ -46,7 +47,7 @@
                             <br>
                             <div class="fieldWrapper">
                                 {{ product_form.description.errors }}
-                                <label for="{{ product_form.description.id_for_label }}">Описание:</label>
+                                <label for="{{ product_form.description.id_for_label }}">Описание:</label> <div class="text-end text-muted" id='textarea_count'>0/1000</div>
                                 {{ product_form.description }}
                             </div>
                             <br>
@@ -294,6 +295,23 @@
 
 
 
+<script>
+    $('#id_description').bind('input', function () {
+        var len = $("#id_description").val().length;
+        $('#textarea_count').text(len + '/1000')
+        if (len > 1000) {
+            $('#id_description').removeClass('alert-success');
+            $('#id_description').addClass('alert-danger');
+        } else {
+            $('#id_description').removeClass('alert-danger');
+            $('#id_description').addClass('alert-success');
+        }
 
+    });
+
+    window.onload = function() {
+        var len = $("#id_description").val().length;
+        $('#textarea_count').text(len + '/1000');}
+</script>
 
 {% endblock %}

@@ -27,25 +27,26 @@
             </div>
             {% if product.count > 0 %}
             <div class="alert alert-success my-3 text-center">
-                Available {{product.count}}
+                Доступно {{product.count}} шт.
             </div>
             {% else %}
             <div class="alert alert-danger my-3 text-center">
-                Currently unavailable
+                Нет в наличии
             </div>
             {% endif %}
             <hr>
             <div class="review">
                 <span class="font-weight-bold text-grey">
-                    Average rating: {{product.get_average_review_score}}/5.0
+                    Рейтинг: {{product.get_average_review_score}}/5.0
                 </span>
                 <div class="mb-3 font-weight-bold">
                     <a href="" class="text-warning" data-toggle="modal" data-target="#myModal">
-                        Write review
+                        Оставить отзыв
                     </a>
                 </div>
             </div>
             <div class="mb-4">
+                {% if product.count > 0 %}
                 <form action="{% url 'online_shop:cart_add' product.pk %}" method="post">
                     {% csrf_token %}
                     <span class="input-group add-to-cart shadow-custom">
@@ -70,6 +71,7 @@
                         </div>
                     </span>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -85,7 +87,7 @@
 
 <hr class="col-7 mx-auto">
 <div class="card shadow-custom border-0 col-lg-8 mx-auto mb-3">
-    <h3 class="py-2 text-grey">Reviews:</h3>
+    <h3 class="py-2 text-grey">Отзывы:</h3>
     {% for review in product.reviews.all %}
     <span class="font-weight-bold py-2 text-grey">
         {{ review.author }} - {{ review.rating }}/5 - {{ review.created }}

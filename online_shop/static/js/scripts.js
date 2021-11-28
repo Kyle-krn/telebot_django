@@ -38,25 +38,25 @@ function increaseAmount(){
     document.getElementById('id_quantity').value = String(currentAmount);
 }
 
-function setTotalCost() {
+// function setTotalCost() {
     
-    let totalCost = Number(document.getElementById("cart_price").innerText);
-    totalCost += getSumOfElements('transport');
-    totalCost = totalCost.toFixed(2);
-    // set total price
-    document.getElementById("order-total").innerHTML = `$${totalCost}`
-}
+//     let totalCost = Number(document.getElementById("cart_price").innerText);
+//     totalCost += getSumOfElements('transport');
+//     totalCost = totalCost.toFixed(2);
+//     // set total price
+//     document.getElementById("order-total").innerHTML = `$${totalCost}`
+// }
 
-function getSumOfElements(elementName){
-    let sum = 0;
-    radios = document.getElementsByName(elementName);
-    for(let i = 0; i < radios.length; i++){
-        if(radios[i].checked){
-            if(radios[i].getAttribute('amount') !== 'free'){
-                sum += Number(radios[i].getAttribute('amount'));
-            }
-        }
-    }
+// function getSumOfElements(elementName){
+//     let sum = 0;
+//     radios = document.getElementsByName(elementName);
+//     for(let i = 0; i < radios.length; i++){
+//         if(radios[i].checked){
+//             if(radios[i].getAttribute('amount') !== 'free'){
+//                 sum += Number(radios[i].getAttribute('amount'));
+//             }
+//         }
+//     }
 
-    return sum;
-}
+//     return sum;
+// }

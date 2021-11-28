@@ -1,7 +1,8 @@
 from django import forms
 from .models import Review
 from django.forms import NumberInput
-from main_app.models import OrderingProduct, OrderSiteProduct
+# from main_app.models import OrderingProduct, OrderSiteProduct
+from .models import OrderSiteProduct
 
 class ReviewForm(forms.ModelForm):
     '''Форма отзыва о товаре'''

@@ -4,7 +4,7 @@ from .models import *
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from itertools import chain
-from django.db.models import Q, query
+from django.db.models import Q
 from main_app.management.commands.utils import get_qiwi_balance
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
@@ -17,8 +17,11 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth import login 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
+from django.core.exceptions import BadRequest
+from online_shop.models import OrderSiteProduct
 
 def index(request):
+    '''Функция для перенаправления юзеров'''
     if not request.user.is_authenticated:
         return redirect('login')
     return redirect('admin_panel:list_product') if request.user.is_superuser else redirect('local_shop:list_product')
@@ -45,6 +48,7 @@ class LoginUser(LoginView):
         else:
             return reverse_lazy('local_shop:list_product') 
 
+
 def logout_user(request):
     '''Выход'''
     logout(request)
@@ -59,6 +63,7 @@ class IndexView(LoginRequiredMixin, ListView):
     template_name = 'main_app/list_product.html'
 
     def get_queryset(self):
+        '''Фильтр по товарам'''
         queryset = Product.objects.all()
         if 'search' in self.request.GET:
             params = {k:v for k,v in self.request.GET.items() if len(v) != 0}
@@ -72,14 +77,14 @@ class IndexView(LoginRequiredMixin, ListView):
                 queryset = queryset.order_by(params['order_by'])
         return queryset
 
-
     def post(self, request):
+        '''Удаление товара'''
         form = ProductDeleteForm(request.POST)
         if form.is_valid():
             cf = form.cleaned_data
             Product.objects.get(pk=cf['id']).delete()
-        return redirect('admin_panel:list_product')
-
+            # return redirect('admin_ panel:list_product')
+            return self.get(request)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,9 +93,10 @@ class IndexView(LoginRequiredMixin, ListView):
         context['delete_form'] = ProductDeleteForm()
         return context
 
+
 @method_decorator(staff_member_required, name='dispatch')
 class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
-    '''Создание нового товара'''
+    '''Представление создания нового товара'''
     template_name = 'main_app/create_product.html'
     form_class = ProductForm
     success_message = "Товар успешно создан!"
@@ -110,7 +116,6 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('admin_panel:reception')
     success_message = 'Количество товара успешно увеличено!'
 
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Приемка товара'
@@ -120,7 +125,7 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    '''Обновить категорию'''
+    '''Представление обновления категории/подкатегории'''
     model = Category
     template_name = 'main_app/category_detail.html'
     form_class = Category_reqForm
@@ -133,7 +138,7 @@ class CategoryUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return context
 
     def post(self, *args, **kwargs):
-        if 'delete' in self.request.POST:
+        if 'delete' in self.request.POST:   # Удаление категории/подкатегории
             category = self.get_object()
             category.delete()
             return redirect('admin_panel:create_category')
@@ -172,20 +177,23 @@ class CategoriesView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class QiwiOrderView(LoginRequiredMixin, ListView):
+    '''Представление просмотра заказов оплаченых через Qiwi'''
     template_name = 'main_app/paid_order.html'
     queryset = OrderingProduct.objects.filter(qiwi_bool=True).order_by('-datetime')
     context_object_name = 'queryset'
 
-    def post(self, request):
-        form = TrackCodeOrderForm(request.POST)
-        if form.is_valid():
-            cf = form.cleaned_data
-            order = OrderingProduct.objects.get(pk=cf['id'])
-            order.track_code = cf['track_code']
-            order.save()
-            messages.success(request, 'Трек-номер успешно добавлен!')
-            return redirect('admin_panel:qiwi_order')
+    # def post(self, request):
+    #     '''Добавление трек-кода к заказу'''
+    #     form = TrackCodeOrderForm(request.POST)
+    #     if form.is_valid():
+    #         cf = form.cleaned_data
+    #         order = OrderingProduct.objects.get(pk=cf['id'])
+    #         order.track_code = cf['track_code']
+    #         order.save()
+    #         messages.success(request, 'Трек-номер успешно добавлен!')
+    #         return redirect('admin_panel:qiwi_order')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -195,18 +203,18 @@ class QiwiOrderView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidOrderView(LoginRequiredMixin, ListView):
-    '''Неоплаченные заказы'''
+    '''Представление неоплаченных заказы'''
     template_name = 'main_app/no_paid_order.html'
     queryset = OrderingProduct.objects.filter(Q(payment_bool=False) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
     
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Неоплаченные заказы'
         return context
 
     def post(self, request):
+        '''Отметить заказ оплаченным'''
         form = HiddenOrderIdForm(request.POST)
         if form.is_valid():
             cf = form.cleaned_data
@@ -224,7 +232,7 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class PaidOrderView(LoginRequiredMixin, ListView):
-    '''Оплаченные заказы'''
+    '''Представление просмотра оплаченных товаров'''
     template_name = 'main_app/paid_order.html'
     queryset = OrderingProduct.objects.filter(Q(payment_bool=True) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
@@ -234,15 +242,16 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         context['title'] = 'Оплаченные заказы'
         return context
 
-    def post(self, request):
-        form = TrackCodeOrderForm(request.POST)
-        if form.is_valid():
-            cf = form.cleaned_data
-            order = OrderingProduct.objects.get(pk=cf['id'])
-            order.track_code = cf['track_code']
-            order.save()
-            messages.success(request, 'Трек-номер успешно добавлен!')
-            return redirect('admin_panel:paid_order')
+    # def post(self, request):
+    #     '''Добавление трек-номера к заказу'''
+    #     form = TrackCodeOrderForm(request.POST)
+    #     if form.is_valid():
+    #         cf = form.cleaned_data
+    #         order = OrderingProduct.objects.get(pk=cf['id'])
+    #         order.track_code = cf['track_code']
+    #         order.save()
+    #         messages.success(request, 'Трек-номер успешно добавлен!')
+    #         return redirect('admin_panel:paid_order')
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -259,6 +268,7 @@ class StatisticView(LoginRequiredMixin, View):
         return context
 
     def get_statistic(self):
+        '''Считает общую статистику, первый элемент кортежа - общая сумма денег, второй элемент - общее кол-во товара'''
         stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
                  'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
                  'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
@@ -269,6 +279,7 @@ class StatisticView(LoginRequiredMixin, View):
         return {k:v for k,v in self.request.GET.items() if v != ''}
 
     def get_queryset(self):
+        '''Фильтрует набор данных о приемке, продаже по заданной дате'''
         params = self.get_params()
         self.sold_queryset = SoldProduct.objects.filter(payment_bool=True)
         if 'start' in params and 'end' in params:
@@ -298,6 +309,7 @@ class ProductView(LoginRequiredMixin, View):
         return {k:v for k,v in self.request.GET.items() if v != ''}
 
     def filter_queryset(self):
+        '''Фильтрует набор данных для отображения таблицы (только приемка, только продажа, только ликвидированные товары или все)'''
         params = self.get_params()
         if 'only' in params:
             if params['only'] == 'reception':
@@ -313,6 +325,7 @@ class ProductView(LoginRequiredMixin, View):
         return result_list
 
     def get_queryset(self, pk):
+        '''Фильтрует набор данных о продажах и приемках по заданной дате'''
         params = self.get_params()
         self.reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
         self.sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
@@ -328,6 +341,7 @@ class ProductView(LoginRequiredMixin, View):
             self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])   
 
     def get_statistic(self):
+        '''Считает общую статистику, первый элемент кортежа - общая сумма денег, второй элемент - общее кол-во товара'''
         stat_dict = {
             'sold_stat': (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
             'reception_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
@@ -349,34 +363,48 @@ class ProductView(LoginRequiredMixin, View):
                                         'price': self.product.price,
                                         'weight': self.product.weight,
                                         'subcategory': self.product.subcategory_id})
+        context['reservation_count'] = self.check_reservation_product()
         return context
+
+    def check_reservation_product(self):
+        product = self.product
+        # pay_objects = PayProduct.objects.filter(user__telegramproductcartcounter_set__product=product)
+        # print(pay_objects)
+        x = TelegramProductCartCounter.objects.filter(Q(product=product) & Q(counter=False))
+        reservation_product = []
+        for item in x:
+            user = item.user
+            if user.payproduct_set.all():
+                reservation_product.append(item)
+        reservation_count = sum([bp.count for bp in reservation_product])
+        return reservation_count
 
     def post(self, request, pk):
         self.get_object()
         self.get_queryset(pk)
 
-        if 'update' in request.POST:
+        if 'update' in request.POST:    # Обновить данные о товаре
             product_form = Product_reqForm(request.POST, files=request.FILES, instance=self.product)
             if product_form.is_valid():
                 product_form.save()
                 messages.success(request, 'Товар успешно обновлен!')
                 return redirect('admin_panel:productdetail', pk=pk)
 
-        elif 'delete' in request.POST:
+        elif 'delete' in request.POST:  # Удалить товар
             self.product.delete()
             messages.success(request, 'Товар усппешно удален!')
             return redirect ('admin_panel:list_product')
 
-        elif 'reception' in request.POST:
+        elif 'reception' in request.POST:   # Приемка товара
             form = ReceptionForProductViewForm(request.POST)
             if form.is_valid():
                 f = form.save(commit=False)
                 f.product = self.product
                 f.save()
                 messages.success(request, 'Количество товара успешно увеличено!')
-                return redirect('admin_panel:productdetail', pk=pk)           
+                return redirect('admin_panel:productdetail', pk=pk)   
 
-        elif 'liquidated' in request.POST:
+        elif 'liquidated' in request.POST:  # Ликвидация товара
             form = ReceptionForProductViewForm(request.POST)
             if form.is_valid():
                 f = form.save(commit=False)
@@ -393,38 +421,90 @@ class ProductView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-
-def control_qiwi(request):
-    '''Для оплаты Qiwi . В приложении не используется'''
-    if not request.user.is_authenticated:
-        return redirect('login')
-    if request.method == 'POST' and 'new_token' in request.POST:
-        form = QiwiTokenForm(request.POST)
-        try:
-            balance = get_qiwi_balance(request.POST['number'], request.POST['token'])
-            if form.is_valid():
-                qiwi = form.save()
-                qiwi.balance = balance
-                qiwi.save()
-        except:
-            messages.success(request, 'Ошибка получения баланса кошелька')
-    elif request.method == 'POST' and 'activate' in request.POST:
-        QiwiToken.objects.update(active=False)
-        qiwi_id = int(request.POST['radio'])
-        QiwiToken.objects.filter(pk=qiwi_id).update(active=True)
-    elif request.method == 'POST' and 'del_tok' in request.POST:
-        qiwi_id = int(request.POST['del_tok_list'])
-        QiwiToken.objects.get(pk=qiwi_id).delete()
-
-    pay_product = PayProduct.objects.all()
+class ControlQiwiView(LoginRequiredMixin, ListView):
+    context_object_name = 'queryset'
+    login_url = '/login/'
+    template_name = 'main_app/control_qiwi.html'
     queryset = QiwiToken.objects.all()
-    form = QiwiTokenForm()
-    return render(request, 'main_app/control_qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})
+
+    def post(self, request):
+        if 'activate' in request.POST:          # Делает активный Qiwi кошелек для оплаты в боте
+            form = QiwiIdForm(request.POST)
+            if form.is_valid():
+                cf = form.cleaned_data
+                QiwiToken.objects.update(active=False)
+                QiwiToken.objects.filter(pk=cf['id']).update(active=True)
+        
+        elif 'new_token' in request.POST:       # Добавляет новый Qiwi кошелек
+            form = QiwiTokenForm(request.POST)
+            try:
+                balance = get_qiwi_balance(request.POST['number'], request.POST['token'])
+                if form.is_valid():
+                    qiwi = form.save()
+                    qiwi.balance = balance
+                    qiwi.save()
+            except:
+                messages.success(request, 'Ошибка получения баланса кошелька')
+
+        elif 'del_tok' in request.POST:         # Удаляет qiwi кошелек
+            form = QiwiIdForm(request.POST)
+            if form.is_valid():
+                cf = form.cleaned_data
+                QiwiToken.objects.get(pk=cf['id']).delete()
+        return redirect('admin_panel:control_qiwi')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = QiwiTokenForm()
+        context['pay_product'] = PayProduct.objects.all()
+        context['radio'] = QiwiIdForm()
+        return context
+
+
+# def control_qiwi(request):
+#     '''Для оплаты Qiwi . В приложении не используется'''
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+#     if request.method == 'POST' and 'new_token' in request.POST:
+#         form = QiwiTokenForm(request.POST)
+#         try:
+#             balance = get_qiwi_balance(request.POST['number'], request.POST['token'])
+#             if form.is_valid():
+#                 qiwi = form.save()
+#                 qiwi.balance = balance
+#                 qiwi.save()
+#         except:
+#             messages.success(request, 'Ошибка получения баланса кошелька')
+#     elif request.method == 'POST' and 'activate' in request.POST:
+#         QiwiToken.objects.update(active=False)
+#         qiwi_id = int(request.POST['radio'])
+#         QiwiToken.objects.filter(pk=qiwi_id).update(active=True)
+#     elif request.method == 'POST' and 'del_tok' in request.POST:
+#         qiwi_id = int(request.POST['del_tok_list'])
+#         QiwiToken.objects.get(pk=qiwi_id).delete()
+
+#     pay_product = PayProduct.objects.all()
+#     queryset = QiwiToken.objects.all()
+#     form = QiwiTokenForm()
+#     return render(request, 'main_app/control_qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})
+
+
+@staff_member_required
+def add_track_code_in_order(request, order_pk):
+    '''Добавляет трек код к заказу'''
+    instance = OrderingProduct.objects.get(pk=order_pk)
+    form = TrackCodeForm(request.POST)
+    if form.is_valid():
+        cf = form.cleaned_data
+        instance.track_code = cf['track_code']
+        instance.save()
+    return redirect('admin_panel:paid_order')
 
 
 
 @staff_member_required
 def change_item_order(request, sold_pk):
+    '''Изменяет кол-во проданного товара в неоплаченном заказе'''
     instance = SoldProduct.objects.get(pk=sold_pk)
     form = OrderChangeForm(request.POST)
     if form.is_valid():
@@ -437,6 +517,7 @@ def change_item_order(request, sold_pk):
 
 @staff_member_required
 def delete_order(request, order_pk):
+    '''Полностью удает заказ'''
     order = OrderingProduct.objects.get(pk=order_pk)
     for item in order.soldproduct_set.all():
         item.delete()
@@ -446,6 +527,7 @@ def delete_order(request, order_pk):
 
 @staff_member_required
 def remove_item_order(request, sold_pk):
+    '''Удаляет заданный товар из заказа'''
     instance = SoldProduct.objects.get(pk=sold_pk)
     order = instance.order
     instance.delete()
@@ -459,30 +541,15 @@ def remove_item_order(request, sold_pk):
 
 
 
+
+
 class SiteOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/site_order.html'
     queryset = OrderSiteProduct.objects.all().order_by('-created')
     context_object_name = 'queryset'
 
-    def post(self, request):
-        if 'order_id' not in request.POST and 'track_code' not in request.POST:
-            messages.error(request, 'Ошибка добавления трек-кода!')
-            return redirect('admin_panel:list_product')
-
-        try:
-            order_id = int(request.POST['order_id'])
-            track_code = request.POST['track_code']
-        except (ValueError, TypeError):
-            messages.error(request, 'Ошибка добавления трек-кода!')
-            return redirect('admin_panel:list_product')
-
-        order = get_object_or_404(OrderingProduct, pk=order_id)
-        order.track_code = track_code
-        order.save()
-        messages.success(request, 'Трек-номер успешно добавлен!')
-        return redirect('admin_panel:qiwi_order')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'QIWI заказы'
+        context['title'] = 'Заказы с сайта'
         return context

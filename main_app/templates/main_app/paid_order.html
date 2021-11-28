@@ -60,9 +60,9 @@
                       </table>
                       <div class='container'>
 
-                        <form action="" method='post'>
+                        <form action="{% url 'admin_panel:add_track_code_in_order' qs.pk %}" method='post'>
                             {% csrf_token %}
-                            <input type="hidden" name="id" id="id_id" value="{{qs.pk}}">
+                            <!-- <input type="hidden" name="id" id="id_id" value="{{qs.pk}}"> -->
                             <div class="input-group mb-3">
                                 <input type="text" name="track_code" id="id_track_code" class="form-control" pattern="[0-9]{13,14}" {% if qs.track_code %} value="{{qs.track_code}}"{% endif %} placeholder="Трек номер"
                                     aria-label="Username" aria-describedby="addon-wrapping">
@@ -73,7 +73,7 @@
 
                       <div class="text-end">
                           <div style='display: inline-block;'>
-                        <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.fio}}" data-address="{{qs.address}}" data-postal="{{qs.post_index}}" data-phone="{{qs.number}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %}  type="button" class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.fio}}" data-address="{{qs.address}}" data-postal="{{qs.post_index}}" data-phone="{{qs.number}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %}  type="button" class="btn modalinfo" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             <i class="far fa-address-card"></i>
                           </button>
 
@@ -139,7 +139,7 @@
 
 
   <script>
-      $('#test').on('click', function() {
+      $('.modalinfo').on('click', function() {
     
   // действия, которые будут выполнены при наступлении события...
   $('#name').html($(this).attr("data-name"));

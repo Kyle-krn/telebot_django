@@ -3,26 +3,26 @@
 {% block content %}
 <div class="card shadow-custom border-0 col-lg-10 mx-auto mb-3">
     <h3 class="py-2 font-weight-bold text-grey text-center">
-        Your order:
+        Ваш заказ:
     </h3>
     <div class="row justify-content-center py-2 text-center header-desc">
         <div class="col-lg-2 align-self-center">
-            Product
+            Товар
         </div>
         <div class="col-lg-2 align-self-center">
-            Description
+            Название
         </div>
         <div class="col-lg-2 align-self-center">
-            Availability
+            В наличии
         </div>
         <div class="col-lg-1 align-self-center">
-            Price
+            Цена
         </div>
         <div class="col-lg-2 align-self-center">
-            Quantity
+            Количество
         </div>
         <div class="col-lg-3 align-self-center">
-            Total price
+            Общая цена
         </div>
     </div>
     <hr class="mt-0">
@@ -41,17 +41,16 @@ col-lg-2 align-self-center text-center">
         <div class="cart-item col-12 col-lg-2 align-self-center">
             {% if product.count > 0 %}
             <div class="text-green mb-0 text-center">
-                Available
+                <i class="fas fa-check"></i>
             </div>
             {% else %}
             <div class="text-danger mb-0 text-center">
-                Currently unavailable
+                <i class="fas fa-times"></i>
             </div>
             {% endif %}
         </div>
-        <div class="cart-item col-12 col-sm-3
-col-lg-1 align-self-center text-center">
-            <span>${{ product.price }}</span>
+        <div class="cart-item col-12 col-sm-3 col-lg-1 align-self-center text-center">
+            <span>{{ product.price }} руб.</span>
         </div>
         <div class="cart-item col-6 col-sm-5 col-lg-2 align-self-center">
             <form action="{% url 'online_shop:cart_add' product.id %}" method='post'>
@@ -68,9 +67,8 @@ col-lg-1 align-self-center text-center">
                 </span>
             </form>
         </div>
-        <div class="cart-item col-12 col-sm-3
-col-lg-2 align-self-center text-right">
-            <span>${{ item.total_price }}</span>
+        <div class="cart-item col-12 col-sm-3 col-lg-2 align-self-center text-right">
+            <span>{{ item.total_price }} руб.</span>
         </div>
         <div class="cart-item col-12 col-lg-1 text-right
 align-self-center">
@@ -86,7 +84,7 @@ align-self-center">
     {% empty %}
     <div class="align-self-center">
         <span class="text-center font-weight-bold text-muted lead">
-            Your shopping cart is empty.
+            Ваша корзина пуста.
         </span>
     </div>
     {% endfor %}
@@ -94,10 +92,10 @@ align-self-center">
     <div class="total-price-cart">
         <h4 class="row justify-content-center">
             <div class="col-5 col-lg-9 text-right text-grey">
-                Total price:
+                Общая цена:
             </div>
             <div class="col-5 col-lg-2 text-right text-danger">
-                ${{ cart_total_price|floatformat:2 }}
+                {{ cart_total_price|floatformat:2 }} р.
             </div>
             <div class="col-2 col-lg-1">
             </div>
@@ -111,10 +109,10 @@ align-self-center">
         <div class="col-lg-6 px-0">
             <div class="btn-group d-flex">
                 <a href="{% url 'online_shop:product_list' %}" class="btn btn-warning shadow-custom col">
-                    Back to shop
+                    Назад
                 </a>
                 <a href="{% url 'online_shop:order_create' %}" class="btn btn-danger shadow-custom col">
-                    Checkout
+                    Оформить заказ
                 </a>
             </div>
         </div>

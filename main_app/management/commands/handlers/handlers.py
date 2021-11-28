@@ -14,6 +14,7 @@ subcategory_list = [x.pk_for_telegram for x in SubCategory.objects.all()]
 product_list = [x.pk_for_telegram for x in Product.objects.all()]
 
 
+
 def update_lists():
     '''Каждый раз обновляет список для отлова хендлреов'''
     global category_list, subcategory_list, product_list
@@ -58,7 +59,9 @@ def category(call):
     '''Вывод подкатегорий'''
     update_lists()
     try:
-        category = Category.objects.get(pk_for_telegram=call.data)
+        category_pk = call.data.split('||')[1]
+        # category = Category.objects.get(pk_for_telegram=call.data)
+        category = Category.objects.get(pk=category_pk)
     except:
         return bot.send_message(call.message.chat.id, 'Упс! Что то пошло не так')
     subcategory = category.subcategory_set.filter(product__count__gte=1).distinct() # Только подкатегории где есть товар
@@ -73,7 +76,9 @@ def subcategory(call):
     update_lists()
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=call.message.chat.id) & Q(counter=True)).delete() # Удаляем каунтер если юзер перешел по кнопке назад
     try:
-        subcategory = SubCategory.objects.get(pk_for_telegram=call.data)
+        subcategory_pk = call.data.split('||')[1]
+        # subcategory = SubCategory.objects.get(pk_for_telegram=call.data)
+        subcategory = SubCategory.objects.get(pk=subcategory_pk)
     except:
         return bot.send_message(call.message.chat.id, 'Упс, что то пошло не так')
 
@@ -97,7 +102,9 @@ def product(call):
     else:
         slug=call.data
     try:
-        product=Product.objects.get(pk_for_telegram=slug)
+        product_pk = slug.split('||')[1]
+        # product=Product.objects.get(pk_for_telegram=slug)
+        product=Product.objects.get(pk=product_pk)
         if product.count <= 0:  # Если юзер на странице товара, но он закончился
             bot.delete_message(call.message.chat.id, call.message.message_id)
             return bot.send_message(chat_id=call.message.chat.id, text='К сожалению данный товар только что закончился.')

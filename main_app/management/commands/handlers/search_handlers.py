@@ -38,7 +38,10 @@ def input_title_product(message):
     except:
         return bot.send_message(chat_id=message.chat.id, text='Я понимаю только текст')
     user = TelegramUser.objects.get(chat_id=message.chat.id)
-    category = Category.objects.get(pk_for_telegram=user.search_data)
+    # print(user.search_data)
+    category_pk = user.search_data.split('||')[1]
+    # category = Category.objects.get(pk_for_telegram=user.search_data)
+    category = Category.objects.get(pk=category_pk)
     product_list = Product.objects.filter(Q(subcategory__category=category) & Q(count__gte=1) & Q(title__icontains=title))
     bot.send_message(chat_id=message.chat.id, text='Выберите товар:', reply_markup=product_keyboard(sub_slug=None, products=product_list, search=True, back=False))
 

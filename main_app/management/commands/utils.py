@@ -42,6 +42,7 @@ def check_price_delivery(post_index, weight):
 
 
 def check_time_delivery(post_index, weight):
+    '''Расчет времени доставки, в приложении пока не используется'''
     url = 'https://tariff.pochta.ru/v1/calculate/delivery'
     data = {
         'json': '',
@@ -66,6 +67,7 @@ def get_pay_qiwi_in(api_access_token, number):
 
 
 def get_qiwi_balance(login, api_access_token):
+    '''Получает инф. о балансе Qiwi кошелька'''
     s = requests.Session()
     s.headers['Accept']= 'application/json'
     s.headers['authorization'] = 'Bearer ' + api_access_token  
@@ -95,30 +97,4 @@ def generate_alphanum_random_string(length):
     rand_string = ''.join(random.sample(letters_and_digits, length))
     return rand_string
 
-
-def send_email(text):
-    addr_from = r"bot3888callback@gmail.com"                 # Адресат
-    addr_to = "dolinv@internet.ru"
-
-    password  = "Bot3888callback*&!/."                                  # Пароль
-    # password  = "iphone95"                                  # Пароль
-    msg = MIMEMultipart()                               # Создаем сообщение
-    msg['From']    = addr_from                          # Адресат
-    msg['To']      = addr_to                            # Получатель
-    msg['Subject'] = 'Тема сообщения'
-    body = text
-
-    msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
-    ctype = 'application/octet-stream'  # Будем использовать общий тип
-    maintype, subtype = ctype.split('/', 1)  # Получаем тип и подтип
-
-    # file.add_header('Content-Disposition', 'attachment', filename=filename) # Добавляем заголовки
-
-
-    server = smtplib.SMTP(host='smtp.gmail.com: 587')         # Создаем объект SMTP
-    server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
-    server.starttls()                                   # Начинаем шифрованный обмен по TLS
-    server.login(addr_from, password)                 # Получаем доступ
-    server.send_message(msg)                            # Отправляем сообщение
-    server.quit()
 

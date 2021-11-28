@@ -16,7 +16,7 @@
             <br>
             <div class="fieldWrapper">
                 {{ form.description.errors }}
-                <label for="{{ form.description.id_for_label }}">Описание:</label>
+                <label for="{{ form.description.id_for_label }}">Описание:</label> <div class="text-end text-muted" id='textarea_count'>0/1000</div>
                 {{ form.description }}
             </div>
             <br>
@@ -69,8 +69,9 @@
         <label for="{{ form.photo.id_for_label }}">Фото:</label>
         {{ form.photo }}
     </div>
-    <br>
+ 
     <div class='text-end'>
+        <br>
         <input type="submit" class='btn btn-success btn-lg' name='update' value="Создать">
         {% url 'admin_panel:create_product' as ap %}
         {% if request.path == ap %}
@@ -80,4 +81,19 @@
     </div>
 </form>
 </div>
+
+<script>
+    $('#id_description').bind('input', function () {
+        var len = $("#id_description").val().length;
+        $('#textarea_count').text(len + '/1000')
+        if (len > 1000) {
+            $('#id_description').removeClass('alert-success');
+            $('#id_description').addClass('alert-danger');
+        } else {
+            $('#id_description').removeClass('alert-danger');
+            $('#id_description').addClass('alert-success');
+        }
+
+    });
+</script>
 {% endblock %}

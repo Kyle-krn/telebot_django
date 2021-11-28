@@ -21,7 +21,7 @@ family=Nunito&display=swap">
     <nav class="navbar navbar-expand-md navbar-dark bg-danger fixed-top py-1" id="main-nav">
         <div class="container">
             <a href="{% url 'online_shop:product_list' %}" class="navbar-brand">
-                <h3 class="font-weight-bold">finesauces</h3>
+                <h3 class="font-weight-bold">Vape shop</h3>
             </a>
             <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
@@ -32,7 +32,7 @@ family=Nunito&display=swap">
                         <div class="dropdown-custom">
                             <a href="{% url 'online_shop:cart_detail' %}" class="nav-link text-white drop-btn">
                                 <i class="fas fa-shopping-cart"></i>
-                                $<span id="cart_price">{{ cart_total_price|floatformat:2 }}</span>
+                                <span id="cart_price">{{ cart_total_price|floatformat:2 }} руб.</span>
                             </a>
                         </div>
                     </li>

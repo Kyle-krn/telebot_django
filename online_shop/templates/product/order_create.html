@@ -3,7 +3,7 @@
 {% block content %}
 <div class="card shadow-custom border-0 col-lg-7 mx-auto mb-3">
     <h3 class="py-2 font-weight-bold text-grey text-center">
-        Delivery information:
+        Оформление заказа:
     </h3>
     <form method="post">
         {% csrf_token %}
@@ -11,13 +11,13 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="">
-                    <label class="text-muted">First name</label>
+                    <label class="text-muted">Имя:</label>
                     {{ order_form.first_name }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="">
-                    <label class="text-muted">Last name</label>
+                    <label class="text-muted">Фамилия:</label>
                     {{ order_form.last_name }}
                 </div>
             </div>
@@ -29,7 +29,7 @@
             </div>
             <div class="col-md-6">
                 <div class="">
-                    <label class="text-muted">Phone number</label>
+                    <label class="text-muted">Номер телефона</label>
                     {{ order_form.telephone }}
                 </div>
             </div>
@@ -38,80 +38,48 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="">
-                    <label class="text-muted">Address</label>
+                    <label class="text-muted">Адрес</label>
                     {{ order_form.address }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="">
-                    <label class="text-muted">Postal code</label>
-                    {{ order_form.postal_code }}
-                </div>
-
-                <script>
-                    $('#id_postal_code').bind('input', function () {
-                        $.ajax({
-                            url: "{% url 'online_shop:validate_postal_code' %}",
-                            method: 'get',
-                            dataType: 'html',
-                            data: { id_postal_code: $('#id_postal_code').val() },
-                            success: function (data) {
-                                $('#id_postal_code').removeClass('alert-danger');
-                                $('#id_postal_code').addClass('alert-success');
-                                obj = JSON.parse(data)
-                                $('#delivery_coast').text(obj.is_taken)
-                                document.getElementById("sub_button").disabled = false;
-                                
-                            },
-                            error: function (data) {
-                                document.getElementById("sub_button").disabled = true;
-                                $('#delivery_coast').text(0)
-                                $('#id_postal_code').addClass('alert-danger');
-                            }
-
-                        });
-                    });
-                </script>
-                
-            </div>
-            <div class="col-md-6">
                 <div class="mb-0">
-                    <label class="text-muted">City</label>
+                    <label class="text-muted">Город</label>
                     {{ order_form.city }}
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="">
+                    <label class="text-muted">Почтовый индекс</label>
+                    {{ order_form.postal_code }}
+                </div>
+            </div>
+
 
         </div>
         <hr>
         <h4 class="py-2 font-weight-bold text-grey">
-            Transport:
+            Стоймость доставки:
         </h4>
         <div class="row">
             <div class="col-md-12">
                 <div class="radiobtn">
-
-                        <h1 id="delivery_coast">0</h1>
+                        
+                        <h1 class='text-right' id="delivery_coast">0 руб.</h1>
 
 
                     </label>
                 </div>
-                <div class="radiobtn">
-                    <input type="radio" id="id_transport_1" name="transport" value="Recipient pickup" amount="free"
-                        onclick="setTotalCost()" />
-                    <label for="id_transport_1">Recipient pickup
-                        <span class="text-green float-right pr-3 font-weight-bold">
-                            free</span>
-                    </label>
-                </div>
+
             </div>
         </div>
         <hr class="mb-4">
         <div class="input-field">
-            <label class="text-muted">Note</label>
+            <label class="text-muted">Заметка к заказу</label>
             {{ order_form.note }}
         </div>
-        <h4 class="py-2 font-weight-bold text-grey">Price total:
-            <span id="order-total" class="text-danger float-right"></span>
+        <h4 class="py-2 font-weight-bold text-grey">Общая цена:
+            <span id="order-total" class="text-danger float-right">{{cart_total_price}} руб.</span>
         </h4>
 </div>
 <div class="col-lg-7 mx-auto mb-3">
@@ -119,14 +87,47 @@
         <div class="col-lg-8 px-0">
             <div class="btn-group d-flex">
                 <a href="{% url 'online_shop:product_list' %}" class="btn btn-warning shadow-custom col">
-                    Back to shop
+                    Назад
                 </a>
                 <button id="sub_button" type="submit" class="btn btn-danger shadow-custom col">
-                    Create order
+                    Создать заказ
                 </button>
             </div>
         </div>
     </div>
 </div>
 </form>
+
+<script>
+    $('#id_postal_code').bind('input', function () {
+        var cart_coast = $('#order-total').text();
+        cart_coast_int = parseInt(cart_coast, 10);
+        $.ajax({
+            url: "{% url 'online_shop:validate_postal_code' %}",
+            method: 'get',
+            dataType: 'html',
+            data: { id_postal_code: $('#id_postal_code').val() },
+            success: function (data) {
+                $('#id_postal_code').removeClass('alert-danger');
+                $('#id_postal_code').addClass('alert-success');
+                obj = JSON.parse(data)
+                $('#delivery_coast').text(obj.is_taken + ' руб.')
+                $('#order-total').text((obj.is_taken + cart_coast_int) + ' руб.')
+                document.getElementById("sub_button").disabled = false;
+                
+            },
+            error: function (data) {
+                document.getElementById("sub_button").disabled = true;
+                $('#delivery_coast').text(0)
+                $('#order-total').text(cart_coast_int + ' руб.')
+                $('#id_postal_code').addClass('alert-danger');
+            }
+
+        });
+    });
+
+
+
+</script>
+
 {% endblock content %}

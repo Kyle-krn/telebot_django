@@ -13,11 +13,11 @@ class Command(BaseCommand):
         queryset = PayProduct.objects.all()
         for item in queryset:
             time_passed = abs(int((item.datetime - timenow).total_seconds() / 60))
-            if time_passed >= 15:
+            if time_passed >= 2:
                 user = item.user
-                cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
-                for product_cart in cart:
-                    product_cart.product.count += product_cart.count
-                    product_cart.product.save()
-                item.delete()
+                # cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
+                # for product_cart in cart:
+                #     product_cart.product.count += product_cart.count
+                #     product_cart.product.save()
+                item.cancel_reservation()
                 # Сделать возврат удаленных товаров обратно 

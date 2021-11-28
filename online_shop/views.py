@@ -1,24 +1,32 @@
 from django.shortcuts import render, get_object_or_404, redirect
+import requests
 from .models import *
 from .forms import *
-from main_app.models import Category, SubCategory, Product, SoldProduct, SoldSiteProduct
+from main_app.models import Category, SubCategory, Product, SoldProduct
+from .models import *
 from decimal import Decimal
 from django.conf import settings
 
 
-def product_list(request, subcategory_slug=None):
+def product_list(request, category_slug=None, subcategory_slug=None):
     '''Представление каталога товаров'''
     categories = Category.objects.all()
-    if subcategory_slug:
-        requested_category = get_object_or_404(SubCategory, slug=subcategory_slug)
-        products = Product.objects.filter(subcategory=requested_category)
+    if category_slug and subcategory_slug:
+        requested_subcategory = get_object_or_404(SubCategory, slug=subcategory_slug)
+        requested_category = get_object_or_404(Category, slug=category_slug)
+        products = Product.objects.filter(subcategory=requested_subcategory)
+    elif category_slug:
+        requested_subcategory = None
+        requested_category = get_object_or_404(Category, slug=category_slug)
+        products = Product.objects.filter(subcategory__category=requested_category)
     else:
         requested_category = None
+        requested_subcategory = None
         products = Product.objects.all()
-    return render(request, 'product/list.html', {'categories': categories, 'requested_category': requested_category, 'products': products})
+    return render(request, 'product/list.html', {'categories': categories, 'requested_subcategory': requested_subcategory, 'requested_category': requested_category, 'products': products})
 
 
-def product_detail(request, subcategory_slug, product_slug):
+def product_detail(request, product_slug):
     '''Детальное представление товара'''
     product = get_object_or_404(Product, slug=product_slug)
     if request.method == 'POST':
@@ -27,7 +35,7 @@ def product_detail(request, subcategory_slug, product_slug):
             cf = review_form.cleaned_data
             author_name = 'Annonymous'
             Review.objects.create(product=product, author=author_name, rating=cf['rating'], text=cf['text'])
-            return redirect('online_shop:product_detail', subcategory_slug=subcategory_slug, product_slug=product_slug)
+            return redirect('online_shop:product_detail', product_slug=product_slug)
     else:
         review_form = ReviewForm()
         cart_product_form = CartAddProductForm()
@@ -70,7 +78,6 @@ def cart_add(request, product_id):
 def cart_detail(request):
     '''Детальное представление корзины'''
     cart = get_cart(request)
-    print(cart)
     product_ids = cart.keys()
     products = Product.objects.filter(id__in=product_ids)
     temp_cart = cart.copy()
