@@ -31,13 +31,13 @@
                         </thead>
                         <tbody>
                           
-                              {% for item in qs.soldsiteproduct_set.all %}
+                              {% for item in qs.soldproduct.all %}
                               <tr {% if item.product.count < item.count %} class="table-danger" {% endif %}>
                             <th scope="row">{{forloop.counter}}</th>
                             <td>{{item.product.title}}</td>
                             <td>{{item.price}} руб.</td>
                             <td>
-                            <form style="display:inline;" action="{% url 'admin_panel:change_item_order' item.pk %}" method="post">
+                            <form style="display:inline;" action="{% url 'admin_panel:change_item_site_order' item.pk %}" method="post">
                             {% csrf_token %}
                             <input title='На складе {{item.product.count}} шт.' style="width: 50%" type="number" id="id_count" name='count' pattern="" value={{item.count}} required> шт.
                             <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Обновить">
@@ -66,7 +66,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td>Общая сумма - {{qs.price|add:qs.transport_cost}} руб.</td>
+                                <td>Общая сумма - {{qs.price|add:qs.transport_cost}} руб. </td>
                               </tr>
                             
                           
@@ -75,7 +75,7 @@
                       <div class='container'>
                       <div class="text-end">
                           <div style='display: inline-block;'>
-                        <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.first_name}} {{qs.last_name}}" data-city="{{qs.city}}" data-address="{{qs.address}}" data-postal="{{qs.postal_code}}" data-phone="{{qs.telephone}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %}  type="button" class="btn modalinfo" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.first_name}} {{qs.last_name}}" data-city="{{qs.city}}" data-address="{{qs.address}}" data-postal="{{qs.postal_code}}" data-phone="{{qs.telephone}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %} data-note="{{qs.note}}"  type="button" class="btn modalinfo" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             <i class="far fa-address-card"></i>
                           </button>
 
@@ -120,23 +120,27 @@
                 <tbody>
                   <tr>
                     <td>Имя:</td>
-                    <td id='name'>Егоров Егор</td>
+                    <td id='name'></td>
                   </tr>
                   <tr>
                     <td>Город:</td>
-                    <td id='city'>Дефлотсити</td>
+                    <td id='city'></td>
                   </tr>
                   <tr>
                     <td>Адрес:</td>
-                    <td id='address'>Пихтулино дом 33</td>
+                    <td id='address'></td>
                   </tr>
                   <tr>
                     <td>Индекс:</td>
-                    <td id='postal_code'>429950</td>
+                    <td id='postal_code'></td>
                   </tr>
                   <tr>
                     <td>Телефон:</td>
-                    <td id='phone_number'>+79000000000</td>
+                    <td id='phone_number'></td>
+                  </tr>
+                  <tr>
+                    <td>Заметка к заказу:</td>
+                    <td id='note'></td>
                   </tr>
                 </tbody>
               </table>
@@ -160,6 +164,7 @@
         $('#exampleModalLabel').html('Информация о заказе #'+qs_id);
         $('#postal_code').html($(this).attr("data-postal"));
         $('#phone_number').html($(this).attr("data-phone"));
+        $('#note').html($(this).attr("data-note"));
     });
   </script>
 

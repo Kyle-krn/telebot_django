@@ -33,7 +33,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                        {% for product in order.offlinesoldproduct_set.all %}
+                        {% for product in order.offlinesoldproduct.all %}
                       <tr>
                         <th scope="row">{{forloop.counter}}</th>
                         <td>{{product.title}}</td>

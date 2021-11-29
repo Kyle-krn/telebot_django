@@ -399,7 +399,7 @@ class NoPaidOrderTest(TestCase):
         response = self.client.post(reverse('admin_panel:remove_item_order', args=(sold_product.pk,)))
         order = OrderingProduct.objects.get(pk=self.order.pk)
         # self.assertEqual(order.soldproduct_set.all().count(), 1)
-        self.assertFalse(order.soldproduct_set.all().exists())
+        self.assertFalse(order.soldproduct.all().exists())
 
     def test_delete_order(self):
         self.client.force_login(self.super_user)

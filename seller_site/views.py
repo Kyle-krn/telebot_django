@@ -501,7 +501,7 @@ def remove_item_order(request, sold_pk):
 @staff_member_required
 def delete_order(request, order_pk):
     order = OfflineOrderingProduct.objects.get(pk=order_pk)
-    for item in order.offlinesoldproduct_set.all():
+    for item in order.offlinesoldproduct.all():
         item.delete()
     order.delete()
     return redirect('local_shop:list_order')

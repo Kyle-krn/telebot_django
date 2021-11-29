@@ -31,7 +31,7 @@
                         </thead>
                         <tbody>
                           
-                              {% for item in qs.soldproduct_set.all %}
+                              {% for item in qs.soldproduct.all %}
                               <tr>
                             <th scope="row">{{forloop.counter}}</th>
                             <td>{{item.product.title}}</td>

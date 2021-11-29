@@ -27,7 +27,8 @@ urlpatterns = [
 
     path('qiwi/', ControlQiwiView.as_view(), name='control_qiwi'),                                                                          # Добавить, удалить токен для QIWI    
 
-    path('change_item_order/<int:sold_pk>', change_item_order, name='change_item_order'),                                                   # Изменить кол-во товара в неоплаченном заказе
+    path('change_item_bot_order/<int:sold_pk>', change_item_bot_order, name='change_item_bot_order'),                                               # Изменить кол-во товара в неоплаченном заказе
+    path('change_item_site_order/<int:sold_pk>', change_item_site_order, name='change_item_site_order'),                                               # Изменить кол-во товара в неоплаченном заказе
     path('delete_order/<int:order_pk>', delete_order, name='delete_order'),                                                                 # Удалить заказ  
     path('remove_item_order/<int:sold_pk>', remove_item_order, name='remove_item_order'),                                                   # Удалить товар из заказа
     path('add_track_code_in_order/<int:order_pk>', add_track_code_in_order, name='add_track_code_in_order'),                                # Добавить трек код

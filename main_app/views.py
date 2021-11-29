@@ -1,4 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
+from django.urls.base import resolve
+
+from main_app.utils import change_item_order_utils
 from .forms import *
 from .models import *
 from django.http import HttpResponseRedirect
@@ -18,7 +21,7 @@ from django.contrib.auth import login
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.core.exceptions import BadRequest
-from online_shop.models import OrderSiteProduct
+from online_shop.models import OrderSiteProduct, SoldSiteProduct
 
 def index(request):
     '''Функция для перенаправления юзеров'''
@@ -219,7 +222,7 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
         if form.is_valid():
             cf = form.cleaned_data
             order = OrderingProduct.objects.get(pk=cf['id'])
-            for item in order.soldproduct_set.all():
+            for item in order.soldproduct.all():
                 item.product.count -= item.count
                 item.product.save()
                 item.payment_bool = True
@@ -241,17 +244,6 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оплаченные заказы'
         return context
-
-    # def post(self, request):
-    #     '''Добавление трек-номера к заказу'''
-    #     form = TrackCodeOrderForm(request.POST)
-    #     if form.is_valid():
-    #         cf = form.cleaned_data
-    #         order = OrderingProduct.objects.get(pk=cf['id'])
-    #         order.track_code = cf['track_code']
-    #         order.save()
-    #         messages.success(request, 'Трек-номер успешно добавлен!')
-    #         return redirect('admin_panel:paid_order')
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -503,23 +495,26 @@ def add_track_code_in_order(request, order_pk):
 
 
 @staff_member_required
-def change_item_order(request, sold_pk):
-    '''Изменяет кол-во проданного товара в неоплаченном заказе'''
+def change_item_bot_order(request, sold_pk):
+    '''Изменяет кол-во проданного товара в неоплаченном заказе (заказ через мендежра в боте)'''
     instance = SoldProduct.objects.get(pk=sold_pk)
-    form = OrderChangeForm(request.POST)
-    if form.is_valid():
-        cf = form.cleaned_data
-        instance.count = cf['count']
-        instance.save()
-        instance.order.set_order_price()
+    change_item_order_utils(instance, request)
     return redirect('admin_panel:no_paid_order')
 
 
 @staff_member_required
+def change_item_site_order(request, sold_pk):
+    '''Изменяет кол-во проданного товара в неоплаченном заказе (заказ через сайт)'''
+    instance = SoldSiteProduct.objects.get(pk=sold_pk)
+    change_item_order_utils(instance, request)
+    return redirect('admin_panel:site_new_order')
+
+
+@staff_member_required
 def delete_order(request, order_pk):
-    '''Полностью удает заказ'''
+    '''Полностью удаляет заказ'''
     order = OrderingProduct.objects.get(pk=order_pk)
-    for item in order.soldproduct_set.all():
+    for item in order.soldproduct.all():
         item.delete()
     order.delete()
     return redirect('admin_panel:no_paid_order')

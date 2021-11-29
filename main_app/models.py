@@ -236,7 +236,7 @@ class SoldProduct(models.Model):
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
     payment_bool = models.BooleanField(default=False, help_text='Произведена ли оплата')
-    order = models.ForeignKey('OrderingProduct', on_delete=models.CASCADE, help_text='Заказ')
+    order = models.ForeignKey('OrderingProduct', related_name='soldproduct', on_delete=models.CASCADE, help_text='Заказ')
 
     def return_in_product(self, new_count):
         '''Изменяет кол-во товара при редактировании заказа'''
@@ -275,7 +275,7 @@ class OrderingProduct(models.Model):
 
     def set_order_price(self):
         '''Обновляет стоймость заказа при его изменении'''
-        self.price = sum([x.price * x.count for x in self.soldproduct_set.all()])
+        self.price = sum([x.price * x.count for x in self.soldproduct.all()])
         return self.save()
 
     def get_datetime(self):

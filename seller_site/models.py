@@ -137,7 +137,7 @@ class OfflineOrderingProduct(models.Model):
 
     def set_order_price(self):
         '''Обновляет стоймость заказа при его изменении'''
-        self.price = sum([x.price * x.count for x in self.offlinesoldproduct_set.all()])
+        self.price = sum([x.price * x.count for x in self.offlinesoldproduct.all()])
         return self.save()
 
     def get_datetime(self):

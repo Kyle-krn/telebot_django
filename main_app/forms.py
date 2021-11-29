@@ -119,14 +119,18 @@ class ProductDeleteForm(forms.ModelForm):
                   raise forms.ValidationError("Не верный id товара!")
 
 
-class OrderChangeForm(forms.ModelForm):
+class OrderChangeForm(forms.Form):
       '''Форма изменения кол-ва товара в заказе'''
       # id = forms.CharField(widget=forms.HiddenInput())
       count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1 , 'type': 'number', 'style': 'width: 25%'}))
 
-      class Meta:
-            model = SoldProduct
-            fields = ['count']
+      def clean_count(self):
+            data = self.cleaned_data['count']
+            if data < 1:
+                  data = 1
+            return data
+
+      
 
 class HiddenOrderIdForm(forms.Form):
       '''Скрытый id для индентификации заказа, используется на вкладках с заказами'''

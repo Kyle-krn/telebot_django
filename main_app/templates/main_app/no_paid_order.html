@@ -31,13 +31,13 @@
                         </thead>
                         <tbody>
                           
-                              {% for item in qs.soldproduct_set.all %}
+                              {% for item in qs.soldproduct.all %}
                               <tr {% if item.product.count < item.count %} class="table-danger" {% endif %}>
                             <th scope="row">{{forloop.counter}}</th>
                             <td>{{item.product.title}}</td>
                             <td>{{item.price}} руб.</td>
                             <td>
-                            <form style="display:inline;" action="{% url 'admin_panel:change_item_order' item.pk %}" method="post">
+                            <form style="display:inline;" action="{% url 'admin_panel:change_item_bot_order' item.pk %}" method="post">
                             {% csrf_token %}
                             <input title="На складе {{item.product.count}} шт." style="width: 50%" type="number" id="id_count" name='count' pattern="" value={{item.count}} required> шт.
                             <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Обновить">

@@ -33,7 +33,7 @@ def track_code_handlers(call):
     except:
         return bot.send_message(chat_id=call.message.chat.id, text='Ваш неоплаченный заказ был удален')
     text = ''
-    for item in order_product.soldproduct_set.all():
+    for item in order_product.soldproduct.all():
         text += f'***Товар -*** {item.product.title}\n***Количество -*** {item.count} шт.\n\n'
     
     if not order_product.track_code:

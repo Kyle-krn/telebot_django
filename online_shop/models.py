@@ -32,15 +32,15 @@ class SoldSiteProduct(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Цена на момент продажи')    
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
-    order = models.ForeignKey('OrderSiteProduct', on_delete=models.CASCADE, help_text='Заказ')
+    order = models.ForeignKey('OrderSiteProduct', related_name='soldproduct', on_delete=models.CASCADE, help_text='Заказ')
 
-    def save(self, *args, **kwargs):
-        '''Отнимает кол-во товара в OfflineProduct'''
-        if self.count <= 0:
-            return
-        self.product.count -= self.count
-        self.product.save()
-        return super(SoldSiteProduct, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     '''Отнимает кол-во товара в OfflineProduct'''
+    #     if self.count <= 0:
+    #         return
+    #     self.product.count -= self.count
+    #     self.product.save()
+    #     return super(SoldSiteProduct, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"{self.product.title} - {self.count} в заказе #{self.order.pk}"
@@ -66,7 +66,7 @@ class OrderSiteProduct(models.Model):
 
     def set_order_price(self):
         '''Обновляет стоймость заказа при его изменении'''
-        self.price = sum([x.price * x.count for x in self.soldsiteproduct_set.all()])
+        self.price = sum([x.price * x.count for x in self.soldproduct.all()])
         return self.save()
 
     def get_datetime(self):
