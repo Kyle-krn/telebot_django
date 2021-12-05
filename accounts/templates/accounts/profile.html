@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Account{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="shadow-custom messages alert alert-danger text-center
+col-lg-7 mx-auto">
+    {% else %}
+    <div class="shadow-custom messages alert alert-success text-center
+col-lg-7 mx-auto">
+        {% endif %}
+        {{ message }}
+        <a href="" class="close">x</a>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <div class="card shadow-custom border-0 col-lg-7 mx-auto mb-3">
+        <h2 class="font-weight-bold text-grey mt-2">Профиль</h2>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-field">
+                        {{ user_form.first_name }}
+                        <label for="first_name">Имя</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-field">
+                        {{ user_form.last_name }}
+                        <label for="last_name">Фамилия</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+
+                    <div class="input-field">
+                        {{ user_form.email }}
+                        <label for="email">Email</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-field">
+                        {{ profile_form.phone_number }}
+                        <label for="phone_number">Номер телефона</label>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-0">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-field">
+                        {{ profile_form.address }}
+                        <label for="address">Адрес</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="postal_code_div" class="input-field">
+                        {{ profile_form.postal_code }}
+                        <label for="postal_code">Почтовый индекс</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-field">
+                        {{ profile_form.city }}
+                        <label for="city">Город</label>
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+            <div class="row">
+                
+                <button type="submit" id='sub_button' class="btn col" data-toggle="tooltip" data-placement="top"
+                    title="Введите новые данные и нажмите «Обновить профиль»">
+                    Обновить профиль</button>
+                <a class="btn col" href="{% url 'password_change' %}">
+                    Изменить пароль
+                </a>
+            </div>
+            <hr>
+        </form>
+    </div>
+</div>
+
+<script>
+    $('#id_postal_code').bind('input', function () {
+        var len_field = $('#id_postal_code').val().length;
+        if (len_field == 0) {
+            document.getElementById("sub_button").disabled = false;
+            $('#sub_button').title = 'Введите новые данные и нажмите «Обновить профиль».'
+            $('#postal_code_div').removeClass('error-input');
+        } else if (len_field == 6) {
+            $.ajax({
+            url: "{% url 'online_shop:validate_postal_code' %}",
+            method: 'get',
+            dataType: 'html',
+            data: { id_postal_code: $('#id_postal_code').val() },
+            success: function (data) {
+                $('#postal_code_div').removeClass('error-input');
+                $('#postal_code_div').addClass('success-input');
+                $('#sub_button').title = 'Введите новые данные и нажмите «Обновить профиль».'
+                document.getElementById("sub_button").disabled = false;
+                
+            },
+            error: function (data) {
+                document.getElementById("sub_button").disabled = true;
+                $('#sub_button').title = 'Не верно заполнен индекс'
+                $('#postal_code_div').addClass('error-input');
+            }  
+        });
+        } else {
+            document.getElementById("sub_button").disabled = true;
+            $('#sub_button').title = 'Не верно заполнен индекс'
+            $('#postal_code_div').addClass('error-input');
+        }
+    });
+
+</script>
+
+{% endblock %}

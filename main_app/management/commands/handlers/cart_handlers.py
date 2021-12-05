@@ -3,7 +3,7 @@ from main_app.models import *
 from .handlers import bot
 from django.db.models import Q
 from main_app.management.commands.keyboards import *
-from main_app.management.commands.utils import *
+from main_app.utils import check_price_delivery, check_time_delivery
 
 
 

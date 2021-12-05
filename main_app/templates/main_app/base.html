@@ -85,6 +85,20 @@
               {% else %}
               <li><a class="dropdown-item" href="{% url 'admin_panel:qiwi_order' %}">Qiwi заказы</a></li>
               {% endif %}
+
+              {% url 'admin_panel:site_no_paid_order' as qo %}
+              {% if request.path == qo %}
+              <li><a class="dropdown-item disabled" href="{% url 'admin_panel:site_no_paid_order' %}">Неоплаченные заказы через сайт</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'admin_panel:site_no_paid_order' %}">Неоплаченные заказы через сайт</a></li>
+              {% endif %}
+
+              {% url 'admin_panel:site_paid_order' as qo %}
+              {% if request.path == qo %}
+              <li><a class="dropdown-item disabled" href="{% url 'admin_panel:site_paid_order' %}">Оплаченные заказы через сайт</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'admin_panel:site_paid_order' %}">Оплаченные заказы через сайт</a></li>
+              {% endif %}
             </ul>
           </div>
 

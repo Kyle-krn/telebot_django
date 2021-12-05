@@ -8,4 +8,5 @@ wheel
 psycopg2
 gunicorn
 django-debug-toolbar
- pytils-0.3
+pytils==0.3
+celery==5.2.1

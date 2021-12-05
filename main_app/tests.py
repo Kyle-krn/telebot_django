@@ -2,7 +2,7 @@ from itertools import product
 import os
 from django.test import TestCase, RequestFactory, Client
 
-from main_app.management.commands.utils import check_price_delivery
+from main_app.utils import check_price_delivery
 from .models import *
 from .views import *
 from .forms import *

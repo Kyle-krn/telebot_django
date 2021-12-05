@@ -1,0 +1,169 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+
+    <h1 class='text-center'>{{title}}</h1>
+
+    <div class="accordion" id="accordionExample">
+        {% for qs in queryset %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{qs.pk}}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse-{{qs.pk}}" aria-expanded="true" aria-controls="collapse-{{qs.pk}}">
+                    Заказ #{{qs.pk}} от {{qs.get_datetime}} на сумму {{qs.price}} руб.
+
+                </button>
+            </h2>
+            <div id="collapse-{{qs.pk}}" class="accordion-collapse collapse" aria-labelledby="heading-{{qs.pk}}"
+                data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+                    <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Товар</th>
+                            <th scope="col">Цена за 1 шт.</th>
+                            <th scope="col">Кол-во</th>
+                            <th scope="col">Общая сумма</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          
+                              {% for item in qs.soldproduct.all %}
+                              <tr>
+                            <th scope="row">{{forloop.counter}}</th>
+                            <td>{{item.product.title}}</td>
+                            <td>{{item.price}} руб.</td>
+                            <td>{{item.count}} шт.</td>
+                            <td>{% widthratio item.price 1 item.count %} руб.</td>
+                        </tr>
+                            {% endfor %}
+                            <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>Сумма доставки - {{qs.transport_cost}} руб.</td>
+                              </tr>
+                              <tr>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>Общая сумма - {{qs.price|add:qs.transport_cost}} руб.</td>
+                              </tr>
+                            
+                          
+                        </tbody>
+                      </table>
+                      <div class='container'>
+
+                        <form action="{% url 'admin_panel:add_track_code_in_site_order' qs.pk %}" method='post'>
+                            {% csrf_token %}
+                            <div class="input-group mb-3">
+                                <input type="hidden" name="id" id="id_id" value="{{qs.pk}}" >
+                                <select class="form-select" name='status' id='id_status' aria-label="Default select example">
+                                    <option value="Processing" {% if qs.status == 'Processing' %} selected {% endif %}>В процессе</option>
+                                    <option value="Shipped" {% if qs.status == 'Shipped' %} selected {% endif %}>Доставляется</option>
+                                    <option value="Ready for pickup" {% if qs.status == 'Ready for pickup' %} selected {% endif %}>Ожидает получения</option>
+                                    <option value="Completed" {% if qs.status == 'Completed' %} selected {% endif %}>Доставленно</option>
+                                  </select>
+                                <input type="text" name="track_code" id="id_track_code" class="form-control" {% if qs.track_code %} value="{{qs.track_code}}"{% endif %} placeholder="Трек номер"
+                                    aria-label="Username" aria-describedby="addon-wrapping">
+                                <button class="btn btn-outline-secondary" type="submit" name="input_trackcode"
+                                    id="button-addon2">Отправить</button>
+                            </div>
+                        </form>
+
+                      <div class="text-end">
+                            <button id='test' data-pk="{{qs.pk}}" data-name="{{qs.first_name}} {{qs.last_name}}" data-city="{{qs.city}}" data-address="{{qs.address}}" data-postal="{{qs.postal_code}}" data-phone="{{qs.telephone}}" {% if qs.user.username %} data-username="{{qs.user.username}}" {% endif %} data-note="{{qs.note}}" data-email="{{qs.email}}" type="button" class="btn modalinfo" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            <i class="far fa-address-card"></i>
+                          </button>
+                          {% if qs.track_code %}
+                          <a href="https://www.pochta.ru/tracking#{{qs.track_code}}" target="_blank"><i class="fas fa-truck-loading"></i></a>
+                          {% endif %}
+                </div>
+
+
+            </div>
+        </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+<!-- Button trigger modal -->
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Информация о заказе #</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <table class="table">
+                <tbody>
+                  <tr>
+                    <td>Имя:</td>
+                    <td id='name'></td>
+                  </tr>
+                  <tr>
+                    <td>Город:</td>
+                    <td id='city'></td>
+                  </tr>
+                  <tr>
+                    <td>Адрес:</td>
+                    <td id='address'></td>
+                  </tr>
+                  <tr>
+                    <td>Индекс:</td>
+                    <td id='postal_code'></td>
+                  </tr>
+                  <tr>
+                    <td>Телефон:</td>
+                    <td id='phone_number'></td>
+                  </tr>
+                  <tr>
+                    <td>email:</td>
+                    <td id='email'></td>
+                  </tr>
+                  <tr>
+                    <td>Заметка к заказу:</td>
+                    <td id='note'></td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+  <script>
+    $('.modalinfo').on('click', function() {
+      $('#name').html($(this).attr("data-name"));
+      var qs_id = $(this).attr("data-pk");
+      $('#city').html($(this).attr("data-city"));
+      $('#address').html($(this).attr("data-address"));
+      $('#exampleModalLabel').html('Информация о заказе #'+qs_id);
+      $('#postal_code').html($(this).attr("data-postal"));
+      $('#phone_number').html($(this).attr("data-phone"));
+      $('#note').html($(this).attr("data-note"));
+      $('#email').html($(this).attr("data-email"));
+  });
+</script>
+
+{% endblock %}

@@ -28,6 +28,29 @@ family=Nunito&display=swap">
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav ml-auto">
+                    {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link text-white">
+                            <i class="fas fa-user"></i> {{ request.user.email }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link text-white">
+                            <i class="fas fa-sign-out-alt"></i> Log out
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="nav-link text-white">
+                            <i class="fas fa-sign-in-alt"></i> Log in
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'register' %}" class="nav-link text-white">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <div class="dropdown-custom">
                             <a href="{% url 'online_shop:cart_detail' %}" class="nav-link text-white drop-btn">

@@ -6,7 +6,12 @@ from main_app.models import Category, SubCategory, Product, SoldProduct
 from .models import *
 from decimal import Decimal
 from django.conf import settings
-
+from main_app.tasks import order_created
+from .utils import send_email_created_order
+from django.http import JsonResponse
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from main_app.utils import check_price_delivery
 
 def product_list(request, category_slug=None, subcategory_slug=None):
     '''Представление каталога товаров'''
@@ -34,6 +39,9 @@ def product_detail(request, product_slug):
         if review_form.is_valid():
             cf = review_form.cleaned_data
             author_name = 'Annonymous'
+            if request.user.is_authenticated and request.user.first_name != '':
+                author_name = request.user.first_name
+
             Review.objects.create(product=product, author=author_name, rating=cf['rating'], text=cf['text'])
             return redirect('online_shop:product_detail', product_slug=product_slug)
     else:
@@ -114,6 +122,7 @@ def cart_clean(request):
     '''Отчистить корзину'''
     del request.session[settings.CART_ID]
 
+from django.core.mail import send_mail
 
 def order_create(request):
     '''Представление создания заказа'''
@@ -122,8 +131,6 @@ def order_create(request):
 
     if request.method == 'POST':
         order_form = OrderCreateForm(request.POST)
-        
-
         if order_form.is_valid():
             cf = order_form.cleaned_data
             delivery_price = check_price_delivery(cf['postal_code'], weight)
@@ -137,19 +144,20 @@ def order_create(request):
                 SoldSiteProduct.objects.create(product=product, price=product.price, count=cart_item['quantity'], order=order)
             order.set_order_price()
             cart_clean(request)
+            send_email_created_order(order.pk)
             return render( request, 'product/order_created.html', {'order': order})
-
         else:
             return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
     else:
         order_form = OrderCreateForm()
+        if request.user.is_authenticated:
+            initial_data = {
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+            }
         return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
 
 
-
-
-from django.http import JsonResponse
-from main_app.management.commands.utils import check_price_delivery
 def validate_postal_code(request):
     """Валидация почтового идекса для AJAX"""
     postal_code = request.GET['id_postal_code']
@@ -163,3 +171,5 @@ def validate_postal_code(request):
     except:
         response = JsonResponse({'error': 'error'}, status=403)
     return response
+
+

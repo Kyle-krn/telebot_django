@@ -3,7 +3,7 @@ from django.forms import fields
 from .models import *
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
-
+from online_shop.models import OrderSiteProduct
 
 
 class ProductForm(forms.ModelForm):
@@ -121,7 +121,6 @@ class ProductDeleteForm(forms.ModelForm):
 
 class OrderChangeForm(forms.Form):
       '''Форма изменения кол-ва товара в заказе'''
-      # id = forms.CharField(widget=forms.HiddenInput())
       count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1 , 'type': 'number', 'style': 'width: 25%'}))
 
       def clean_count(self):
@@ -137,22 +136,8 @@ class HiddenOrderIdForm(forms.Form):
       id = forms.IntegerField(widget=forms.HiddenInput())
       
 
-      def clean_id(self):
-            data = self.cleaned_data['id']
-            try:
-                  OrderingProduct.objects.get(pk=data)
-                  return data
-            except:
-                  raise forms.ValidationError("Не верный id заказа!")
-
-
-# class TrackCodeOrderForm(HiddenOrderIdForm):
-#       '''Дополняет форму выше трек кодом'''
-#       track_code = forms.CharField()
-
-
 class TrackCodeForm(forms.Form):
-      track_code = forms.CharField()
+      track_code = forms.CharField(required=False)
 
 
 class QiwiIdForm(forms.Form):
@@ -165,3 +150,14 @@ class QiwiIdForm(forms.Form):
                   return data
             except:
                   raise forms.ValidationError("Не верный id токена")
+
+
+class PaidOrderSiteForm(forms.ModelForm):
+      '''Форма изменения статуса заказа и трек номера заказа через сайт'''
+      id = forms.IntegerField()
+      track_code = forms.CharField(required=False)
+      # status = forms.ChoiceField()
+
+      class Meta:
+            model = OrderSiteProduct
+            fields = ['id', 'status', 'track_code']

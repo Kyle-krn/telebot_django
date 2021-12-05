@@ -10,25 +10,25 @@
         {{order_form.errors}}
         <div class="row">
             <div class="col-md-6">
-                <div class="">
+                <div class="input-field">
                     <label class="text-muted">Имя:</label>
                     {{ order_form.first_name }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="">
+                <div class="input-field">
                     <label class="text-muted">Фамилия:</label>
                     {{ order_form.last_name }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="">
+                <div class="input-field">
                     <label class="text-muted">Email</label>
                     {{ order_form.email }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="">
+                <div class="input-field">
                     <label class="text-muted">Номер телефона</label>
                     {{ order_form.telephone }}
                 </div>
@@ -37,19 +37,19 @@
         <hr class="mt-0">
         <div class="row">
             <div class="col-md-6">
-                <div class="">
+                <div class="input-field">
                     <label class="text-muted">Адрес</label>
                     {{ order_form.address }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="mb-0">
+                <div class="input-field">
                     <label class="text-muted">Город</label>
                     {{ order_form.city }}
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="">
+                <div id="postal_code_div" class="input-field">
                     <label class="text-muted">Почтовый индекс</label>
                     {{ order_form.postal_code }}
                 </div>
@@ -98,6 +98,8 @@
 </div>
 </form>
 
+
+
 <script>
     $('#id_postal_code').bind('input', function () {
         var cart_coast = $('#order-total').text();
@@ -108,8 +110,8 @@
             dataType: 'html',
             data: { id_postal_code: $('#id_postal_code').val() },
             success: function (data) {
-                $('#id_postal_code').removeClass('alert-danger');
-                $('#id_postal_code').addClass('alert-success');
+                $('#postal_code_div').removeClass('error-input');
+                $('#postal_code_div').addClass('success-input');
                 obj = JSON.parse(data)
                 $('#delivery_coast').text(obj.is_taken + ' руб.')
                 $('#order-total').text((obj.is_taken + cart_coast_int) + ' руб.')
@@ -118,15 +120,14 @@
             },
             error: function (data) {
                 document.getElementById("sub_button").disabled = true;
-                $('#delivery_coast').text(0)
-                $('#order-total').text(cart_coast_int + ' руб.')
-                $('#id_postal_code').addClass('alert-danger');
+                $('#delivery_coast').text(0);
+                $('#order-total').text(cart_coast_int + ' руб.');
+                $('#postal_code_div').removeClass('success-input');
+                $('#postal_code_div').addClass('error-input');
             }
 
         });
     });
-
-
 
 </script>
 

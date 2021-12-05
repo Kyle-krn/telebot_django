@@ -1,11 +1,14 @@
 from django.urls import path, include
 from .views import *
+from django.contrib.auth import views as auth_views
 
 app_name = 'online_shop'
 
 urlpatterns = [
     
     path('', product_list, name='product_list'),
+
+
     path('cart/', cart_detail, name='cart_detail'),
     path('order/create', order_create, name='order_create'),
     path('product/<slug:product_slug>', product_detail, name='product_detail'),

@@ -19,10 +19,18 @@ from main_app.management.commands.handlers.handlers import bot
 from vape_shop.settings import TELEGRAM_GROUP_ID
 from django.contrib.auth.models import Group, User
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
-class CreateOrderView(LoginRequiredMixin, View):
+class CreateOrderView(UserPassesTestMixin, View):
     template_name = 'seller_site/create_order.html'
+
+    def test_func(self):
+        try:
+            seller_group = Group.objects.get(name='sellers')
+            return self.request.user.is_superuser or seller_group in self.request.user.groups.all() 
+        except Group.DoesNotExist:
+            return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
         context = {}
@@ -69,12 +77,19 @@ class CreateOrderView(LoginRequiredMixin, View):
 
 
 
-class OfflineReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class OfflineReceptionProductView(UserPassesTestMixin, SuccessMessageMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'seller_site/create_reception.html'
     form_class = OfflineReceptionForm
     success_url = reverse_lazy('local_shop:create_reception')
     success_message = 'Количество товара успешно увеличено!'
+
+    def test_func(self):
+        try:
+            seller_group = Group.objects.get(name='sellers')
+            return self.request.user.is_superuser or seller_group in self.request.user.groups.all() 
+        except Group.DoesNotExist:
+            return self.request.user.is_superuser
 
     def form_valid(self, form):
         product = get_object_or_404(OfflineProduct, pk=int(self.request.POST['product']))
@@ -209,11 +224,18 @@ class OfflineCreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateVi
         return context
 
 
-class OfflineIndexView(LoginRequiredMixin, ListView):
+class OfflineIndexView(UserPassesTestMixin, ListView):
     '''Вывод всех товаров'''
     context_object_name = 'product'
     login_url = '/login/'
     template_name = 'seller_site/list_product.html'
+
+    def test_func(self):
+        try:
+            seller_group = Group.objects.get(name='sellers')
+            return self.request.user.is_superuser or seller_group in self.request.user.groups.all() 
+        except Group.DoesNotExist:
+            return self.request.user.is_superuser
 
     @method_decorator(staff_member_required, name='dispatch')
     def post(self, request):
@@ -455,9 +477,16 @@ class OfflineStatisticView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-class OfflineSellerPage(LoginRequiredMixin, View):
+class OfflineSellerPage(UserPassesTestMixin, View):
     '''Представление для отображения продаж за день'''
     template_name = 'seller_site/seller_page.html'
+
+    def test_func(self):
+        try:
+            seller_group = Group.objects.get(name='sellers')
+            return self.request.user.is_superuser or seller_group in self.request.user.groups.all() 
+        except Group.DoesNotExist:
+            return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
         context = {}

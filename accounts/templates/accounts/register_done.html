@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Успешная регистрация{% endblock %}
+{% block content %}
+<div class="card shadow-custom border-0 col-lg-5 mx-auto mb-3 text-center">
+    <h3 class="py-2 font-weight-bold text-grey">
+        Добро пожаловать, {{ new_user.first_name }}
+    </h3>
+    <hr class="my-0">
+    <div class="py-2">
+        Ваш аккаунт успешно создан.
+        Вы можете <a href="{% url 'login' %}">войти.</a>
+    </div>
+</div>
+{% endblock %}

@@ -97,18 +97,19 @@ class OfflineSoldProduct(models.Model):
         self.product.save()
         return super(OfflineSoldProduct, self).save(*args, **kwargs)
 
-    def return_in_product(self, new_count):
-        '''Изменяет кол-во товара при редактировании заказа'''
+                                                                    # вроде не используется, проверить
+    # def return_in_product(self, new_count):
+        # '''Изменяет кол-во товара при редактировании заказа'''
         # if new_count <= 0:
         #     self.product.count += self.count
         #     self.product.save()
         #     return super(OfflineSoldProduct, self).delete()
             
         # else:
-        self.product.count += (self.count - new_count)
-        self.product.save()
-        self.count = new_count
-        return super(OfflineSoldProduct, self).save()
+        # self.product.count += (self.count - new_count)
+        # self.product.save()
+        # self.count = new_count
+        # return super(OfflineSoldProduct, self).save()
 
     def delete(self, *args, **kwargs):
         self.product.count += self.count

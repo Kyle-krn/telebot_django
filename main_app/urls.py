@@ -23,14 +23,18 @@ urlpatterns = [
     path('qiwi_order/', QiwiOrderView.as_view(), name='qiwi_order'),                                                                        # Заказы через Qiwi
 
 
-    path('site_new_order/', SiteOrderView.as_view(), name='site_new_order'),                                                                 
+    path('site_new_order/', NoPaidSiteOrderView.as_view(), name='site_no_paid_order'),                                                                 
+    path('site_old_order/', PaidSiteOrderView.as_view(), name='site_paid_order'),                                                                 
 
     path('qiwi/', ControlQiwiView.as_view(), name='control_qiwi'),                                                                          # Добавить, удалить токен для QIWI    
 
-    path('change_item_bot_order/<int:sold_pk>', change_item_bot_order, name='change_item_bot_order'),                                               # Изменить кол-во товара в неоплаченном заказе
-    path('change_item_site_order/<int:sold_pk>', change_item_site_order, name='change_item_site_order'),                                               # Изменить кол-во товара в неоплаченном заказе
-    path('delete_order/<int:order_pk>', delete_order, name='delete_order'),                                                                 # Удалить заказ  
-    path('remove_item_order/<int:sold_pk>', remove_item_order, name='remove_item_order'),                                                   # Удалить товар из заказа
-    path('add_track_code_in_order/<int:order_pk>', add_track_code_in_order, name='add_track_code_in_order'),                                # Добавить трек код
+    path('change_item_bot_order/<int:sold_pk>', change_item_bot_order, name='change_item_bot_order'),                                       # Изменить кол-во товара в неоплаченном заказе (бот)
+    path('change_item_site_order/<int:sold_pk>', change_item_site_order, name='change_item_site_order'),                                    # Изменить кол-во товара в неоплаченном заказе (сайт)
+    path('delete_bot_order/<int:order_pk>', delete_bot_order, name='delete_bot_order'),                                                     # Удалить заказ (бот)  
+    path('delete_site_order/<int:order_pk>', delete_site_order, name='delete_site_order'),                                                  # Удалить заказ (сайт)
+    path('remove_item_bot_order/<int:sold_pk>', remove_item_bot_order, name='remove_item_bot_order'),                                       # Удалить товар из заказа (бот)
+    path('remove_item_site_order/<int:sold_pk>', remove_item_site_order, name='remove_item_site_order'),                                    # Удалить товар из заказа (сайт)
+    path('add_track_code_in_bot_order/<int:order_pk>', add_track_code_in_order, name='add_track_code_in_order'),                                # Добавить трек код
+    path('add_track_code_in_site_order/<int:order_pk>', add_track_code_and_status_order_site, name='add_track_code_in_site_order'),                                # Добавить трек код
     ]
 

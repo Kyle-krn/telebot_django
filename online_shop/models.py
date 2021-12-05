@@ -57,7 +57,7 @@ class OrderSiteProduct(models.Model):
     city = models.CharField(max_length=100)
     note = models.TextField(blank=True)
     transport_cost = models.DecimalField(max_digits=10, decimal_places=2)
-    track_code = models.BigIntegerField(blank=True, null=True, help_text='Трек-код заказа')
+    track_code = models.CharField(max_length=100, blank=True, null=True, help_text='Трек-код заказа')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     

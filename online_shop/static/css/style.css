@@ -219,6 +219,7 @@
     background: #fee8c3;
   }
   
+  
   .form-group input,
   .input-field input,
   .input-field textarea {
@@ -231,6 +232,8 @@
     margin-bottom: 30px;
     width: 100%;
   }
+
+
   
   .input-field input:focus {
     outline: none;
@@ -243,6 +246,16 @@
   .input-field label {
     margin-bottom: 5px !important;
   }
+
+  .error-input input {
+    border-bottom: 2px solid red; /* здесь */
+  }
+
+  .success-input input {
+    border-bottom: 2px solid rgb(6, 241, 6); /* здесь */
+
+  }
+
   
   .form-control {
     transition: 0.5s;

@@ -1,9 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
 from django.urls.base import resolve
-
-from main_app.utils import change_item_order_utils
-from .forms import *
-from .models import *
+from main_app.utils import change_item_order_utils, delete_order_utils, remove_item_order_utils
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from itertools import chain
@@ -22,6 +19,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.core.exceptions import BadRequest
 from online_shop.models import OrderSiteProduct, SoldSiteProduct
+from online_shop.utils import send_email_change_status_order
+from .forms import *
+from .models import *
 
 def index(request):
     '''Функция для перенаправления юзеров'''
@@ -30,39 +30,39 @@ def index(request):
     return redirect('admin_panel:list_product') if request.user.is_superuser else redirect('local_shop:list_product')
 
 
-class LoginUser(LoginView):
-    '''Аутенификация пользователя'''
-    form_class = LoginUserForm
-    template_name = 'main_app/login.html'
+# class LoginUser(LoginView):
+#     '''Аутенификация пользователя'''
+#     form_class = LoginUserForm
+#     template_name = 'main_app/login.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Логин'
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = 'Логин'
+#         return context
 
-    def form_valid(self, form):
-        login(self.request, form.get_user())
-        user = form.get_user()
-        return HttpResponseRedirect(self.get_success_url(user))
+#     def form_valid(self, form):
+#         login(self.request, form.get_user())
+#         user = form.get_user()
+#         return HttpResponseRedirect(self.get_success_url(user))
 
-    def get_success_url(self, user):
-        if user.is_superuser:
-            return reverse_lazy('admin_panel:list_product')
-        else:
-            return reverse_lazy('local_shop:list_product') 
+#     def get_success_url(self, user):
+#         if user.is_superuser:
+#             return reverse_lazy('admin_panel:list_product')
+#         else:
+#             return reverse_lazy('local_shop:list_product') 
 
 
-def logout_user(request):
-    '''Выход'''
-    logout(request)
-    return redirect('login')
+# def logout_user(request):
+#     '''Выход'''
+#     logout(request)
+#     return redirect('login')
 
 
 @method_decorator(staff_member_required, name='dispatch')
 class IndexView(LoginRequiredMixin, ListView):
     '''Вывод всех товаров'''
     context_object_name = 'product'
-    login_url = '/login/'
+    # login_url = 'accounts/login/'
     template_name = 'main_app/list_product.html'
 
     def get_queryset(self):
@@ -183,20 +183,9 @@ class CategoriesView(LoginRequiredMixin, View):
 @method_decorator(staff_member_required, name='dispatch')
 class QiwiOrderView(LoginRequiredMixin, ListView):
     '''Представление просмотра заказов оплаченых через Qiwi'''
-    template_name = 'main_app/paid_order.html'
+    template_name = 'main_app/order/paid_order.html'
     queryset = OrderingProduct.objects.filter(qiwi_bool=True).order_by('-datetime')
     context_object_name = 'queryset'
-
-    # def post(self, request):
-    #     '''Добавление трек-кода к заказу'''
-    #     form = TrackCodeOrderForm(request.POST)
-    #     if form.is_valid():
-    #         cf = form.cleaned_data
-    #         order = OrderingProduct.objects.get(pk=cf['id'])
-    #         order.track_code = cf['track_code']
-    #         order.save()
-    #         messages.success(request, 'Трек-номер успешно добавлен!')
-    #         return redirect('admin_panel:qiwi_order')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -207,7 +196,7 @@ class QiwiOrderView(LoginRequiredMixin, ListView):
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidOrderView(LoginRequiredMixin, ListView):
     '''Представление неоплаченных заказы'''
-    template_name = 'main_app/no_paid_order.html'
+    template_name = 'main_app/order/no_paid_order.html'
     queryset = OrderingProduct.objects.filter(Q(payment_bool=False) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
     
@@ -221,7 +210,7 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
         form = HiddenOrderIdForm(request.POST)
         if form.is_valid():
             cf = form.cleaned_data
-            order = OrderingProduct.objects.get(pk=cf['id'])
+            order = get_object_or_404(OrderingProduct, pk=cf['id'])
             for item in order.soldproduct.all():
                 item.product.count -= item.count
                 item.product.save()
@@ -236,13 +225,50 @@ class NoPaidOrderView(LoginRequiredMixin, ListView):
 @method_decorator(staff_member_required, name='dispatch')
 class PaidOrderView(LoginRequiredMixin, ListView):
     '''Представление просмотра оплаченных товаров'''
-    template_name = 'main_app/paid_order.html'
+    template_name = 'main_app/order/paid_order.html'
     queryset = OrderingProduct.objects.filter(Q(payment_bool=True) & Q(qiwi_bool=False)).order_by('-datetime')
     context_object_name = 'queryset'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оплаченные заказы'
+        return context
+
+@method_decorator(staff_member_required, name='dispatch')
+class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
+    template_name = 'main_app/order/site_order.html'
+    queryset = OrderSiteProduct.objects.filter(status='Created').order_by('-created')
+    context_object_name = 'queryset'
+
+    def post(self, request):
+        '''Отметить заказ оплаченным'''
+        form = HiddenOrderIdForm(request.POST)
+        if form.is_valid():
+            cf = form.cleaned_data
+            order = get_object_or_404(OrderSiteProduct, pk=cf['id'])
+            for item in order.soldproduct.all():
+                item.product.count -= item.count
+                item.product.save()
+            order.status = 'Processing'
+            order.save()
+            send_email_change_status_order(order.pk)
+            messages.success(request, 'Заказ успешно обработан!')
+            return redirect('admin_panel:site_no_paid_order')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Неоплаченные заказы с сайта'
+        return context
+
+@method_decorator(staff_member_required, name='dispatch')
+class PaidSiteOrderView(LoginRequiredMixin, ListView):
+    template_name = 'main_app/order/paid_site_order.html'
+    queryset = OrderSiteProduct.objects.exclude(status='Created').order_by('-created')
+    context_object_name = 'queryset'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Оплаченные заказы с сайта'
         return context
 
 
@@ -359,9 +385,8 @@ class ProductView(LoginRequiredMixin, View):
         return context
 
     def check_reservation_product(self):
+        '''Вычисляет кол-во товара на бронировании'''
         product = self.product
-        # pay_objects = PayProduct.objects.filter(user__telegramproductcartcounter_set__product=product)
-        # print(pay_objects)
         x = TelegramProductCartCounter.objects.filter(Q(product=product) & Q(counter=False))
         reservation_product = []
         for item in x:
@@ -453,34 +478,6 @@ class ControlQiwiView(LoginRequiredMixin, ListView):
         return context
 
 
-# def control_qiwi(request):
-#     '''Для оплаты Qiwi . В приложении не используется'''
-#     if not request.user.is_authenticated:
-#         return redirect('login')
-#     if request.method == 'POST' and 'new_token' in request.POST:
-#         form = QiwiTokenForm(request.POST)
-#         try:
-#             balance = get_qiwi_balance(request.POST['number'], request.POST['token'])
-#             if form.is_valid():
-#                 qiwi = form.save()
-#                 qiwi.balance = balance
-#                 qiwi.save()
-#         except:
-#             messages.success(request, 'Ошибка получения баланса кошелька')
-#     elif request.method == 'POST' and 'activate' in request.POST:
-#         QiwiToken.objects.update(active=False)
-#         qiwi_id = int(request.POST['radio'])
-#         QiwiToken.objects.filter(pk=qiwi_id).update(active=True)
-#     elif request.method == 'POST' and 'del_tok' in request.POST:
-#         qiwi_id = int(request.POST['del_tok_list'])
-#         QiwiToken.objects.get(pk=qiwi_id).delete()
-
-#     pay_product = PayProduct.objects.all()
-#     queryset = QiwiToken.objects.all()
-#     form = QiwiTokenForm()
-#     return render(request, 'main_app/control_qiwi.html', context={'form': form, 'queryset': queryset, 'pay_product': pay_product})
-
-
 @staff_member_required
 def add_track_code_in_order(request, order_pk):
     '''Добавляет трек код к заказу'''
@@ -492,6 +489,15 @@ def add_track_code_in_order(request, order_pk):
         instance.save()
     return redirect('admin_panel:paid_order')
 
+
+def add_track_code_and_status_order_site(request, order_pk):
+    '''Добавлет трек и изменяет статус заказа'''
+    instance = get_object_or_404(OrderSiteProduct, pk=order_pk)
+    form = PaidOrderSiteForm(request.POST, instance=instance)
+    if form.is_valid():
+        form.save()
+        send_email_change_status_order(instance.pk)
+        return redirect('admin_panel:site_paid_order')
 
 
 @staff_member_required
@@ -507,29 +513,39 @@ def change_item_site_order(request, sold_pk):
     '''Изменяет кол-во проданного товара в неоплаченном заказе (заказ через сайт)'''
     instance = SoldSiteProduct.objects.get(pk=sold_pk)
     change_item_order_utils(instance, request)
-    return redirect('admin_panel:site_new_order')
+    return redirect('admin_panel:site_no_paid_order')
 
 
 @staff_member_required
-def delete_order(request, order_pk):
-    '''Полностью удаляет заказ'''
+def delete_bot_order(request, order_pk):
+    '''Полностью удаляет заказ (заказ через менеджера в боте)'''
     order = OrderingProduct.objects.get(pk=order_pk)
-    for item in order.soldproduct.all():
-        item.delete()
-    order.delete()
+    delete_order_utils(order)
     return redirect('admin_panel:no_paid_order')
 
 
 @staff_member_required
-def remove_item_order(request, sold_pk):
-    '''Удаляет заданный товар из заказа'''
+def delete_site_order(request, order_pk):
+    '''Полностью удаляет заказ (заказ через сайт)'''
+    order = OrderSiteProduct.objects.get(pk=order_pk)
+    delete_order_utils(order)
+    return redirect('admin_panel:site_new_order')
+
+
+@staff_member_required
+def remove_item_bot_order(request, sold_pk):
+    '''Удаляет заданный товар из заказа (заказ через бота)'''
     instance = SoldProduct.objects.get(pk=sold_pk)
-    order = instance.order
-    instance.delete()
-    order.set_order_price()
+    remove_item_order_utils(instance)
     return redirect('admin_panel:no_paid_order')    
 
 
+@staff_member_required
+def remove_item_site_order(request, sold_pk):
+    '''Удаляет заданный товар из заказа (заказ через сайт)'''
+    instance = SoldSiteProduct.objects.get(pk=sold_pk)
+    remove_item_order_utils(instance)
+    return redirect('admin_panel:site_new_order')   
 
 
 
@@ -538,13 +554,3 @@ def remove_item_order(request, sold_pk):
 
 
 
-class SiteOrderView(LoginRequiredMixin, ListView):
-    template_name = 'main_app/site_order.html'
-    queryset = OrderSiteProduct.objects.all().order_by('-created')
-    context_object_name = 'queryset'
-
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Заказы с сайта'
-        return context
