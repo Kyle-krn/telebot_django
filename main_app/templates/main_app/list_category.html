@@ -1,13 +1,14 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
+
+{% block title %} Категории {% endblock %}
+
 {% block content %}
-
-
 
 <div class='container'>
 
 <div class="text-center">
-    <h1>{{title}}</h1>
+    <h1>Категории</h1>
 </div>
 <br>
 <form action="{% url 'admin_panel:create_category' %}" method="post" enctype="multipart/form-data">

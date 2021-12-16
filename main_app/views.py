@@ -91,7 +91,6 @@ class IndexView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Все товары'
         context['category'] = Category.objects.all()
         context['delete_form'] = ProductDeleteForm()
         return context
@@ -106,7 +105,6 @@ class CreateProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Новый товар'
         context['category'] = Category.objects.all()
         return context
 
@@ -121,7 +119,6 @@ class ReceptionProductView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Приемка товара'
         context['category'] = Category.objects.all()
         return context
 
@@ -155,7 +152,6 @@ class CategoriesView(LoginRequiredMixin, View):
 
     def get_context_data(self, **kwargs):
         context = {}
-        context['title'] = 'Категории (Онлайн магазин)'
         context['queryset'] = Category.objects.all()
         context['category_form'] = CategoryForm()
         context['sc_form'] = SubcategoryForm()
@@ -283,7 +279,6 @@ class StatisticView(LoginRequiredMixin, View):
 
     def get_context_data(self, **kwargs):
         context = {}
-        context['title'] = 'Статистика'
         context['users'] = TelegramUser.objects.all().count()
         context['stat_dict'] = self.get_statistic()
         return context
