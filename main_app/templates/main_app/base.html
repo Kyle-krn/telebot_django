@@ -1,6 +1,6 @@
+{% load static %}
 <!doctype html>
 <html lang="ru">
-
 <head>
   <!-- Обязательные метатеги -->
   <meta charset="utf-8">
@@ -61,8 +61,8 @@
           {% endif %}
 
           <div class="dropdown">
-            <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-              Заказы
+            <a class="btn btn-outline-light dropdown-toggle px-2" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              Заказы (Бот)
             </a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
               {% url 'admin_panel:no_paid_order' as no %}
@@ -85,7 +85,14 @@
               {% else %}
               <li><a class="dropdown-item" href="{% url 'admin_panel:qiwi_order' %}">Qiwi заказы</a></li>
               {% endif %}
+            </ul>
+          </div>
 
+          <div class="dropdown px-2">
+            <a class="btn btn-outline-light dropdown-toggle px-2" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              Заказы (Сайт)
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
               {% url 'admin_panel:site_no_paid_order' as qo %}
               {% if request.path == qo %}
               <li><a class="dropdown-item disabled" href="{% url 'admin_panel:site_no_paid_order' %}">Неоплаченные заказы через сайт</a></li>
@@ -98,6 +105,13 @@
               <li><a class="dropdown-item disabled" href="{% url 'admin_panel:site_paid_order' %}">Оплаченные заказы через сайт</a></li>
               {% else %}
               <li><a class="dropdown-item" href="{% url 'admin_panel:site_paid_order' %}">Оплаченные заказы через сайт</a></li>
+              {% endif %}
+
+              {% url 'admin_panel:site_qiwi_order' as qo %}
+              {% if request.path == qo %}
+              <li><a class="dropdown-item disabled" href="{% url 'admin_panel:site_qiwi_order' %}">Оплаченные заказы через сайт (QIWI)</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'admin_panel:site_qiwi_order' %}">Оплаченные заказы через сайт (QIWI)</a></li>
               {% endif %}
             </ul>
           </div>
@@ -140,9 +154,7 @@
 
     <br>
     {% block content %}
-    <div class="container">
 
-    </div>
     {% endblock %}
 
   </main>

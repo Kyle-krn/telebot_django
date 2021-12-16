@@ -25,6 +25,7 @@ urlpatterns = [
 
     path('site_new_order/', NoPaidSiteOrderView.as_view(), name='site_no_paid_order'),                                                                 
     path('site_old_order/', PaidSiteOrderView.as_view(), name='site_paid_order'),                                                                 
+    path('site_qiwi_order/', QiwiSiteOrderView.as_view(), name='site_qiwi_order'),                                                                 
 
     path('qiwi/', ControlQiwiView.as_view(), name='control_qiwi'),                                                                          # Добавить, удалить токен для QIWI    
 

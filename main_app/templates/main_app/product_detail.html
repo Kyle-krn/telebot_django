@@ -252,7 +252,7 @@
 </div>
 
 
-
+<div class='table-responsive'>
 <table class="table">
     <thead>
         <tr>
@@ -267,7 +267,7 @@
     <tbody>
         {% for tq in trade_queryset %}
 
-        {% if tq.get_my_model_name == 'soldproduct' %}
+        {% if tq.get_my_model_name == 'soldproduct' or tq.get_my_model_name == 'soldsiteproduct' %}
         <tr class="table-light">
             <th scope="">Продано</th>
             {% else %}
@@ -294,7 +294,7 @@
         </tr>
     </tbody>
 </table>
-
+</div>
 
 
 <script>

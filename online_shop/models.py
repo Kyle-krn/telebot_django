@@ -35,13 +35,13 @@ class SoldSiteProduct(models.Model):
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
     order = models.ForeignKey('OrderSiteProduct', related_name='soldproduct', on_delete=models.CASCADE, help_text='Заказ')
 
-    # def save(self, *args, **kwargs):
-    #     '''Отнимает кол-во товара в OfflineProduct'''
-    #     if self.count <= 0:
-    #         return
-    #     self.product.count -= self.count
-    #     self.product.save()
-    #     return super(SoldSiteProduct, self).save(*args, **kwargs)
+    def get_datetime(self):
+        user_timezone = pytz.timezone(settings.TIME_ZONE)
+        datetime = self.date.astimezone(user_timezone)
+        return datetime.strftime('%m/%d/%Y %H:%M')
+
+    def get_my_model_name(self):
+        return self._meta.model_name
 
     def __str__(self) -> str:
         return f"{self.product.title} - {self.count} в заказе #{self.order.pk}"

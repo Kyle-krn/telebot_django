@@ -235,7 +235,7 @@ class PaidOrderView(LoginRequiredMixin, ListView):
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/order/site_order.html'
-    queryset = OrderSiteProduct.objects.filter(status='Created').order_by('-created')
+    queryset = OrderSiteProduct.objects.filter(Q(status='Awaiting payment') & Q(pay_url__isnull=True)).order_by('-created')
     context_object_name = 'queryset'
 
     def post(self, request):
@@ -261,12 +261,23 @@ class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
 @method_decorator(staff_member_required, name='dispatch')
 class PaidSiteOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/order/paid_site_order.html'
-    queryset = OrderSiteProduct.objects.exclude(status='Created').order_by('-created')
+    queryset = OrderSiteProduct.objects.exclude(status='Awaiting payment').filter(pay_url__isnull=True).order_by('-created')
     context_object_name = 'queryset'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оплаченные заказы с сайта'
+        return context
+
+@method_decorator(staff_member_required, name='dispatch')
+class QiwiSiteOrderView(LoginRequiredMixin, ListView):
+    template_name = 'main_app/order/paid_site_order.html'
+    queryset = OrderSiteProduct.objects.exclude(status='Awaiting payment').filter(pay_url__isnull=False).order_by('-created')
+    context_object_name = 'queryset'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Qiwi заказы с сайта'
         return context
 
 ###############################################################################
@@ -275,7 +286,7 @@ class PaidSiteOrderView(LoginRequiredMixin, ListView):
 class StatisticView(LoginRequiredMixin, View):
     '''Представления общей статистики по товарам'''
     template_name = 'main_app/statistic.html'
-    reception_queryset = ReceptionProduct.objects.all()
+    
 
     def get_context_data(self, **kwargs):
         context = {}
@@ -285,7 +296,8 @@ class StatisticView(LoginRequiredMixin, View):
 
     def get_statistic(self):
         '''Считает общую статистику, первый элемент кортежа - общая сумма денег, второй элемент - общее кол-во товара'''
-        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+        stat_dict = {'sold_stat' : (sum([x.count * x.price for x in self.bot_sold_queryset]) + sum([x.count * x.price for x in self.site_sold_queryset]), 
+                                    sum([x.count for x in self.bot_sold_queryset]) + sum([x.count for x in self.site_sold_queryset])),
                  'reception_stat' : (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
                  'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))}
         stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
@@ -297,15 +309,20 @@ class StatisticView(LoginRequiredMixin, View):
     def get_queryset(self):
         '''Фильтрует набор данных о приемке, продаже по заданной дате'''
         params = self.get_params()
-        self.sold_queryset = SoldProduct.objects.filter(payment_bool=True)
+        self.reception_queryset = ReceptionProduct.objects.all()
+        self.bot_sold_queryset = SoldProduct.objects.filter(payment_bool=True)
+        self.site_sold_queryset = SoldSiteProduct.objects.exclude(order__status='Awaiting payment')
         if 'start' in params and 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__range=[params['start'], params['end']])
             self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
         elif 'start' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__gte=params['start'])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__gte=params['start'])
             self.reception_queryset =self. reception_queryset.filter(date__gte=params['start'])
         elif 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__lte=params['end'])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__lte=params['end'])
             self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])      
 
     def get(self, request):
@@ -331,12 +348,12 @@ class ProductView(LoginRequiredMixin, View):
             if params['only'] == 'reception':
                 result_list = self.reception_queryset.filter(liquidated=False)
             elif params['only'] == 'sold':
-                result_list = self.sold_queryset
+                result_list = self.bot_sold_queryset
             elif params['only'] == 'liquidated':
                 result_list = self.reception_queryset.filter(liquidated=True)
         else:
             result_list = sorted(
-                    chain(self.reception_queryset, self.sold_queryset),
+                    chain(self.reception_queryset, self.bot_sold_queryset, self.site_sold_queryset),
                     key=lambda instance: instance.date, reverse=True)
         return result_list
 
@@ -344,22 +361,27 @@ class ProductView(LoginRequiredMixin, View):
         '''Фильтрует набор данных о продажах и приемках по заданной дате'''
         params = self.get_params()
         self.reception_queryset = ReceptionProduct.objects.filter(product__pk=pk)
-        self.sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
+        self.bot_sold_queryset = SoldProduct.objects.filter(Q(product__pk=pk) & Q(payment_bool=True))
+        self.site_sold_queryset = SoldSiteProduct.objects.exclude(order__status='Awaiting payment').filter(product__pk=pk)
 
         if 'start' in params and 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__range=[params['start'], params['end']])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__range=[params['start'], params['end']])
             self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
         elif 'start' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__gte=params['start'])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__gte=params['start'])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__gte=params['start'])
             self.reception_queryset = self.reception_queryset.filter(date__gte=params['start'])
         elif 'end' in params:
-            self.sold_queryset = self.sold_queryset.filter(date__lte=params['end'])
+            self.bot_sold_queryset = self.bot_sold_queryset.filter(date__lte=params['end'])
+            self.site_sold_queryset = self.site_sold_queryset.filter(date__lte=params['end'])
             self.reception_queryset = self.reception_queryset.filter(date__lte=params['end'])   
 
     def get_statistic(self):
         '''Считает общую статистику, первый элемент кортежа - общая сумма денег, второй элемент - общее кол-во товара'''
         stat_dict = {
-            'sold_stat': (sum([x.count * x.price for x in self.sold_queryset]), sum([x.count for x in self.sold_queryset])),
+            'sold_stat': (sum([x.count * x.price for x in self.bot_sold_queryset]) + sum([x.count * x.price for x in self.site_sold_queryset]), 
+                          sum([x.count for x in self.bot_sold_queryset]) + sum([x.count for x in self.site_sold_queryset])),
             'reception_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=False)]), sum([x.count for x in self.reception_queryset.filter(liquidated=False)])),
             'liquidated_stat': (sum([x.count * x.price for x in self.reception_queryset.filter(liquidated=True)]) ,sum([x.count for x in self.reception_queryset.filter(liquidated=True)]))
         }
