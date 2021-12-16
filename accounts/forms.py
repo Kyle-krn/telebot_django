@@ -9,7 +9,7 @@ class UserRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'password',)
+        fields = ('first_name', 'last_name', 'email', 'password', 'username')
 
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),

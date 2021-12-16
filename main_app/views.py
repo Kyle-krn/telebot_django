@@ -234,6 +234,8 @@ class PaidOrderView(LoginRequiredMixin, ListView):
         context['title'] = 'Оплаченные заказы'
         return context
 
+############################################################################
+
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
     template_name = 'main_app/order/site_order.html'
@@ -271,6 +273,7 @@ class PaidSiteOrderView(LoginRequiredMixin, ListView):
         context['title'] = 'Оплаченные заказы с сайта'
         return context
 
+###############################################################################
 
 @method_decorator(staff_member_required, name='dispatch')
 class StatisticView(LoginRequiredMixin, View):

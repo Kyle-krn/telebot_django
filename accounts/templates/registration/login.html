@@ -4,7 +4,7 @@
 {% if form.errors %}
 <div class="shadow-custom messages alert alert-danger
 col-lg-4 mx-auto text-center">
-    Incorrect username / password
+    Неверные логин / пароль
     <a href="" class="close">x</a>
 </div>
 {% endif %}
@@ -14,19 +14,19 @@ col-lg-4 mx-auto text-center">
         {% csrf_token %}
         <div class="input-field">
             {{ form.username }}
-            <label for="username">Username</label>
+            <label for="username">Имя пользователя</label>
         </div>
         <div class="input-field">
             {{ form.password }}
-            <label for="password">Password</label>
+            <label for="password">Пароль</label>
         </div>
         <button class="btn btn-block btn-warning mb-3" type="submit">
-            Log in
+            Войти
         </button>
     </form>
     <div class="text-center mb-2">
         <a href="{% url 'password_reset' %}" class="text-decoration-none">
-            Forgot your password?
+            Забыли пароль?
         </a>
     </div>
 </div>

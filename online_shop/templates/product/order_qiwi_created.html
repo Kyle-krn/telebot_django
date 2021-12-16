@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.id }} created{% endblock %}
+{% block content %}
+<div class="card shadow-custom border-0 col-lg-7 mx-auto mb-3">
+    <div class="py-3">
+        <h3 class="text-center">Спасибо за заказ. Номер вашего заказа
+            <strong>{{ order.id }}</strong>
+        </h3>
+        <div class="text-center">
+            <div class="text-center">
+                <h5>Наша система автоматически проверяет заказ на наличие оплаты. После поступления оплаты на ваш email
+                    придет письмо о смене статуса заказа. Ссылка на оплату действует 1 час, по истечении этого времени
+                    неоплаченные заказы автоматически удаляются.</h5>
+                <div class="btn-group d-flex">
+                    <a id="pay_url" href="{{order.pay_url}}" target="_blank" class="btn btn-warning shadow-custom col">
+                        Перейти к оплате
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var pay_url = $('#pay_url').attr('href');
+        window.open(pay_url, '_blank');
+    })
+</script>
+
+{% endblock content %}

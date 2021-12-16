@@ -7,7 +7,7 @@ from .models import *
 from decimal import Decimal
 from django.conf import settings
 from main_app.tasks import order_created
-from .utils import send_email_created_order
+from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -135,7 +135,10 @@ def order_create(request):
             cf = order_form.cleaned_data
             delivery_price = check_price_delivery(cf['postal_code'], weight)
             order = order_form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
             order.transport_cost = delivery_price
+            # order.transport_cost = 1
             order.save()
             product_ids = cart.keys()
             products = Product.objects.filter(id__in=product_ids)
@@ -144,8 +147,17 @@ def order_create(request):
                 SoldSiteProduct.objects.create(product=product, price=product.price, count=cart_item['quantity'], order=order)
             order.set_order_price()
             cart_clean(request)
-            send_email_created_order(order.pk)
-            return render( request, 'product/order_created.html', {'order': order})
+            if 'manager_payment' in request.POST:
+                send_email_order_method_payment_manager(order.pk)
+                return render( request, 'product/order_created.html', {'order': order})
+            else:
+                # Не закончено
+                bill = create_bill_qiwi(order.pk)
+                order.pay_url = bill
+                order.save()
+                send_email_order_method_payment_qiwi(order.pk)
+                return render( request, 'product/order_qiwi_created.html', {'order': order})
+
         else:
             return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
     else:
@@ -154,7 +166,13 @@ def order_create(request):
             initial_data = {
                 'first_name': request.user.first_name,
                 'last_name': request.user.last_name,
+                'email': request.user.email,
+                'telephone': request.user.profile.phone_number,
+                'address': request.user.profile.address,
+                'postal_code': request.user.profile.postal_code,
+                'city': request.user.profile.city,
             }
+            order_form = OrderCreateForm(initial=initial_data)
         return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
 
 

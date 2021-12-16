@@ -30,7 +30,7 @@
     {% with product=item.product %}
     <div class="row justify-content-center cart">
         <div class="cart-item col-4 col-lg-2">
-            <a href="{{ product.get_absolute_url }}">
+            <a href="{% url 'online_shop:product_detail' product.slug %}">
                 <img src="{{ product.photo.url }}" alt="" class="img-fluid rounded-0">
             </a>
         </div>

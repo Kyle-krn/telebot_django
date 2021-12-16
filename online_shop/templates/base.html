@@ -36,18 +36,18 @@ family=Nunito&display=swap">
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'logout' %}" class="nav-link text-white">
-                            <i class="fas fa-sign-out-alt"></i> Log out
+                            <i class="fas fa-sign-out-alt"></i> Выйти
                         </a>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a href="{% url 'login' %}" class="nav-link text-white">
-                            <i class="fas fa-sign-in-alt"></i> Log in
+                            <i class="fas fa-sign-in-alt"></i> Войти
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'register' %}" class="nav-link text-white">
-                            <i class="fas fa-user-plus"></i> Register
+                            <i class="fas fa-user-plus"></i> Регистрация
                         </a>
                     </li>
                     {% endif %}

@@ -17,6 +17,7 @@ class Review(models.Model):
 
 
 ORDER_STATUS = [
+    ('Awaiting payment', 'Ожидает оплаты'),
     ('Created', 'Созданно'),
     ('Processing', 'В процессе'),
     ('Shipped', 'Доставляется'),
@@ -48,6 +49,7 @@ class SoldSiteProduct(models.Model):
 
 class OrderSiteProduct(models.Model):
     '''Заказы через сайт, пока не используется в приложении'''
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
@@ -61,8 +63,10 @@ class OrderSiteProduct(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     
-    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='Created')
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='Awaiting payment')
     price = models.IntegerField(blank=True, null=True)
+
+    pay_url = models.URLField(max_length=250, blank=True, null=True, help_text='Url оплаты в QIWI')
 
     def set_order_price(self):
         '''Обновляет стоймость заказа при его изменении'''

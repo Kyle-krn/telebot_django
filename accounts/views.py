@@ -46,7 +46,9 @@ def profile(request):
             user_form = UpdateUserForm(instance=request.user, data=request.POST)
             profile_form = UpdateProfileForm(instance=request.user.profile, data=request.POST)
             if user_form.is_valid() and profile_form.is_valid():
-                user_form.save()
+                user_form.save(commit=False)
+                request.user.username = email
+                request.user.save() 
                 profile_form.save()
                 messages.success(request, 'Профиль успешно обновлен')
         else:

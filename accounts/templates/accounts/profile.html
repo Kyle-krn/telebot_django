@@ -70,7 +70,7 @@ col-lg-7 mx-auto">
             </div>
             <hr>
             <div class="row">
-                
+
                 <button type="submit" id='sub_button' class="btn col" data-toggle="tooltip" data-placement="top"
                     title="Введите новые данные и нажмите «Обновить профиль»">
                     Обновить профиль</button>
@@ -79,6 +79,26 @@ col-lg-7 mx-auto">
                 </a>
             </div>
             <hr>
+            <h3 class="mb-3">Ваши заказы:</h3>
+            <table class="table">
+                {% for order in request.user.orders.all %}
+                <tr>
+                    <td>
+                        <a href="" class="text-decoration-none">
+                            {{ order.id }}
+                        </a>
+                    </td>
+                    <td>{{ order.created|date }}</td>
+                    <td class="text-green">
+                        {{ order.price|add:order.transport_cost}} руб.
+                    </td>
+                    <td>{{ order.get_status_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    No orders yet
+                </tr>
+                {% endfor %}
         </form>
     </div>
 </div>
@@ -92,23 +112,23 @@ col-lg-7 mx-auto">
             $('#postal_code_div').removeClass('error-input');
         } else if (len_field == 6) {
             $.ajax({
-            url: "{% url 'online_shop:validate_postal_code' %}",
-            method: 'get',
-            dataType: 'html',
-            data: { id_postal_code: $('#id_postal_code').val() },
-            success: function (data) {
-                $('#postal_code_div').removeClass('error-input');
-                $('#postal_code_div').addClass('success-input');
-                $('#sub_button').title = 'Введите новые данные и нажмите «Обновить профиль».'
-                document.getElementById("sub_button").disabled = false;
-                
-            },
-            error: function (data) {
-                document.getElementById("sub_button").disabled = true;
-                $('#sub_button').title = 'Не верно заполнен индекс'
-                $('#postal_code_div').addClass('error-input');
-            }  
-        });
+                url: "{% url 'online_shop:validate_postal_code' %}",
+                method: 'get',
+                dataType: 'html',
+                data: { id_postal_code: $('#id_postal_code').val() },
+                success: function (data) {
+                    $('#postal_code_div').removeClass('error-input');
+                    $('#postal_code_div').addClass('success-input');
+                    $('#sub_button').title = 'Введите новые данные и нажмите «Обновить профиль».'
+                    document.getElementById("sub_button").disabled = false;
+
+                },
+                error: function (data) {
+                    document.getElementById("sub_button").disabled = true;
+                    $('#sub_button').title = 'Не верно заполнен индекс'
+                    $('#postal_code_div').addClass('error-input');
+                }
+            });
         } else {
             document.getElementById("sub_button").disabled = true;
             $('#sub_button').title = 'Не верно заполнен индекс'

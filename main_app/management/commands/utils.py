@@ -2,7 +2,6 @@ import requests
 import random
 import string
 from main_app.models import QiwiToken
-from vape_shop.settings import QIWI_TOKEN
 
 
 
