@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from online_shop.models import OrderSiteProduct
 from django.conf import settings
 from seller_site.models import OfflineCategory
+
 @shared_task
 def order_created(order_id):
     # order = OrderSiteProduct.objects.get(pk=order_id)

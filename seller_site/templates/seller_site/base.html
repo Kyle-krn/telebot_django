@@ -39,14 +39,14 @@
          {% endif %}
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-
+          
           {% url 'local_shop:list_product' as apo %}
           {% if request.path == apo %}
           <li><a href="{% url 'local_shop:list_product' %}" class="nav-link px-2 disabled">Все товары</a></li>
           {% else %}
           <li><a href="{% url 'local_shop:list_product' %}" class="nav-link px-2 text-white">Все товары</a></li>
           {% endif %}
-
+          
           {% url 'local_shop:register_seller' as r %}
           {% if request.user.is_superuser %}
           {% if request.path == r %}
@@ -64,7 +64,7 @@
           <li><a href="{% url 'local_shop:list_order' %}" class="nav-link px-2 text-white">Заказы</a></li>
           {% endif %}
           {% endif %}
-
+          
           {% url 'local_shop:statistic' as so %}
           {% if request.user.is_superuser %}
           {% if request.path == so %}

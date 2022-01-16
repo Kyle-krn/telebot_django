@@ -21,7 +21,6 @@ class OfflineSubCategory(models.Model):
     category = models.ForeignKey(OfflineCategory, on_delete=models.CASCADE, help_text='Категория подкатегории')
     name = models.CharField(max_length=150, db_index=True, help_text='Имя подкатегории')
 
-
     def __str__(self):
         return self.name
 
@@ -36,8 +35,6 @@ class OfflineProduct(models.Model):
 
     def get_absolute_url(self):
         return reverse('local_shop:product_detail', kwargs={'pk': self.pk})
-
-
 
     def __str__(self):
         return self.title
@@ -87,7 +84,7 @@ class OfflineSoldProduct(models.Model):
     count = models.IntegerField(help_text='Кол-во проданного товара')
     date = models.DateTimeField(auto_now_add=True, help_text='Дата и время продажи')
     price_for_seller = models.IntegerField(help_text='Отчисления продавцу')
-    order = models.ForeignKey('OfflineOrderingProduct', on_delete=models.CASCADE, help_text='Заказ')
+    order = models.ForeignKey('OfflineOrderingProduct', related_name='offlinesoldproduct', on_delete=models.CASCADE, help_text='Заказ')
 
     def save(self, *args, **kwargs):
         '''Отнимает кол-во товара в OfflineProduct'''
@@ -98,18 +95,18 @@ class OfflineSoldProduct(models.Model):
         return super(OfflineSoldProduct, self).save(*args, **kwargs)
 
                                                                     # вроде не используется, проверить
-    # def return_in_product(self, new_count):
-        # '''Изменяет кол-во товара при редактировании заказа'''
-        # if new_count <= 0:
-        #     self.product.count += self.count
-        #     self.product.save()
-        #     return super(OfflineSoldProduct, self).delete()
+    def return_in_product(self, new_count):
+        '''Изменяет кол-во товара при редактировании заказа'''
+        if new_count <= 0:
+            self.product.count += self.count
+            self.product.save()
+            return super(OfflineSoldProduct, self).delete()
             
-        # else:
-        # self.product.count += (self.count - new_count)
-        # self.product.save()
-        # self.count = new_count
-        # return super(OfflineSoldProduct, self).save()
+        else:
+            self.product.count += (self.count - new_count)
+            self.product.save()
+            self.count = new_count
+            return super(OfflineSoldProduct, self).save()
 
     def delete(self, *args, **kwargs):
         self.product.count += self.count

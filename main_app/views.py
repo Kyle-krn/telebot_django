@@ -1,25 +1,19 @@
 from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
-from django.urls.base import resolve
-from main_app.utils import change_item_order_utils, delete_order_utils, remove_item_order_utils
-from django.http import HttpResponseRedirect
 from django.contrib import messages
-from itertools import chain
 from django.db.models import Q
-from main_app.management.commands.utils import get_qiwi_balance
 from django.urls import reverse_lazy
-from django.contrib.auth.views import LoginView
-from django.contrib.auth import logout
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
 from django.views import View
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth import login 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-from django.core.exceptions import BadRequest
 from online_shop.models import OrderSiteProduct, SoldSiteProduct
 from online_shop.utils import send_email_change_status_order
+from main_app.utils import change_item_order_utils, delete_order_utils, remove_item_order_utils
+from main_app.management.commands.utils import get_qiwi_balance
+from itertools import chain
 from .forms import *
 from .models import *
 
@@ -28,34 +22,6 @@ def index(request):
     if not request.user.is_authenticated:
         return redirect('login')
     return redirect('admin_panel:list_product') if request.user.is_superuser else redirect('local_shop:list_product')
-
-
-# class LoginUser(LoginView):
-#     '''Аутенификация пользователя'''
-#     form_class = LoginUserForm
-#     template_name = 'main_app/login.html'
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['title'] = 'Логин'
-#         return context
-
-#     def form_valid(self, form):
-#         login(self.request, form.get_user())
-#         user = form.get_user()
-#         return HttpResponseRedirect(self.get_success_url(user))
-
-#     def get_success_url(self, user):
-#         if user.is_superuser:
-#             return reverse_lazy('admin_panel:list_product')
-#         else:
-#             return reverse_lazy('local_shop:list_product') 
-
-
-# def logout_user(request):
-#     '''Выход'''
-#     logout(request)
-#     return redirect('login')
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -234,6 +200,7 @@ class PaidOrderView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
+    '''Неоплаченные заказы с сайта'''
     template_name = 'main_app/order/site_order.html'
     queryset = OrderSiteProduct.objects.filter(Q(status='Awaiting payment') & Q(pay_url__isnull=True)).order_by('-created')
     context_object_name = 'queryset'
@@ -260,6 +227,7 @@ class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class PaidSiteOrderView(LoginRequiredMixin, ListView):
+    '''Оплаченные заказы с сайта'''
     template_name = 'main_app/order/paid_site_order.html'
     queryset = OrderSiteProduct.objects.exclude(status='Awaiting payment').filter(pay_url__isnull=True).order_by('-created')
     context_object_name = 'queryset'
@@ -271,6 +239,7 @@ class PaidSiteOrderView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class QiwiSiteOrderView(LoginRequiredMixin, ListView):
+    '''Киви заказы с сайта'''
     template_name = 'main_app/order/paid_site_order.html'
     queryset = OrderSiteProduct.objects.exclude(status='Awaiting payment').filter(pay_url__isnull=False).order_by('-created')
     context_object_name = 'queryset'
@@ -459,6 +428,7 @@ class ProductView(LoginRequiredMixin, View):
 
 
 class ControlQiwiView(LoginRequiredMixin, ListView):
+    '''Представление контроля киви кошельков'''
     context_object_name = 'queryset'
     login_url = '/login/'
     template_name = 'main_app/control_qiwi.html'

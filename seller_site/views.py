@@ -15,14 +15,13 @@ from datetime import date
 from django.db.models import Q, F, Sum
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
-from main_app.management.commands.handlers.handlers import bot
-from vape_shop.settings import TELEGRAM_GROUP_ID
 from django.contrib.auth.models import Group, User
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 class CreateOrderView(UserPassesTestMixin, View):
+    '''Представление создания заказа'''
     template_name = 'seller_site/create_order.html'
 
     def test_func(self):
@@ -43,8 +42,8 @@ class CreateOrderView(UserPassesTestMixin, View):
             messages.error(request, 'Ошибка добавления чека!')
             return redirect('local_shop:list_product')
 
-        pk_list = request.POST.getlist('product_id')    
-        count_list = request.POST.getlist('product_count')
+        pk_list = request.POST.getlist('product_id')        # Берем список id товаров
+        count_list = request.POST.getlist('product_count')  # Берем список кол-ва товара
 
         if len(pk_list) != len(count_list):     # Доп проверка
             messages.error(request, 'Ошибка добавления чека!')
@@ -76,7 +75,6 @@ class CreateOrderView(UserPassesTestMixin, View):
         return render(request, self.template_name, context=self.get_context_data())
 
 
-
 class OfflineReceptionProductView(UserPassesTestMixin, SuccessMessageMixin, CreateView):
     '''Представление добавления кол-ва товара (приемка)'''
     template_name = 'seller_site/create_reception.html'
@@ -106,6 +104,7 @@ class OfflineReceptionProductView(UserPassesTestMixin, SuccessMessageMixin, Crea
 
 @method_decorator(staff_member_required, name='dispatch')
 class RegisterUser(CreateView):
+    '''Регистрация продавца'''
     form_class = RegisterUserForm
     template_name = 'seller_site/register.html'
     success_url = reverse_lazy('local_shop:list_product')
@@ -132,10 +131,8 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
         context['title'] = 'Категории (Оффлайн магазин)'
         context['category'] = OfflineCategory.objects.all()
         context['category_form'] = OffilneCategoryForm()
-
         context['change_category_form'] = OffilneChangeCategoryForm(auto_id="change_category_%s")
         context['change_subcategory_form'] = OfflineChangeSubcategoryForm(auto_id="change_subcategory_%s")
-
         context['sc_form'] = OfflineSubcategoryForm()
         return context
 
@@ -145,8 +142,6 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             if category_form.is_valid():
                 category_form.save()
                 messages.success(request, 'Новая категория успешно создана!')
-                
-
         elif 'change_category' in request.POST: # Изменить категорию
             try:
                 instance = get_object_or_404(OfflineCategory, pk=int(request.POST.get('id')))
@@ -157,8 +152,6 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             if category_form.is_valid():
                 category_form.save()
                 messages.success(request, 'Категория успешно обновлена!')
-
-
         elif 'delete_category' in request.POST:     # Удалить категорию
             if 'category_pk' not in request.POST:
                 messages.error(request, 'Ошибка удаления категории!')
@@ -168,40 +161,31 @@ class OfflineCategoriesView(LoginRequiredMixin, View):
             except (ValueError, TypeError):
                 messages.error(request, 'Ошибка удаления категории!')
                 return redirect('local_shop:list_product')
-
             get_object_or_404(OfflineCategory, pk=category_pk).delete()
             messages.success(request, 'Категория успешно удалена!')
-
         elif 'create_sc' in request.POST:   # Создать подкатеогрию
             sc_form = OfflineSubcategoryForm(request.POST)
             if sc_form.is_valid():
                 sc_form.save()
                 messages.success(request, 'Новая подкатегория успешно создана!')
-
         elif 'change_subcategory' in request.POST:
-
             try:
                 instance = get_object_or_404(OfflineSubCategory, pk=int(request.POST.get('id')))
             except (ValueError, TypeError):
                 messages.error(request, 'Ошибка изменения категории')
-
             subcategory_form = OfflineChangeSubcategoryForm(request.POST, instance=instance)
             if subcategory_form.is_valid():
                 subcategory_form.save()
                 messages.success(request, 'Подкатегория успешно обновлена!')
-
-
         elif 'delete_subcategory' in request.POST:      # Удалить подкатегорию
             if 'subcategory_pk' not in request.POST:
                 messages.error(request, 'Ошибка удаления подкатегории!')
                 return redirect('local_shop:list_product')
-            
             try:
                 subcategory_pk = int(request.POST.get('subcategory_pk'))
             except (ValueError, TypeError):
                 messages.error(request, 'Ошибка удаления подкатегории!')
                 return redirect('local_shop:list_product')
-
             get_object_or_404(OfflineSubCategory, pk=subcategory_pk).delete()
             messages.success(request, 'Подкатегория успешно удалена!')
         return redirect('local_shop:list_category')
@@ -395,7 +379,7 @@ class OfflineOrderView(LoginRequiredMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = OfflineCategory.objects.all()
-        context['users'] = User.objects.all() 
+        context['users'] = User.objects.filter(groups__name='sellers') 
         context['cash_seller'] = self.seller_filter() 
         context['form'] = OrderChangeForm()
         context['title'] = 'Заказы'
@@ -438,20 +422,32 @@ class OfflineStatisticView(LoginRequiredMixin, View):
 
     def get_reception_stat(self):
         '''Статистика каждого товара по приемке'''
-        return OfflineProduct.objects.annotate(reception_count=Sum('offlinereceptionproduct__count')).annotate(reception_sum=F('purchase_price') * F('reception_count')).order_by('-reception_count')
+        return OfflineProduct.objects.annotate(reception_count=Sum('offlinereceptionproduct__count'))  \
+                                     .annotate(reception_sum=F('purchase_price') * F('reception_count'))  \
+                                     .order_by('-reception_count')
 
     def get_sold_stat(self):
         '''Статистика каждого товара по продажам'''
-        return OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count')).annotate(sold_sum=F('price') * F('sold_count')).order_by('-sold_count') 
+        return OfflineProduct.objects.annotate(sold_count=Sum('offlinesoldproduct__count'))  \
+                                     .annotate(sold_sum=F('price') * F('sold_count'))  \
+                                     .order_by('-sold_count')
 
     def get_statistic(self):
         '''Общая статистика магазина'''
-        stat_dict = {'sold_stat' :[int(x or 0) for x in tuple(self.sold_queryset.annotate(sold_sum=F('count') * F('price')).aggregate(all_sold_price = Sum('sold_sum'),all_sold_count = Sum('count')).values())],
-                     'reception_stat' :[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=False).annotate(reception_sum=F('count') * F('price')).aggregate(all_reception_price= Sum('reception_sum'), all_reception_count=Sum('count')).values())],
-                     'liquidated_stat':[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=True).annotate(reception_sum=F('count') * F('price')).aggregate(all_reception_price= Sum('reception_sum'), all_reception_count=Sum('count')).values())]}
+        stat_dict = {'sold_stat' :[int(x or 0) for x in tuple(self.sold_queryset  \
+                                                                                .annotate(sold_sum=F('count') * F('price'))  \
+                                                                                .aggregate(all_sold_price = Sum('sold_sum'),
+                                                                                all_sold_count = Sum('count')).values())],
+                     'reception_stat' :[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=False)  \
+                                                                                          .annotate(reception_sum=F('count') * F('price'))  \
+                                                                                          .aggregate(all_reception_price= Sum('reception_sum'), 
+                                                                                          all_reception_count=Sum('count')).values())],
+                     'liquidated_stat':[int(x or 0) for x in tuple(self.reception_queryset.filter(liquidated=True)  \
+                                                                                          .annotate(reception_sum=F('count') * F('price'))  \
+                                                                                          .aggregate(all_reception_price= Sum('reception_sum'), 
+                                                                                          all_reception_count=Sum('count')).values())]}
         stat_dict['all_stat'] = stat_dict['sold_stat'][0] - stat_dict['reception_stat'][0] - stat_dict['liquidated_stat'][0]
         return stat_dict
-
 
     def get_params(self):
         return {k:v for k,v in self.request.GET.items() if v != ''}
@@ -461,7 +457,6 @@ class OfflineStatisticView(LoginRequiredMixin, View):
         params = self.get_params()
         self.sold_queryset = OfflineSoldProduct.objects.all()
         self.reception_queryset = OfflineReceptionProduct.objects.all()
-
         if 'start' in params and 'end' in params:
             self.sold_queryset = self.sold_queryset.filter(date__range=[params['start'], params['end']])
             self.reception_queryset = self.reception_queryset.filter(date__range=[params['start'], params['end']])
@@ -510,6 +505,7 @@ class OfflineSellerPage(UserPassesTestMixin, View):
 
 @staff_member_required
 def change_item_order(request, sold_pk):
+    '''Изменяет кол-во товара в заказе'''
     instance = OfflineSoldProduct.objects.get(pk=sold_pk)
     form = OrderChangeForm(request.POST)
     if form.is_valid():
@@ -518,8 +514,11 @@ def change_item_order(request, sold_pk):
     instance.order.set_order_price()
     return redirect('local_shop:list_order')
 
+
+
 @staff_member_required
 def remove_item_order(request, sold_pk):
+    '''Удалет товар из заказа'''
     instance = OfflineSoldProduct.objects.get(pk=sold_pk)
     order = instance.order
     instance.delete()
@@ -529,6 +528,7 @@ def remove_item_order(request, sold_pk):
 
 @staff_member_required
 def delete_order(request, order_pk):
+    '''Удаляет заказ'''
     order = OfflineOrderingProduct.objects.get(pk=order_pk)
     for item in order.offlinesoldproduct.all():
         item.delete()

@@ -1,17 +1,22 @@
 from django.shortcuts import render, get_object_or_404, redirect
-import requests
 from .models import *
 from .forms import *
 from main_app.models import Category, SubCategory, Product, SoldProduct
 from .models import *
 from decimal import Decimal
 from django.conf import settings
-from main_app.tasks import order_created
 from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
 from django.http import JsonResponse
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
 from main_app.utils import check_price_delivery
+from django import template
+
+register = template.Library()
+
+
+@register.filter(name='tes')
+def tes(value, arg):
+    value = 'ghb'
+    return value
 
 def product_list(request, category_slug=None, subcategory_slug=None):
     '''Представление каталога товаров'''
@@ -89,20 +94,13 @@ def cart_detail(request):
     product_ids = cart.keys()
     products = Product.objects.filter(id__in=product_ids)
     temp_cart = cart.copy()
-
     for product in products:
-
         cart_item = temp_cart[str(product.pk)]
-
         if cart_item['quantity'] > product.count:
             cart_item['quantity'] = product.count
-
-
         cart_item['product'] = product
         cart_item['total_price'] = (Decimal(cart_item['price']) * cart_item['quantity'])
         cart_item['update_quantity_form'] = CartAddProductForm(initial={'quantity': cart_item['quantity']})
-
-
     cart_total_price = sum(Decimal(item['price']) * item['quantity'] for item in temp_cart.values())
     return render(request, 'product/cart_detail.html', {'cart': temp_cart.values(), 'cart_total_price': cart_total_price})
 
@@ -113,7 +111,6 @@ def cart_remove(request, product_id):
     product_id = str(product_id)
     if product_id in cart:
         del cart[product_id]
-
         request.session.modified = True
         return redirect('online_shop:cart_detail')
 
@@ -122,13 +119,11 @@ def cart_clean(request):
     '''Отчистить корзину'''
     del request.session[settings.CART_ID]
 
-from django.core.mail import send_mail
 
 def order_create(request):
     '''Представление создания заказа'''
     cart = get_cart(request)
     weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
-
     if request.method == 'POST':
         order_form = OrderCreateForm(request.POST)
         if order_form.is_valid():

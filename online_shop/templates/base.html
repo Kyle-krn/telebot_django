@@ -29,6 +29,23 @@ family=Nunito&display=swap">
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav ml-auto">
                     {% if request.user.is_authenticated %}
+
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                            <a href="{% url 'admin_panel:list_product' %}" class="nav-link text-white">
+                                <i class="fas fa-tools"></i> Админка 
+                            </a>
+                        </li>
+                    {% endif %}
+                    {%  load my_templatetag %}
+                    {% if request.user|has_group:"sellers" %}
+                        <li class="nav-item">
+                            <a href="{% url 'local_shop:list_product' %}" class="nav-link text-white">
+                                <i class="fas fa-cash-register"></i>Продажи  <i class="fas fa-store"></i> 
+                            </a>
+                        </li>
+                    {% endif %}
+                                        
                     <li class="nav-item">
                         <a href="{% url 'profile' %}" class="nav-link text-white">
                             <i class="fas fa-user"></i> {{ request.user.email }}

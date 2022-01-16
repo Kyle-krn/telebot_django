@@ -51,6 +51,7 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {{qs.offlinesoldproduct_set.all}}
                         {% for product in qs.offlinesoldproduct.all %}
                       <tr class=''>
                         <th scope="row">{{forloop.counter}}</th>
