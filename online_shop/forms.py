@@ -14,9 +14,9 @@ class ReviewForm(forms.ModelForm):
         widgets = {'text': forms.Textarea(attrs={'class': 'form-control shadow px-2', 'rows': 6}),
                    'rating': forms.RadioSelect}
 
-class CartAddProductForm(forms.Form):
-    '''Форма кол-ва товара в коризне и на странице продукта'''
-    quantity = forms.IntegerField(min_value=1, widget=NumberInput(attrs={'class': 'form-control text-center px-3', 'value': 1}))
+# class CartAddProductForm(forms.Form):
+#     '''Форма кол-ва товара в коризне и на странице продукта'''
+#     quantity = forms.IntegerField(min_value=1, widget=NumberInput(attrs={'class': 'form-control text-center px-3', 'value': 1}))
 
 class OrderCreateForm(forms.ModelForm):
     '''Форма создания заказа'''

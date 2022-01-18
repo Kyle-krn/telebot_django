@@ -47,7 +47,7 @@
             </div>
             <div class="mb-4">
                 {% if product.count > 0 %}
-                <form action="{% url 'online_shop:cart_add' product.pk %}" method="post">
+                <form action="{% url 'cart:cart_add' product.pk %}" method="post">
                     {% csrf_token %}
                     <span class="input-group add-to-cart shadow-custom">
                         <div class="input-group-prepend">

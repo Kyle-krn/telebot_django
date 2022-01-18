@@ -53,7 +53,7 @@ col-lg-2 align-self-center text-center">
             <span>{{ product.price }} руб.</span>
         </div>
         <div class="cart-item col-6 col-sm-5 col-lg-2 align-self-center">
-            <form action="{% url 'online_shop:cart_add' product.id %}" method='post'>
+            <form action="{% url 'cart:cart_add' product.id %}" method='post'>
                 {% csrf_token %}
                 <span class="input-group shopping-cart">
                     {{ item.update_quantity_form.quantity }}
@@ -72,7 +72,7 @@ col-lg-2 align-self-center text-center">
         </div>
         <div class="cart-item col-12 col-lg-1 text-right
 align-self-center">
-            <form action="{% url 'online_shop:cart_remove' product.id %}" method="post">
+            <form action="{% url 'cart:cart_remove' product.id %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn" data-toggle="tooltip" data-placement="top" title="Remove">
                     <i class="fas fa-trash-alt"></i>

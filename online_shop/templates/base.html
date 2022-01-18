@@ -70,7 +70,7 @@ family=Nunito&display=swap">
                     {% endif %}
                     <li class="nav-item">
                         <div class="dropdown-custom">
-                            <a href="{% url 'online_shop:cart_detail' %}" class="nav-link text-white drop-btn">
+                            <a href="{% url 'cart:cart_detail' %}" class="nav-link text-white drop-btn"> 
                                 <i class="fas fa-shopping-cart"></i>
                                 <span id="cart_price">{{ cart_total_price|floatformat:2 }} руб.</span>
                             </a>
