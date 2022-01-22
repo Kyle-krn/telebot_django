@@ -4,9 +4,6 @@ import logging
 import telebot
 
 
-
-
-
 class Command(BaseCommand):
     help = 'Чистит базу'
 

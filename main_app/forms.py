@@ -1,10 +1,7 @@
+from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from django.forms import fields
-from .models import *
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth.models import User
 from online_shop.models import OrderSiteProduct
-
+from .models import *
 
 class ProductForm(forms.ModelForm):
       '''Форма для создания товара'''

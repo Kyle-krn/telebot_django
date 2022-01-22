@@ -1,9 +1,11 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from datetime import date
 from .forms import *
 from .models import *
+
+
 User = get_user_model()
 
 
@@ -20,7 +22,7 @@ class CreateOrderTest(TestCase):
         self.product = OfflineProduct.objects.create(title='Product', purchase_price=100, price=50, count=5, subcategory=self.subcategory)
         self.product_2 = OfflineProduct.objects.create(title='Product', purchase_price=100, price=50, count=5, subcategory=self.subcategory)
 
-    def test_anon_requared(self):
+    def test_requared(self):
         '''Тест доступа'''
         response = self.client.get(reverse('local_shop:create_order'))
         self.assertEqual(response.status_code, 302)
@@ -263,7 +265,6 @@ class OfflineCreateProductTest(TestCase):
         self.assertEqual(product.purchase_price, data['purchase_price'])
         self.assertEqual(product.price, data['price'])
         self.assertEqual(product.subcategory.pk, data['subcategory'])
-# Create your tests here.
 
 
 class OfflineIndexTest(TestCase):

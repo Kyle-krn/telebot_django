@@ -1,23 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
-from .models import *
-from django.contrib import messages
-from .forms import *
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import Group, User
 from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView
+from django.db.models import Q, F, Sum
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from django.views.generic import ListView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.views import View
 from itertools import chain
 from collections import Counter
 from datetime import date
-from django.db.models import Q, F, Sum
-from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
-from django.contrib.auth.models import Group, User
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.mixins import UserPassesTestMixin
+from .models import *
+from .forms import *
 
 
 class CreateOrderView(UserPassesTestMixin, View):
@@ -513,7 +512,6 @@ def change_item_order(request, sold_pk):
         instance.return_in_product(cf['count'])
     instance.order.set_order_price()
     return redirect('local_shop:list_order')
-
 
 
 @staff_member_required

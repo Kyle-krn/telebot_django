@@ -3,8 +3,6 @@ import random
 import string
 from main_app.models import QiwiToken
 
-
-
 def get_pay_qiwi_in(api_access_token, number):
     '''Берет последние 25 входящих платежей на киви'''
     s7 = requests.Session()

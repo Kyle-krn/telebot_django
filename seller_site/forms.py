@@ -78,7 +78,6 @@ class OfflineReceptionForProductViewForm(OfflineReceptionForm):
 
 
 class OrderChangeForm(forms.ModelForm):
-      # id = forms.CharField(widget=forms.HiddenInput())
       count = forms.IntegerField(label='Кол-во товара:', widget=forms.TextInput(attrs={'min': 1 , 'type': 'number', 'style': 'width: 25%'}))
 
       class Meta:

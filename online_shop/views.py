@@ -1,3 +1,6 @@
+from django.views.generic import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView
 from django.shortcuts import render, get_object_or_404, redirect
 from cart.forms import CartAddProductForm
 from cart.views import cart_clean, get_cart
@@ -5,166 +8,126 @@ from .models import *
 from .forms import *
 from main_app.models import Category, SubCategory, Product
 from .models import *
-from decimal import Decimal
-from django.conf import settings
 from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
 from django.http import JsonResponse
 from main_app.utils import check_price_delivery
 
 
-def product_list(request, category_slug=None, subcategory_slug=None):
-    '''Представление каталога товаров'''
-    categories = Category.objects.all()
-    if category_slug and subcategory_slug:
-        requested_subcategory = get_object_or_404(SubCategory, slug=subcategory_slug)
-        requested_category = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(subcategory=requested_subcategory)
-    elif category_slug:
-        requested_subcategory = None
-        requested_category = get_object_or_404(Category, slug=category_slug)
-        products = Product.objects.filter(subcategory__category=requested_category)
-    else:
-        requested_category = None
-        requested_subcategory = None
-        products = Product.objects.all()
-    return render(request, 'product/list.html', {'categories': categories, 
-                                                 'requested_subcategory': requested_subcategory,
-                                                 'requested_category': requested_category, 
-                                                 'products': products})
+class ProductListView(ListView):
+    '''Каталог товаров'''
+    context_object_name = 'products'
+    template_name = 'product/list.html'
+
+    def get_queryset(self):
+        queryset = Product.objects.all() 
+        self.category_slug = self.kwargs.get('category_slug')
+        self.subcategory_slug = self.kwargs.get('subcategory_slug')
+        if self.category_slug and self.subcategory_slug:
+            '''Товары подкатегории'''
+            self.requested_subcategory = get_object_or_404(SubCategory, slug=self.subcategory_slug)
+            self.requested_category = get_object_or_404(Category, slug=self.category_slug)
+            queryset = Product.objects.filter(subcategory=self.requested_subcategory)
+        elif self.category_slug:
+            '''Товары категории'''
+            self.requested_subcategory = None
+            self.requested_category = get_object_or_404(Category, slug=self.category_slug)
+            queryset = Product.objects.filter(subcategory__category=self.requested_category)
+        else:
+            '''Все товары'''
+            self.requested_category = None
+            self.requested_subcategory = None
+            queryset = Product.objects.all()
+        return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['requested_category'] = self.requested_category     # Активна категория
+        context['requested_subcategory'] = self.requested_subcategory   # Активная подкатегория
+        return context
 
 
-def product_detail(request, product_slug):
-    '''Детальное представление товара'''
-    product = get_object_or_404(Product, slug=product_slug)
-    if request.method == 'POST':
+class ProductDetailView(DetailView):
+    '''Страница товара'''
+    model = Product
+    context_object_name = 'product'
+    template_name = 'product/detail.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['review_form'] = ReviewForm()       # Форма отзывов
+        context['cart_product_form'] = CartAddProductForm()     # Форма добавления в корзину
+        return context
+
+    def post(self, request, slug):
+        '''Добавление отзыва к товару'''
         review_form = ReviewForm(request.POST)
         if review_form.is_valid():
             cf = review_form.cleaned_data
             author_name = 'Annonymous'
             if request.user.is_authenticated and request.user.first_name != '':
                 author_name = request.user.first_name
-            Review.objects.create(product=product, author=author_name, rating=cf['rating'], text=cf['text'])
-            return redirect('online_shop:product_detail', product_slug=product_slug)
-    else:
-        review_form = ReviewForm()
-        cart_product_form = CartAddProductForm()
-    return render(request, 'product/detail.html', {'product': product, 'review_form': review_form, 'cart_product_form': cart_product_form})
+            Review.objects.create(product=self.get_object(), author=author_name, rating=cf['rating'], text=cf['text'])
+            return redirect('online_shop:product_detail', slug=slug)
 
 
-# def get_cart(request):
-#     '''Получить корзину'''
-#     cart = request.session.get(settings.CART_ID)
-#     if not cart:
-#         cart = request.session[settings.CART_ID] = {}
-#     return cart
+class CreateOrderView(CreateView):
+    '''Оформление заказа'''
+    template_name = 'product/order_create.html'
+    form_class = OrderCreateForm
 
-
-# def cart_add(request, product_id):
-#     '''Добавление товара в корзину'''
-#     cart = get_cart(request)
-#     product = get_object_or_404(Product, pk=product_id)
-#     product_id = str(product.id)
-#     form = CartAddProductForm(request.POST)
-#     if form.is_valid():
-#         cd = form.cleaned_data
-
-#         if cd['quantity'] > product.count:
-#             cd['quantity'] = product.count
-
-#         if product_id not in cart:
-#             cart[product_id] = {'quantity': 0, 'price': str(product.price), 'weight': product.weight}
-#         if request.POST.get('overwrite_qty'):
-#             cart[product_id]['quantity'] = cd['quantity']
-#         else:
-#             if (cd['quantity'] + cart[product_id]['quantity']) > product.count:
-#                 cart[product_id]['quantity'] = product.count
-#             else:
-#                 cart[product_id]['quantity'] += cd['quantity']
-#         request.session.modified = True
-#     return redirect('online_shop:cart_detail')
-
-
-# def cart_detail(request):
-#     '''Детальное представление корзины'''
-#     cart = get_cart(request)
-#     product_ids = cart.keys()
-#     products = Product.objects.filter(id__in=product_ids)
-#     temp_cart = cart.copy()
-#     for product in products:
-#         cart_item = temp_cart[str(product.pk)]
-#         if cart_item['quantity'] > product.count:
-#             cart_item['quantity'] = product.count
-#         cart_item['product'] = product
-#         cart_item['total_price'] = (Decimal(cart_item['price']) * cart_item['quantity'])
-#         cart_item['update_quantity_form'] = CartAddProductForm(initial={'quantity': cart_item['quantity']})
-#     cart_total_price = sum(Decimal(item['price']) * item['quantity'] for item in temp_cart.values())
-#     return render(request, 'product/cart_detail.html', {'cart': temp_cart.values(), 'cart_total_price': cart_total_price})
-
-
-# def cart_remove(request, product_id):
-#     '''Удаление товара из корзины'''
-#     cart = get_cart(request)
-#     product_id = str(product_id)
-#     if product_id in cart:
-#         del cart[product_id]
-#         request.session.modified = True
-#         return redirect('online_shop:cart_detail')
-
-
-# def cart_clean(request):
-#     '''Отчистить корзину'''
-#     del request.session[settings.CART_ID]
-
-
-def order_create(request):
-    '''Представление создания заказа'''
-    cart = get_cart(request)
-    weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
-    if request.method == 'POST':
-        order_form = OrderCreateForm(request.POST)
-        if order_form.is_valid():
-            cf = order_form.cleaned_data
-            delivery_price = check_price_delivery(cf['postal_code'], weight)
-            order = order_form.save(commit=False)
-            if request.user.is_authenticated:
-                order.user = request.user
-            order.transport_cost = delivery_price
-            # order.transport_cost = 1
-            order.save()
-            product_ids = cart.keys()
-            products = Product.objects.filter(id__in=product_ids)
-            for product in products:
-                cart_item =cart[str(product.id)]
-                SoldSiteProduct.objects.create(product=product, price=product.price, count=cart_item['quantity'], order=order)
-            order.set_order_price()
-            cart_clean(request)
-            if 'manager_payment' in request.POST:
-                send_email_order_method_payment_manager(order.pk)
-                return render( request, 'product/order_created.html', {'order': order})
-            else:
-                # Не закончено
-                bill = create_bill_qiwi(order.pk)
-                order.pay_url = bill
-                order.save()
-                send_email_order_method_payment_qiwi(order.pk)
-                return render( request, 'product/order_qiwi_created.html', {'order': order})
-
-        else:
-            return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
-    else:
-        order_form = OrderCreateForm()
-        if request.user.is_authenticated:
-            initial_data = {
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-                'email': request.user.email,
-                'telephone': request.user.profile.phone_number,
-                'address': request.user.profile.address,
-                'postal_code': request.user.profile.postal_code,
-                'city': request.user.profile.city,
+    def get_initial(self):
+        '''Если это зарегистрированный пользователь, заполняем форму его данными'''
+        super(CreateOrderView, self).get_initial()
+        if self.request.user.is_authenticated:
+            self.initial = {
+                'first_name': self.request.user.first_name,
+                'last_name': self.request.user.last_name,
+                'email': self.request.user.email,
+                'telephone': self.request.user.profile.phone_number,
+                'address': self.request.user.profile.address,
+                'postal_code': self.request.user.profile.postal_code,
+                'city': self.request.user.profile.city,
             }
-            order_form = OrderCreateForm(initial=initial_data)
-        return render(request,'product/order_create.html', {'cart': cart, 'order_form': order_form})
+        return self.initial
+
+    def form_valid(self, form):
+        '''Оформление заказа'''
+        cart = get_cart(self.request)
+        weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
+        cf = form.cleaned_data
+        delivery_price = check_price_delivery(cf['postal_code'], weight)        # Стоимость доставки почтой РФ
+        order = form.save(commit=False)
+        if self.request.user.is_authenticated:
+                order.user = self.request.user
+        order.transport_cost = delivery_price
+        # order.transport_cost = 1
+        order.save()
+        product_ids = cart.keys()
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            '''Добавляем товары из корзины в заказ'''
+            cart_item =cart[str(product.id)]
+            SoldSiteProduct.objects.create(product=product, price=product.price, count=cart_item['quantity'], order=order)
+        order.set_order_price()     # Устанавливаем цену заказа
+        cart_clean(self.request)    # Чистим корзину
+        if 'manager_payment' in self.request.POST:
+            '''Оплата через менедежра'''
+            send_email_order_method_payment_manager(order.pk)
+            return render( self.request, 'product/order_created.html', {'order': order})
+        else:
+            '''Оплата через QIWI'''
+            bill = create_bill_qiwi(order.pk)
+            order.pay_url = bill
+            order.save()
+            send_email_order_method_payment_qiwi(order.pk)
+            return render( self.request, 'product/order_qiwi_created.html', {'order': order})
+
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cart'] = get_cart(self.request)
+        return context
 
 
 def validate_postal_code(request):
@@ -177,7 +140,8 @@ def validate_postal_code(request):
         weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
         delivery = check_price_delivery(request.GET['id_postal_code'], weight)
         response = JsonResponse({'is_taken': delivery}, status=200)
-    except:
+    except KeyError:
+        '''Невалидный индекс'''
         response = JsonResponse({'error': 'error'}, status=403)
     return response
 

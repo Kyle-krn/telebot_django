@@ -1,19 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
-from django.contrib import messages
-from django.db.models import Q
-from django.urls import reverse_lazy
-from django.views.generic import ListView
+from itertools import chain
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
+from main_app.management.commands.utils import get_qiwi_balance
+from django.db.models import Q
+from django.views.generic import ListView
+from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404
+from django.contrib import messages
+from django.urls import reverse_lazy
 from django.views import View
-from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from online_shop.models import OrderSiteProduct, SoldSiteProduct
 from online_shop.utils import send_email_change_status_order
 from main_app.utils import change_item_order_utils, delete_order_utils, remove_item_order_utils
-from main_app.management.commands.utils import get_qiwi_balance
-from itertools import chain
 from .forms import *
 from .models import *
 
@@ -28,7 +28,6 @@ def index(request):
 class IndexView(LoginRequiredMixin, ListView):
     '''Вывод всех товаров'''
     context_object_name = 'product'
-    # login_url = 'accounts/login/'
     template_name = 'main_app/list_product.html'
 
     def get_queryset(self):
@@ -52,7 +51,6 @@ class IndexView(LoginRequiredMixin, ListView):
         if form.is_valid():
             cf = form.cleaned_data
             Product.objects.get(pk=cf['id']).delete()
-            # return redirect('admin_ panel:list_product')
             return self.get(request)
 
     def get_context_data(self, *args, **kwargs):
@@ -256,7 +254,6 @@ class StatisticView(LoginRequiredMixin, View):
     '''Представления общей статистики по товарам'''
     template_name = 'main_app/statistic.html'
     
-
     def get_context_data(self, **kwargs):
         context = {}
         context['users'] = TelegramUser.objects.all().count()

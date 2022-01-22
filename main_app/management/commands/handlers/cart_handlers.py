@@ -1,11 +1,8 @@
-import telebot
-from main_app.models import *
-from .handlers import bot
 from django.db.models import Q
+from main_app.models import *
 from main_app.management.commands.keyboards import *
 from main_app.utils import check_price_delivery, check_time_delivery
-
-
+from .handlers import bot
 
 @bot.message_handler(regexp='^(🛒 Корзина)$')
 @bot.callback_query_handler(func=lambda call: call.data == 'back_cart')
@@ -65,10 +62,6 @@ def cart_handlers(message):
     for item in cart:
         text += f'***Товар -*** {item.product.title}\n***Стоймость за 1 шт. -*** {item.product.price} руб.\n***Кол-во -*** {item.count} шт.\n\n'
 
-    
-    # if weight >= 10000:
-        # text = '***Ваш заказ превышает допустимый вес в 10 кг. Пожалуйста измените корзину***\n\n' + text
-        # keyboard = cart_keyboard()
 
     bot.send_message(chat_id=user_id, text=text, reply_markup=keyboard, parse_mode='markdown')
 

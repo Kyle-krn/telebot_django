@@ -1,7 +1,5 @@
 from django.urls import path
 from .views import *
-from django.conf.urls.static import static
-from vape_shop import settings
 from .models import *
 from .forms import *
 

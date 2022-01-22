@@ -1,6 +1,6 @@
 from .handlers import bot
-from main_app.models import *
 from django.db.models import Q
+from main_app.models import *
 from main_app.management.commands.keyboards import *
 from vape_shop.settings import TELEGRAM_GROUP_ID
 
@@ -14,7 +14,6 @@ def new_order(call):
     order = OrderingProduct.objects.create(user=user, delivery_pay=delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index)
     for item in cart:
         order_product = SoldProduct.objects.create(product=item.product, count=item.count, price=item.product.price, order=order)
-        # order.sold_product.add(order_product)
     order.set_order_price()
     cart.delete()
     # bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через менедежра на сумму {delivery_pay+sum([x.count * x.product.price for x in cart])} руб.')

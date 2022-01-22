@@ -18,23 +18,23 @@ col-lg-5 mx-auto text-center">
         <div class="form-group">
             {% csrf_token %}
             <div class="input-field">
-                {{ user_form.first_name }}
+                {{ form.first_name }}
                 <label for="first_name">Имя</label>
             </div>
             <div class="input-field">
-                {{ user_form.last_name }}
+                {{ form.last_name }}
                 <label for="last_name">Фамилия</label>
             </div>
             <div class="input-field">
-                {{ user_form.email }}
+                {{ form.email }}
                 <label for="email">Email</label>
             </div>
             <div class="input-field">
-                {{ user_form.password }}
+                {{ form.password }}
                 <label for="password">Пароль</label>
             </div>
             <div class="input-field">
-                {{ user_form.password2 }}
+                {{ form.password2 }}
                 <label for="password2">Повторите пароль</label>
             </div>
         </div>

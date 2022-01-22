@@ -7,30 +7,30 @@
     </h3>
     <form method="post">
         {% csrf_token %}
-        {{order_form.errors}}
+        {{orm.errors}}
         <div class="row">
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Имя:</label>
-                    {{ order_form.first_name }}
+                    {{ form.first_name }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Фамилия:</label>
-                    {{ order_form.last_name }}
+                    {{ form.last_name }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Email</label>
-                    {{ order_form.email }}
+                    {{ form.email }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Номер телефона</label>
-                    {{ order_form.telephone }}
+                    {{ form.telephone }}
                 </div>
             </div>
         </div>
@@ -39,19 +39,19 @@
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Адрес</label>
-                    {{ order_form.address }}
+                    {{ form.address }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="input-field">
                     <label class="text-muted">Город</label>
-                    {{ order_form.city }}
+                    {{ form.city }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div id="postal_code_div" class="input-field">
                     <label class="text-muted">Почтовый индекс</label>
-                    {{ order_form.postal_code }}
+                    {{ form.postal_code }}
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
         <hr class="mb-4">
         <div class="input-field">
             <label class="text-muted">Заметка к заказу</label>
-            {{ order_form.note }}
+            {{ form.note }}
         </div>
         <h4 class="py-2 font-weight-bold text-grey">Общая цена:
             <span id="order-total" class="text-danger float-right">{{cart_total_price}} руб.</span>

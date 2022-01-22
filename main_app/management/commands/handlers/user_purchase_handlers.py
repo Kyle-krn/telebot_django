@@ -1,10 +1,7 @@
-from .handlers import bot
+from django.db.models import Q
 from main_app.models import *
 from main_app.management.commands.keyboards import *
-from vape_shop.settings import DADATA_TOKEN
-from dadata import Dadata
-from django.db.models import Q
-
+from .handlers import bot
 
 @bot.message_handler(regexp='^(📂 Мои товары)$')
 def my_purchase_handlers(message):

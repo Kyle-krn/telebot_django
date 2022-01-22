@@ -1,10 +1,13 @@
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+
+
 
 class Profile(models.Model):
+    '''Расширение юзера'''
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=250, blank=True, null=True)
     address = models.CharField(max_length=250, blank=True, null=True)

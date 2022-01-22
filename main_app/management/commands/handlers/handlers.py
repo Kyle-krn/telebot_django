@@ -1,7 +1,7 @@
 import telebot
+from django.db.models import Q
 from main_app.models import *
 from main_app.management.commands.keyboards import *
-from django.db.models import Q
 from vape_shop.settings import TELEGRAM_TOKEN
 
 test_photo = 'https://inlnk.ru/mexGV'
@@ -60,7 +60,6 @@ def category(call):
     update_lists()
     try:
         category_pk = call.data.split('||')[1]
-        # category = Category.objects.get(pk_for_telegram=call.data)
         category = Category.objects.get(pk=category_pk)
     except:
         return bot.send_message(call.message.chat.id, 'Упс! Что то пошло не так')
@@ -77,7 +76,6 @@ def subcategory(call):
     TelegramProductCartCounter.objects.filter(Q(user__chat_id=call.message.chat.id) & Q(counter=True)).delete() # Удаляем каунтер если юзер перешел по кнопке назад
     try:
         subcategory_pk = call.data.split('||')[1]
-        # subcategory = SubCategory.objects.get(pk_for_telegram=call.data)
         subcategory = SubCategory.objects.get(pk=subcategory_pk)
     except:
         return bot.send_message(call.message.chat.id, 'Упс, что то пошло не так')
@@ -103,7 +101,6 @@ def product(call):
         slug=call.data
     try:
         product_pk = slug.split('||')[1]
-        # product=Product.objects.get(pk_for_telegram=slug)
         product=Product.objects.get(pk=product_pk)
         if product.count <= 0:  # Если юзер на странице товара, но он закончился
             bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -191,8 +188,3 @@ def command_start(message):
     bot.send_message(
         chat_id=data.id, text='Категорически приветсвтую', reply_markup=main_keyboard())
 
-
-# @bot.message_handler(func=lambda message: True, content_types=['text'])
-# def get_answer(message):
-#     update_lists()
-#     bot.send_message('-702248306', f'ddd')

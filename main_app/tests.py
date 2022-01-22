@@ -1,10 +1,10 @@
 import os
+from decimal import Decimal
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from main_app.utils import check_price_delivery
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
-from decimal import Decimal
 from .models import *
 from .views import *
 from .forms import *

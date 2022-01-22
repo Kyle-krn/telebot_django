@@ -132,7 +132,6 @@ class OfflineOrderingProduct(models.Model):
     datetime = models.DateTimeField(auto_now_add=True, help_text='Дата и время создания заказа')
     price = models.IntegerField(blank=True, null=True)
 
-
     def set_order_price(self):
         '''Обновляет стоймость заказа при его изменении'''
         self.price = sum([x.price * x.count for x in self.offlinesoldproduct.all()])

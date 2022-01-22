@@ -1,7 +1,7 @@
-from .handlers import bot
 from main_app.models import *
 from main_app.management.commands.keyboards import *
 from vape_shop.settings import DADATA_TOKEN
+from .handlers import bot
 from dadata import Dadata
 
 dadata = Dadata(DADATA_TOKEN)
