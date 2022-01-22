@@ -1,7 +1,6 @@
 import os
 from decimal import Decimal
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from main_app.utils import check_price_delivery
@@ -72,8 +71,11 @@ class ListProductTest(TestCase):
     def tearDown(self):
         try:
             os.remove(self.category.photo.path)
+            os.remove(self.category_1.photo.path)
             os.remove(self.subcategory.photo.path)
+            os.remove(self.subcategory_1.photo.path)
             os.remove(self.product.photo.path)
+            os.remove(self.product_1.photo.path)
         except FileNotFoundError:
             pass
         

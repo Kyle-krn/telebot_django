@@ -29,7 +29,7 @@ class CartDetailView(View):
         context = {}
         cart = self.get_user_cart()
         context['cart'] = cart[0]
-        context['profile_form'] = cart[1]
+        context['cart_total_price'] = cart[1]
         return context
 
     def get(self, request):
@@ -53,12 +53,16 @@ def cart_add(request, product_id):
     if form.is_valid():
         cd = form.cleaned_data
         if cd['quantity'] > product.count:
+            '''Если юзер пытается добавить кол-во в корзину больше чем на складе'''
             cd['quantity'] = product.count
         if product_id not in cart:
+            '''Если этого товара нет в корзину, создаем новый словарь в коризне'''
             cart[product_id] = {'quantity': 0, 'price': str(product.price), 'weight': product.weight}
         if request.POST.get('overwrite_qty'):
+            '''Изменить кол-во товара (форма в детальной корзине)'''
             cart[product_id]['quantity'] = cd['quantity']
         else:
+            '''Добавить кол-во товара в корзину'''
             if (cd['quantity'] + cart[product_id]['quantity']) > product.count:
                 cart[product_id]['quantity'] = product.count
             else:

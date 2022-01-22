@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class CreateOrderTest(TestCase):
-    '''seller/make_order/ (name='create_order')'''
+    '''Создание нового заказа| seller/make_order/ (name='create_order')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -59,7 +59,7 @@ class CreateOrderTest(TestCase):
 
 
 class OfflineReceptionProductTest(TestCase):
-    '''seller/reception/ (name='create_reception')'''
+    '''Приемка товара| seller/reception/ (name='create_reception')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -102,7 +102,7 @@ class OfflineReceptionProductTest(TestCase):
 
 
 class RegisterUserTest(TestCase):
-    '''seller/register_seller/ (name='register_seller')'''
+    '''Регистрация нового продавца| seller/register_seller/ (name='register_seller')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -139,7 +139,7 @@ class RegisterUserTest(TestCase):
 
 
 class OfflineCategoriesTest(TestCase):
-    '''seller/category/ (name='list_category')'''
+    '''Список катеогрий| seller/category/ (name='list_category')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -224,7 +224,7 @@ class OfflineCategoriesTest(TestCase):
 
 
 class OfflineCreateProductTest(TestCase):
-    '''seller/add_product/ (name='create_product')'''
+    '''Создание товара| seller/add_product/ (name='create_product')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -268,7 +268,7 @@ class OfflineCreateProductTest(TestCase):
 
 
 class OfflineIndexTest(TestCase):
-    '''seller/ (name='list_product')'''
+    '''Список товара| seller/ (name='list_product')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -322,7 +322,7 @@ class OfflineIndexTest(TestCase):
 
 
 class OfflineProductAdminTest(TestCase):
-    '''seller/product/<int:pk>/ (name='product_detail')'''
+    '''Детальное представление товара| seller/product/<int:pk>/ (name='product_detail')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -392,7 +392,7 @@ class OfflineProductAdminTest(TestCase):
 
 
 class OfflineOrderAdminTest(TestCase):
-    '''seller/list_order/ (name='list_order')'''
+    '''Список заказов| seller/list_order/ (name='list_order')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -473,7 +473,7 @@ class OfflineOrderAdminTest(TestCase):
 
 
 class OfflineStatisticTest(TestCase):
-    '''seller/stat/ (name='statistic')'''
+    '''Статистика| seller/stat/ (name='statistic')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')
@@ -539,7 +539,7 @@ class OfflineStatisticTest(TestCase):
 
 
 class OfflineSellerTest(TestCase):
-    '''seller/my_sales/ (name='my_sales')'''
+    '''Статистика продавца| seller/my_sales/ (name='my_sales')'''
     def setUp(self):
         self.client = Client()
         self.seller_user = User.objects.create(username='seller1', password='password')

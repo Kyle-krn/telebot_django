@@ -101,7 +101,6 @@ class CreateOrderView(CreateView):
         if self.request.user.is_authenticated:
                 order.user = self.request.user
         order.transport_cost = delivery_price
-        # order.transport_cost = 1
         order.save()
         product_ids = cart.keys()
         products = Product.objects.filter(id__in=product_ids)
@@ -123,7 +122,6 @@ class CreateOrderView(CreateView):
             send_email_order_method_payment_qiwi(order.pk)
             return render( self.request, 'product/order_qiwi_created.html', {'order': order})
 
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cart'] = get_cart(self.request)
@@ -139,7 +137,7 @@ def validate_postal_code(request):
         cart = get_cart(request)
         weight = sum([x['weight'] * x['quantity'] for x in cart.values()])
         delivery = check_price_delivery(request.GET['id_postal_code'], weight)
-        response = JsonResponse({'is_taken': delivery}, status=200)
+        response = JsonResponse({'is_taken': delivery}, status=200)     # Возвращаем стоймость доставки
     except KeyError:
         '''Невалидный индекс'''
         response = JsonResponse({'error': 'error'}, status=403)

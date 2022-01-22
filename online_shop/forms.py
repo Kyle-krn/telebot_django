@@ -1,8 +1,5 @@
 from django import forms
 from .models import Review
-from django.forms import NumberInput
-from django.contrib.auth.models import User
-# from main_app.models import OrderingProduct, OrderSiteProduct
 from main_app.utils import check_price_delivery
 from .models import OrderSiteProduct
 
@@ -14,9 +11,6 @@ class ReviewForm(forms.ModelForm):
         widgets = {'text': forms.Textarea(attrs={'class': 'form-control shadow px-2', 'rows': 6}),
                    'rating': forms.RadioSelect}
 
-# class CartAddProductForm(forms.Form):
-#     '''Форма кол-ва товара в коризне и на странице продукта'''
-#     quantity = forms.IntegerField(min_value=1, widget=NumberInput(attrs={'class': 'form-control text-center px-3', 'value': 1}))
 
 class OrderCreateForm(forms.ModelForm):
     '''Форма создания заказа'''
