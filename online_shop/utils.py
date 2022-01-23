@@ -8,30 +8,34 @@ from .models import OrderSiteProduct
 
 def send_email_order_method_payment_qiwi(order_id):
     order = OrderSiteProduct.objects.get(pk=order_id)
-    subject = f'Заказ номер {order.id}'
-    message = f'Дорогой {order.first_name}, \n\n' \
+    subject = f'Магазин Vape_shop. Заказ #{order_id}'
+    message = f'Доброго времени суток {order.first_name}! \n\n' \
               f'Статус вашего заказа - Ожидает оплаты.\n' \
-              f'Ссылка для оплаты - {order.pay_url}' \
-              f'Your order ID is {order.id}.'
+              f'Вы можете оплатить заказ по этой ссылке - {order.pay_url}.\n' \
+              f'Номер вашего заказа #{order.id}.\n\n'  \
+               'ВНИМАНИЕ! ЭТО НЕ НАСТОЯЩИЙ МАГАЗИН, ПОЖАЛУЙСТА НЕ ОПЛАЧИВАЙТЕ ЗАКАЗЫ, \n'  \
+               'САЙТ СУЩЕСТВУЕТ КАК ТЕСТОВЫЙ МАГАЗИН'
     mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
     return mail_sent
 
 def send_email_order_method_payment_manager(order_id):
     order = OrderSiteProduct.objects.get(pk=order_id)
-    subject = f'Заказ номер {order.id}'
-    message = f'Дорогой {order.first_name}, \n\n' \
+    subject = f'Магазин Vape_shop. Заказ #{order_id}'
+    message = f'Доброго времени суток {order.first_name}! \n\n' \
               f'<! -- ЗДЕСЬ РЕКВИЗИТЫ БАНКОВ ДЛЯ ОПЛАТЫ НА ПРЯМУЮ --!>.\n' \
               f'После оплаты свяжитесь с нашим менеджером и пришлите ему скриншот оплаты .\n' \
-              f'<! -- ЗДЕСЬ ВСЕ КОНТАКТЫ НАШЕГО МЕНЕДЕЖРА --!>'
+              f'<! -- ЗДЕСЬ ВСЕ КОНТАКТЫ НАШЕГО МЕНЕДЕЖРА --!>\n\n'  \
+               'ВНИМАНИЕ! ЭТО НЕ НАСТОЯЩИЙ МАГАЗИН, ПОЖАЛУЙСТА НЕ ОПЛАЧИВАЙТЕ ЗАКАЗЫ, \n'  \
+               'САЙТ СУЩЕСТВУЕТ КАК ТЕСТОВЫЙ МАГАЗИН'
     mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
     return mail_sent
 
 
 def send_email_change_status_order(order_id):
     order = OrderSiteProduct.objects.get(pk=order_id)
-    subject = f'Заказ номер {order.id}'  
-    message = f'Dear {order.first_name}, \n\n' \
-              f'Status of your order {order.id} was changed to {order.status}. \n'
+    subject = f'Магазин Vape_shop. Заказ #{order_id}'
+    message = f'Доброго времени суток {order.first_name}! \n\n' \
+              f'Статус вашего заказа сменился на {order.get_status_display()}. \n'
     if order.track_code:
         message +=  f'Track code is {order.track_code}.'
     mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
@@ -39,9 +43,9 @@ def send_email_change_status_order(order_id):
 
 def send_email_delete_order(order_id):
     order = OrderSiteProduct.objects.get(pk=order_id)
-    subject = f'Заказ номер {order.id}'  
-    message = f'Dear {order.first_name}, \n\n' \
-              f'Ваш заказ был удален в связи истечением срока оплаты или отклонением оплаты.'
+    subject = f'Магазин Vape_shop. Заказ #{order_id}'
+    message = f'Доброго времени суток {order.first_name}! \n\n' \
+              f'Статус вашего заказа сменился на {order.get_status_display()}. \n'
     mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
     return mail_sent
 
