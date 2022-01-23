@@ -1,6 +1,6 @@
 from django.db.models import Q
 from main_app.models import *
-from main_app.management.commands.keyboards import *
+from bot.management.commands.keyboards import *
 from .handlers import bot
 
 @bot.message_handler(regexp='^(📂 Мои товары)$')

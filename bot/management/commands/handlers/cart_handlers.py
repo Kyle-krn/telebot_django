@@ -1,6 +1,6 @@
 from django.db.models import Q
 from main_app.models import *
-from main_app.management.commands.keyboards import *
+from bot.management.commands.keyboards import *
 from main_app.utils import check_price_delivery, check_time_delivery
 from .handlers import bot
 

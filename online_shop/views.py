@@ -2,16 +2,17 @@ from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.conf import settings
 from cart.forms import CartAddProductForm
 from cart.views import cart_clean, get_cart
+from main_app.utils import check_price_delivery
+from main_app.models import Category, SubCategory, Product
+from bot.management.commands.handlers.handlers import bot
+from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
+from .models import *
 from .models import *
 from .forms import *
-from main_app.models import Category, SubCategory, Product
-from .models import *
-from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
-from django.http import JsonResponse
-from main_app.utils import check_price_delivery
-
 
 class ProductListView(ListView):
     '''Каталог товаров'''
@@ -113,6 +114,14 @@ class CreateOrderView(CreateView):
         if 'manager_payment' in self.request.POST:
             '''Оплата через менедежра'''
             send_email_order_method_payment_manager(order.pk)
+            text_for_channel = '<b>Заказ через сайт</b>\n'  \
+                               '<b>Оплата через менеджера</b>\n\n'  \
+                               f'<b>Сумма корзины {order.price} руб.</b>\n\n'  \
+                               f'<b>Сумма доставки {order.transport_cost} руб.</b>\n\n'
+            for item in order.soldproduct.all():
+                text_for_channel += f'<b><u>{item.product.title}</u></b> - {item.count} шт.\n'
+            text_for_channel += f'\n<b>Номер телефона покупателя - {cf["telephone"]}</b>'
+            bot.send_message(chat_id=settings.TELEGRAM_GROUP_ID, text=text_for_channel, disable_web_page_preview=True, parse_mode='HTML')
             return render( self.request, 'product/order_created.html', {'order': order})
         else:
             '''Оплата через QIWI'''

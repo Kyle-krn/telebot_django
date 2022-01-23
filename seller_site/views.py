@@ -1,4 +1,6 @@
-from django.contrib.admin.views.decorators import staff_member_required
+from itertools import chain
+from collections import Counter
+from datetime import date
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group, User
@@ -11,12 +13,13 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.conf import settings
 from django.views import View
-from itertools import chain
-from collections import Counter
-from datetime import date
+from bot.management.commands.handlers.handlers import bot
 from .models import *
 from .forms import *
+
+
 
 
 class CreateOrderView(UserPassesTestMixin, View):
@@ -62,11 +65,26 @@ class CreateOrderView(UserPassesTestMixin, View):
         total_price = 0
         for item in l_list: # Добавляем проданные товары в чек
             product = get_object_or_404(OfflineProduct, pk=item[0])
-            OfflineSoldProduct.objects.create(user=request.user, product=product,title=product.title ,price=product.price, count=item[1], price_for_seller=product.subcategory.category.price_for_seller, order=order)
+            OfflineSoldProduct.objects.create(user=request.user, 
+                                              product=product,
+                                              title=product.title, 
+                                              price=product.price, 
+                                              count=item[1], 
+                                              price_for_seller=product.subcategory.category.price_for_seller, 
+                                              order=order)
             total_price += product.price * item[1]
         order.price = total_price
         order.save()
         # bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Новый чек на сумму {order.price} руб. Продавец - {request.user.first_name} {request.user.last_name}')
+        text_for_channel = '<b>Создан новый чек в оффлайн магазине.\n' \
+                          f'Продавец - {order.user.first_name} {order.user.last_name}.\n' \
+                          f'Сумма чека - {total_price} руб.</b>\n\n'
+        total_sum_for_seller = 0
+        for item in order.offlinesoldproduct.all():
+            text_for_channel += f'<b><u>{item.product.title}</u></b> - {item.count} шт.\n'
+            total_sum_for_seller += item.price_for_seller * item.count
+        text_for_channel += f'\n<b>Заработок продавца с этого чека {total_sum_for_seller} руб.</b>'           
+        bot.send_message(chat_id=settings.TELEGRAM_GROUP_ID, text=text_for_channel, parse_mode='HTML')
         messages.success(request, 'Чек успешно создан!')
         return redirect('local_shop:list_product')   
 

@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
-from main_app.management.commands.utils import get_qiwi_balance
+from bot.management.commands.utils import get_qiwi_balance
 from django.db.models import Q
 from django.views.generic import ListView
 from django.shortcuts import render, get_object_or_404, redirect, get_object_or_404

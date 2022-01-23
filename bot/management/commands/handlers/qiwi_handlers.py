@@ -1,10 +1,10 @@
 import datetime
 from .handlers import bot
 from main_app.models import *
-from main_app.management.commands.keyboards import *
-from main_app.management.commands.utils import *
+from bot.management.commands.keyboards import *
+from bot.management.commands.utils import *
 from django.db.models import Q
-from main_app.management.commands.utils import *
+from bot.management.commands.utils import *
 from vape_shop.settings import TELEGRAM_GROUP_ID
 
 
@@ -101,6 +101,7 @@ def check_pay_handlers(call):
     answer = check_qiwi(comment=pay_data.pay_comment, price=(pay_data.delivery_pay+pay_data.product_pay))
     qiwi = QiwiToken.objects.get(active=True)
     if answer:
+    # if True:
         if answer == 'error':   
             qiwi.blocked = True
             qiwi.active = False
@@ -128,11 +129,22 @@ def check_pay_handlers(call):
 def sold_product(user, pay_data):
     '''Успешная оплата'''
     cart = TelegramProductCartCounter.objects.filter(Q(user=user) & Q(counter=False))
-    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=f'Сделан заказ через QIWI на сумму {pay_data.delivery_pay+pay_data.product_pay} руб.')
     order = OrderingProduct.objects.create(user=user, delivery_pay=pay_data.delivery_pay, fio=user.fio, address=user.address, number=user.number, post_index=user.post_index, payment_bool=True, qiwi_bool=True)
     for item in cart:
         sold_product = SoldProduct.objects.create(product=item.product, price=item.product.price, count=item.count, payment_bool=True, order=order)
     order.set_order_price()
     pay_data.delete()           #
     cart.delete()
+    text_for_channel = '<b>Заказ в боте</b>\n'  \
+                       '<b>Заказ оформлен через менеджера</b>\n\n'  \
+                       f'<b>Сумма корзины {order.price} руб.</b>\n\n'  \
+                       f'<b>Сумма Доставки {order.delivery_pay} руб.</b>\n\n'
+
+    for item in order.soldproduct.all():
+        text_for_channel += f'<b><u>{item.product.title}</u></b> - {item.count} шт.\n'
+    
+    if user.username:
+        text_for_channel += f'\n<b>Телеграм покупателя - @{user.username} </b>'
+
+    bot.send_message(chat_id=TELEGRAM_GROUP_ID, text=text_for_channel, parse_mode='HTML', disable_web_page_preview=True)
     

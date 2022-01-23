@@ -1,5 +1,5 @@
 from main_app.models import *
-from main_app.management.commands.keyboards import *
+from bot.management.commands.keyboards import *
 from vape_shop.settings import DADATA_TOKEN
 from .handlers import bot
 from dadata import Dadata
@@ -81,14 +81,14 @@ def input_address(message):
     user = TelegramUser.objects.get(chat_id=message.chat.id)
     user.address = address
     user.save()
-    message = bot.send_message(message.chat.id, f"Введите адрес вашу фамилию, имя и отчество: ", reply_markup=cancel_next_step_keyboard())
+    message = bot.send_message(message.chat.id, f"Введите вашу фамилию, имя и отчество: ", reply_markup=cancel_next_step_keyboard())
     bot.register_next_step_handler(message, input_fio)
 
 
 def input_fio(message):
     fio = message.text
     if not fio:
-        message = bot.send_message(message.chat.id, f"Введите адрес вашу фамилию, имя и отчество: ", reply_markup=cancel_next_step_keyboard())
+        message = bot.send_message(message.chat.id, f"Введите вашу фамилию, имя и отчество: ", reply_markup=cancel_next_step_keyboard())
         bot.register_next_step_handler(message, input_fio)
         return
     user = TelegramUser.objects.get(chat_id=message.chat.id)

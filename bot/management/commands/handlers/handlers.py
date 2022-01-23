@@ -1,7 +1,7 @@
 import telebot
 from django.db.models import Q
 from main_app.models import *
-from main_app.management.commands.keyboards import *
+from bot.management.commands.keyboards import *
 from vape_shop.settings import TELEGRAM_TOKEN
 
 test_photo = 'https://inlnk.ru/mexGV'

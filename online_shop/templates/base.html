@@ -1,4 +1,6 @@
 {% load static %}
+{%  load my_templatetag %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -41,11 +43,11 @@ family=Nunito&display=swap">
                             </a>
                         </li>
                     {% endif %}
-                    {%  load my_templatetag %}
+                        
                     {% if request.user|has_group:"sellers" %}
                         <li class="nav-item">
                             <a href="{% url 'local_shop:list_product' %}" class="nav-link text-white">
-                                <i class="fas fa-cash-register"></i>Продажи  <i class="fas fa-store"></i> 
+                                <i class="fas fa-cash-register"></i>Продажи
                             </a>
                         </li>
                     {% endif %}
