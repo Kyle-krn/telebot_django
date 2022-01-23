@@ -1,4 +1,4 @@
 bind = '127.0.0.1:8000'
-worker = 3
-user = 'kyle'
+worker = 2
+user = 'vape_site'
 timeout = 120
