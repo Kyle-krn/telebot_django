@@ -48,7 +48,6 @@ class SoldSiteProduct(models.Model):
 
 
 class OrderSiteProduct(models.Model):
-    '''Заказы через сайт, пока не используется в приложении'''
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
