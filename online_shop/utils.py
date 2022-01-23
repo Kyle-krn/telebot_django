@@ -1,7 +1,11 @@
 import requests
 import json
 from datetime import datetime, timedelta
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from io import BytesIO
+import weasyprint
 from django.conf import settings
 from .models import OrderSiteProduct
 
@@ -38,8 +42,23 @@ def send_email_change_status_order(order_id):
               f'Статус вашего заказа сменился на {order.get_status_display()}. \n'
     if order.track_code:
         message +=  f'Track code is {order.track_code}.'
-    mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
-    return mail_sent
+    if order.status == 'Created':
+        email = EmailMessage(
+		subject,
+		message,
+		'santa.mail.little.helper@gmail.com',
+		[order.email])
+        html = render_to_string('pdf.html', {'order': order})
+        out = BytesIO()
+        stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
+        weasyprint.HTML(string=html).write_pdf(out,stylesheets=stylesheets)
+        email.attach(f'order_{order.id}.pdf',
+			out.getvalue(),
+			'application/pdf')
+        email.send()
+    else:
+        mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
+        return mail_sent
 
 def send_email_delete_order(order_id):
     order = OrderSiteProduct.objects.get(pk=order_id)

@@ -212,7 +212,7 @@ class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
             for item in order.soldproduct.all():
                 item.product.count -= item.count
                 item.product.save()
-            order.status = 'Processing'
+            order.status = 'Created'
             order.save()
             send_email_change_status_order(order.pk)
             messages.success(request, 'Заказ успешно обработан!')

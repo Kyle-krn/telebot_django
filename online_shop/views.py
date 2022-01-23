@@ -1,4 +1,5 @@
 from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.template.loader import render_to_string
@@ -169,13 +170,15 @@ def validate_postal_code(request):
     return response
 
 
-
+@login_required
 def invoice_pdf(request, order_id):
     order = get_object_or_404(OrderSiteProduct, id=order_id)
+    if not request.user.is_superuser or order.user != request.user:
+        return redirect('online_shop:product_list')
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'filename=order_{order.id}.pdf'
     # generate pdf
     html = render_to_string('pdf.html', {'order': order})
-    stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + 'css/pdf.css')]
+    stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
     weasyprint.HTML(string=html).write_pdf(response, stylesheets=stylesheets)
     return response
