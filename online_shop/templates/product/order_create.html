@@ -99,7 +99,7 @@
                 <button id="sub_button" type="submit" name="manager_payment" class="btn btn-danger shadow-custom col">
                     Оплата через менеджера (Без коммиссии)
                 </button>
-                <button id="sub_button" name="qiwi_payment" type="submit" class="btn btn-danger shadow-custom col">
+                <button id="sub_qiwi_button" name="qiwi_payment" type="submit" class="btn btn-danger shadow-custom col">
                     Оплата QIWI (Может взиматься коммиссия 2%)
                 </button>
             </div>
@@ -130,10 +130,12 @@
                 $('#delivery_coast').text(obj.is_taken + ' руб.')
                 $('#order-total').text((obj.is_taken + cart_coast_int) + ' руб.')
                 document.getElementById("sub_button").disabled = false;
+                document.getElementById("sub_qiwi_button").disabled = false;
 
             },
             error: function (data) {
                 document.getElementById("sub_button").disabled = true;
+                document.getElementById("sub_qiwi_button").disabled = true;
                 $('#delivery_coast').text(0);
                 $('#order-total').text(cart_coast_int + ' руб.');
                 $('#postal_code_div').removeClass('success-input');
@@ -157,10 +159,12 @@
                     $('#delivery_coast').text(obj.is_taken + ' руб.')
                     $('#order-total').text((obj.is_taken + cart_coast_int) + ' руб.')
                     document.getElementById("sub_button").disabled = false;
+                    document.getElementById("sub_qiwi_button").disabled = false;
 
                 },
                 error: function (data) {
                     document.getElementById("sub_button").disabled = true;
+                    document.getElementById("sub_qiwi_button").disabled = true;
                     $('#delivery_coast').text(0);
                     $('#order-total').text(cart_coast_int + ' руб.');
                     $('#postal_code_div').removeClass('success-input');

@@ -23,11 +23,15 @@ family=Nunito&display=swap">
             <a href="{% url 'online_shop:product_list' %}" class="navbar-brand">
                 <h3 class="font-weight-bold">Vape shop</h3>
             </a>
+            
             <button class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav ml-auto">
+                    <li class='nav-item'>
+                        <a href="https://t.me" class="nav-link text-white"><i class="fab fa-telegram-plane"></i> Магазин в телеграме</a>
+                    </li>
                     {% if request.user.is_authenticated %}
 
                     {% if request.user.is_superuser %}
