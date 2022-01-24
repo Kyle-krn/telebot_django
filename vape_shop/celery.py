@@ -16,7 +16,11 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'check_reservation_task' :{
-    'task': 'bot.tasks.check_reservation_bot',
-    'schedule' : crontab(minute='*/5'),
+        'task': 'bot.tasks.check_reservation_bot',
+        'schedule' : crontab(minute='*/1'),
     },
+    'check_qiwi_payment': {
+        'task': 'online_shop.tasks.check_site_qiwi_payment',
+        'schedule' : crontab(minute='*/1'),
+    }
 }
