@@ -2,7 +2,8 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db.models import Q
 from bot.management.commands.handlers.handlers import bot
-from online_shop.utils import check_bill_api_qiwi, send_email_change_status_order, send_email_delete_order
+from online_shop.utils import check_bill_api_qiwi
+from online_shop.tasks import send_email_change_status_order, send_email_delete_order
 from online_shop.models import OrderSiteProduct
 
 class Command(BaseCommand):
@@ -19,7 +20,7 @@ class Command(BaseCommand):
                     item.product.count -= item.count
                     item.product.save()
                 order.save()
-                send_email_change_status_order(order.id)
+                send_email_change_status_order.delay(order.id)
                 
                 text_for_channel = '<b>Заказ через сайт</b>\n'  \
                                    '<b>Заказ оплачен через QIWI</b>\n\n'  \
@@ -31,5 +32,5 @@ class Command(BaseCommand):
                 bot.send_message(chat_id=settings.TELEGRAM_GROUP_ID, text=text_for_channel, parse_mode='HTML')
 
             elif res['status']['value'] == 'EXPIRED' or res['status']['value'] == 'REJECTED':
-                send_email_delete_order(order.id)
+                send_email_delete_order.delay(order.id)
                 order.delete()

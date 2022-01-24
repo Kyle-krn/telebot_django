@@ -12,7 +12,8 @@ from cart.views import cart_clean, get_cart
 from main_app.utils import check_price_delivery
 from main_app.models import Category, SubCategory, Product
 from bot.management.commands.handlers.handlers import bot
-from .utils import send_email_order_method_payment_qiwi, send_email_order_method_payment_manager, create_bill_qiwi
+from .utils import create_bill_qiwi
+from .tasks import *
 from .models import *
 from .models import *
 from .forms import *
@@ -128,7 +129,7 @@ class CreateOrderView(CreateView):
         cart_clean(self.request)    # Чистим корзину
         if 'manager_payment' in self.request.POST:
             '''Оплата через менедежра'''
-            send_email_order_method_payment_manager(order.pk)
+            send_email_order_method_payment_manager.delay(order.pk)
             text_for_channel = '<b>Заказ через сайт</b>\n'  \
                                '<b>Оплата через менеджера</b>\n\n'  \
                                f'<b>Сумма корзины {order.price} руб.</b>\n\n'  \
@@ -144,7 +145,7 @@ class CreateOrderView(CreateView):
             bill = create_bill_qiwi(order.pk)
             order.pay_url = bill
             order.save()
-            send_email_order_method_payment_qiwi(order.pk)
+            send_email_order_method_payment_qiwi.delay(order.pk)
             return render(self.request, 'product/order_qiwi_created.html', {'order': order})
 
     def get_context_data(self, *args, **kwargs):

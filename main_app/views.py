@@ -12,7 +12,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.utils.decorators import method_decorator
 from online_shop.models import OrderSiteProduct, SoldSiteProduct
-from online_shop.utils import send_email_change_status_order
+from online_shop.tasks import send_email_change_status_order
 from main_app.utils import change_item_order_utils, delete_order_utils, remove_item_order_utils
 from .forms import *
 from .models import *
@@ -213,7 +213,7 @@ class NoPaidSiteOrderView(LoginRequiredMixin, ListView):
                 item.product.save()
             order.status = 'Created'
             order.save()
-            send_email_change_status_order(order.pk)
+            send_email_change_status_order.delay(order.pk)
             messages.success(request, 'Заказ успешно обработан!')
             return redirect('admin_panel:site_no_paid_order')
 
@@ -482,7 +482,7 @@ def add_track_code_and_status_order_site(request, order_pk):
     form = PaidOrderSiteForm(request.POST, instance=instance)
     if form.is_valid():
         form.save()
-        send_email_change_status_order(instance.pk)
+        send_email_change_status_order.delay(instance.pk)
         return redirect('admin_panel:site_paid_order')
 
 
