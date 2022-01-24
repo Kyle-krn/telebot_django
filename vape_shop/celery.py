@@ -15,8 +15,8 @@ app.autodiscover_tasks()
 
 
 app.conf.beat_schedule = {
-    'test-cron' :{
-    'task': 'online_shop.tasks.test_crontab',
-    'schedule' : crontab(minute='*/1'),
-    }
+    'check_reservation_task' :{
+    'task': 'bot.tasks.check_reservation_bot',
+    'schedule' : crontab(minute='*/5'),
+    },
 }
