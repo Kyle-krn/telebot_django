@@ -1,10 +1,11 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
+{% block title %}Оплаченные заказы{% endblock %}
 {% block content %}
 
 <div class="container">
 
-  <h1 class='text-center'>{{title}}</h1>
+  <h1 class='text-center'>Оплаченные заказы</h1>
 
     <div class="accordion" id="accordionExample">
         {% for qs in queryset %}
