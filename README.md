@@ -55,29 +55,31 @@
 
 # Запуск локально
 ---
-1. Клонируйте репозиторий с github
-2. Создайте виртуальное окружение
-3. Установите зависимости `pip install -r requariements.txt`
-4. Измените название файла `vape_shop/  settings.py.example`, убрав из него `.example`
+* Клонируйте репозиторий с github
+* Создайте виртуальное окружение
+* Установите зависимости `pip install -r requariements.txt`
+* Если возникают сложности при установке пакетов в виртуальном окружении, попробуйте эти команды:
+  ```pip install -U pip``` и ```pip install --upgrade setuptools```
+* Измените название файла `vape_shop/  settings.py.example`, убрав из него `.example`
   - ```TELEGRAM_TOKEN``` - Токен от телеграм бота
   - ```TELEGRAM_GROUP_ID``` - ID канала где бот должен быть администратором, что бы отправлять данные о заказах
   - ```DADATA_TOKEN``` - https://dadata.ru/api/
   - ```QIWI_PRIVATE_KEY``` - Приватный ключ от p2p QIWI, для оплаты по ссылкам на сайте https://p2p.qiwi.com/
-  
-    Рассылка email из gmail, нужно разрешить аккаунту доступ к стороним приложениям, ищите в настройках google ```Ненадежные приложения, у которых есть доступ к аккаунту```
-      -  ```EMAIL_PASSWORD``` = пароль от почты
-      -  ```EMAIL_BACKEND``` = "django.core.mail.backends.smtp.EmailBackend"
-      -  ```EMAIL_HOST``` = "smtp.gmail.com"
-      -  ```EMAIL_USE_TLS``` = True
-      -  ```EMAIL_PORT``` = 587
-      -  ```EMAIL_HOST_USER``` = почта
-      -  ```EMAIL_HOST_PASSWORD``` = пароль от почты
-5. Установите RabbitMQ для Celery командой: ```sudo apt-get install rabbitmq-server```
-6. Убедитесь что RabbitMQ работает, выполнив команду: ```sudo rabbitmq-server```
-7. Локальный запусе использует SQLLite, так что просто примините миграции командой: ```python3 manage.py migrate```
-8. Можете запустить бота командой: ```python3 manage.py bot```
-9. Запустить сайт локально: ```python3 manage.py runserver```
-10. Запустите celery командой: ```celery -A vape_shop worker -l info```
+ 
+   Рассылка email из gmail, нужно разрешить аккаунту доступ к стороним приложениям, ищите в настройках google ```Ненадежные приложения, у которых есть доступ к аккаунту```
+     -  ```EMAIL_PASSWORD``` = пароль от почты
+     -  ```EMAIL_BACKEND``` = "django.core.mail.backends.smtp.EmailBackend"
+     -  ```EMAIL_HOST``` = "smtp.gmail.com"
+     -  ```EMAIL_USE_TLS``` = True
+     -  ```EMAIL_PORT``` = 587
+     -  ```EMAIL_HOST_USER``` = почта
+     -  ```EMAIL_HOST_PASSWORD``` = пароль от почты
+* Установите RabbitMQ для Celery командой: ```sudo apt-get install rabbitmq-server```
+* Убедитесь что RabbitMQ работает, выполнив команду: ```sudo rabbitmq-server```
+* Локальный запусе использует SQLLite, так что просто примините миграции командой: ```python3 manage.py migrate```
+* Можете запустить бота командой: ```python3 manage.py bot```
+* Запустить сайт локально: ```python3 manage.py runserver```
+* Запустите celery командой: ```celery -A vape_shop worker -l info```
 
 # Запуск на сервере
 ---
