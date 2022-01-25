@@ -79,7 +79,9 @@ def change_cart_handlers(call):
 def del_product_in_cart_handlers(call):
     '''Удалить определенный товар'''
     product_slug = call.data.split('~')[1]
-    cart_product = TelegramProductCartCounter.objects.get(Q(user__chat_id=call.message.chat.id) & Q(counter=False) & Q(product__pk_for_telegram=product_slug))
+    product_id = int(product_slug.split('||')[1])
+    product = Product.objects.get(pk=product_id)
+    cart_product = TelegramProductCartCounter.objects.get(Q(user__chat_id=call.message.chat.id) & Q(counter=False) & Q(product=product))
     if call.data.split('~')[-1] == 'yes':
         cart_product.delete()
         return change_cart_handlers(call)

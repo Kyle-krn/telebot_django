@@ -28,7 +28,7 @@ def index(request):
 class IndexView(LoginRequiredMixin, ListView):
     '''Вывод всех товаров'''
     context_object_name = 'product'
-    paginate_by = 10
+    paginate_by = 40
     template_name = 'main_app/list_product.html'
 
     def get_queryset(self):

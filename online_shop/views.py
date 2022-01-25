@@ -174,7 +174,7 @@ def validate_postal_code(request):
 @login_required
 def invoice_pdf(request, order_id):
     order = get_object_or_404(OrderSiteProduct, id=order_id)
-    if not request.user.is_superuser or order.user != request.user:
+    if order.user != request.user:
         return redirect('online_shop:product_list')
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'filename=order_{order.id}.pdf'

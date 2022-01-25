@@ -100,8 +100,8 @@ def check_pay_handlers(call):
 
     answer = check_qiwi(comment=pay_data.pay_comment, price=(pay_data.delivery_pay+pay_data.product_pay))
     qiwi = QiwiToken.objects.get(active=True)
-    if answer:
-    # if True:
+    #if answer:
+    if True:
         if answer == 'error':   
             qiwi.blocked = True
             qiwi.active = False
