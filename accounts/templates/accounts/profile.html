@@ -84,7 +84,7 @@ col-lg-7 mx-auto">
                 {% for order in request.user.orders.all %}
                 <tr>
                     <td>
-                        <a href="{% url 'online_shop:invoice_pdf', order.id %}" class="text-decoration-none">
+                        <a href="{% url 'online_shop:invoice_pdf' order.id %}" class="text-decoration-none">
                             {{ order.id }}
                         </a>
                     </td>

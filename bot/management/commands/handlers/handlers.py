@@ -139,13 +139,14 @@ def product(call):
 
     text = f'*Название -* {product.title}\n*Цена -* {product.price} руб.\n*Описание -* {product.description}\n*Остаток -* {product.count}шт.'
 
+
     if call.data.split('~')[0] == 'search_p':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_photo(chat_id=call.message.chat.id, photo=photo, caption=text, reply_markup=keyboard, parse_mode='markdown')
         
     bot.edit_message_media(chat_id=call.message.chat.id, 
                            media=types.InputMediaPhoto(media=photo, 
-                                                       caption=text, parse_mode='markdown'),   
+                                                       caption=text, parse_mode='markdown'),
                            message_id=call.message.message_id, 
                            reply_markup=keyboard)
     

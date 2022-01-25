@@ -153,7 +153,7 @@ class ReceptionProduct(models.Model):
 
 class TelegramUser(models.Model):
     '''Модель юзеров из телеграма'''
-    chat_id = models.IntegerField(unique=True, help_text='Id пользователя телеграм')
+    chat_id = models.BigIntegerField(unique=True, help_text='Id пользователя телеграм')
     first_name = models.CharField(max_length=255, blank=True, null=True, help_text='Имя')
     last_name = models.CharField(max_length=255, blank=True, null=True, help_text='Фамилия')
     username = models.CharField(max_length=255, blank=True, null=True, help_text='Юзернейм')
