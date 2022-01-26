@@ -17,9 +17,8 @@
       - ```ALTER ROLE <ИМЯ ПОЛЬЗОВАТЕЛЯ> SET client_encoding TO 'utf8';``` - Настраиваем кодировки
       - ```ALTER ROLE <ИМЯ ПОЛЬЗОВАТЕЛЯ> SET default_transaction_isolation TO 'read committed';``` - Устанавливаем уровень изоляции
       - ```ALTER ROLE vape_site SET timezone TO 'UTC';``` - Устанавливаем часовой пояс
-      - ```\q``` - Выходим оболчки Postgres
+      - ```\q``` - Выходим из оболчки Postgres
 9. Примините миграции: ```python3 manage.py migrate```
-10 . Создайте папки ```media``` и ```logs``` в корне проекта
 11. Создайте суперпользователя командой ```python3 manage.py createsuperuser```
 12. Если вы все сделали правильно, вы уже можете попробовать запустить сервер командой ```gunicorn vape_shop.wsgi:application --bind <IP Сервера>:8000```,
 он должен быть доступен по адресу http://<IP ВАШЕГО СЕРВЕРА>:8000
