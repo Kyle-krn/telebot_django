@@ -20,8 +20,6 @@ from .models import *
 from .forms import *
 
 
-
-
 class CreateOrderView(UserPassesTestMixin, View):
     '''Представление создания заказа'''
     template_name = 'seller_site/create_order.html'
