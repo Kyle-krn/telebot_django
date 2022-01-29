@@ -93,7 +93,7 @@
 ---
 https://cloudrinku.me - Сайт
 
-https://t.me/testshopbotroitbot - Бот
+https://t.me/vape_shop_django_bot - Бот
 
 
 
