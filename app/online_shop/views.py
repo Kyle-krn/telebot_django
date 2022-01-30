@@ -6,7 +6,6 @@ from django.template.loader import render_to_string
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
-import weasyprint
 from cart.forms import CartAddProductForm
 from cart.views import cart_clean, get_cart
 from main_app.utils import check_price_delivery
@@ -171,15 +170,15 @@ def validate_postal_code(request):
     return response
 
 
-@login_required
-def invoice_pdf(request, order_id):
-    order = get_object_or_404(OrderSiteProduct, id=order_id)
-    if order.user != request.user:
-        return redirect('online_shop:product_list')
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'filename=order_{order.id}.pdf'
-    # generate pdf
-    html = render_to_string('pdf.html', {'order': order})
-    stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
-    weasyprint.HTML(string=html).write_pdf(response, stylesheets=stylesheets)
-    return response
+# @login_required
+# def invoice_pdf(request, order_id):
+#     order = get_object_or_404(OrderSiteProduct, id=order_id)
+#     if order.user != request.user:
+#         return redirect('online_shop:product_list')
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = f'filename=order_{order.id}.pdf'
+#     # generate pdf
+#     html = render_to_string('pdf.html', {'order': order})
+#     stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
+#     weasyprint.HTML(string=html).write_pdf(response, stylesheets=stylesheets)
+#     return response

@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  web:
+    # Берем Dockerfile из каталога app
+    build: ./app
+    # Запускаем тестовый сервер
+    command: sh -c "gunicorn vape_shop.wsgi:application --bind 0.0.0.0:8000"
+    # куда будут помещены данные из каталога app
+    # volumes:
+    #   - ./app/:/home/kyle
+    volumes:
+     - static_volume:/home/kyle/staticfiles
+     - media:/home/kyle/media
+    # Открываем порт 8000 внутри и снаружи
+    expose:
+      - 8000
+    # Файл содержащий переменные для контейнера 
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    volumes:
+     - static_volume:/home/kyle/staticfiles
+     - media:/home/kyle/media
+    depends_on:
+      - web
+  celery:
+    build: ./app
+    command: celery -A vape_shop worker -l INFO
+    volumes:
+      - ./app/:/home/kyle
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - web
+      - rabbit
+  celery_beat:
+    build: ./app
+    command: celery -A vape_shop beat -l INFO
+    volumes:
+      - ./app/:/home/kyle
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - web
+      - rabbit
+      - celery
+      - nginx
+  rabbit:
+    restart: always
+    image: "rabbitmq:3-management"
+    environment:
+      RABBITMQ_NODENAME: "rabbit@localhost"
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+  db:
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=vape_site
+      - POSTGRES_PASSWORD=SheDriveMeCrazy280
+      - POSTGRES_DB=vape_shop
+volumes:
+  postgres_data:
+  static_volume:
+  media:

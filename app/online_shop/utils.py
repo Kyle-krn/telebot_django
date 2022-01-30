@@ -1,11 +1,6 @@
 import requests
 import json
 from datetime import datetime, timedelta
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from io import BytesIO
-import weasyprint
 from django.conf import settings
 from .models import OrderSiteProduct
 

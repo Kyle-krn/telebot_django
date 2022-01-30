@@ -3,16 +3,19 @@ from django.db.models import Q
 from main_app.models import *
 from bot.management.commands.keyboards import *
 from vape_shop.settings import TELEGRAM_TOKEN
+from django.db.utils import ProgrammingError
 
 test_photo = 'https://inlnk.ru/mexGV'
 cat_photo = 'https://i.ytimg.com/vi/2QvOxa_7wEw/maxresdefault.jpg'
 subcat_photo = 'https://i.ytimg.com/vi/jaRANdL5qrE/maxresdefault.jpg'
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-category_list = [x.pk_for_telegram for x in Category.objects.all()]
-subcategory_list = [x.pk_for_telegram for x in SubCategory.objects.all()]
-product_list = [x.pk_for_telegram for x in Product.objects.all()]
-
+try:
+    category_list = [x.pk_for_telegram for x in Category.objects.all()]
+    subcategory_list = [x.pk_for_telegram for x in SubCategory.objects.all()]
+    product_list = [x.pk_for_telegram for x in Product.objects.all()]
+except Exception as e:
+    pass
 
 
 def update_lists():
