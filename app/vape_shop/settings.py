@@ -120,6 +120,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 STATICFILES_FINDERS = (
@@ -143,6 +146,10 @@ LOGIN_REDIRECT_URL = 'online_shop:product_list'
 LOGOUT_REDIRECT_URL = 'online_shop:product_list'
 
 # /// messages 
+
+
+
+
 MESSAGE_TAGS = {
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
@@ -151,24 +158,12 @@ MESSAGE_TAGS = {
 
 
 
-TELEGRAM_TOKEN = 
-TELEGRAM_GROUP_ID = 
-DADATA_TOKEN = 
-
-QIWI_PRIVATE_KEY = 
-
-EMAIL_PASSWORD = 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 
-EMAIL_HOST_PASSWORD = 
-
 CART_ID = 'cart'
 
+CELERY_BROKER_URL = 'amqp://rabbitmq:rabbitmq@rabbit:5672'
+CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
 
-try:
-    from .local_settings import *
-except ImportError:
-    from .prod_settings import *
+
+from .prod_settings import *

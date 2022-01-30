@@ -1,6 +1,5 @@
 venv/
 app/static/
-app/vape_shop/settings.py
 app/vape_shop/prod_settings.py
 app/media/**/
 **/__pycache__/
@@ -9,4 +8,3 @@ env/
 /.env.dev
 /.env.prod
 /.env.prod.db
-

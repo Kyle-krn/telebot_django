@@ -1,24 +1,35 @@
-import os
-from pathlib import Path
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-SECRET_KEY = Секретный ключ от продакшн приложения
-BASE_DIR = Path(__file__).resolve().parent.parent
- 
-DEBUG = False
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ["Ваш ip или домен"]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': имя базы данных,
-        'USER': пользователь от postgres,
-        'PASSWORD': пароль пользователя,
-        'HOST': '127.0.0.1',
-        'PORT': 5432,
-
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
-} 
+}
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+EMAIL_PASSWORD = 'пароль от почты'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "почта"
+EMAIL_HOST_PASSWORD = "пароль от почты"
+
+TELEGRAM_TOKEN = 'токен телеграм бота'
+TELEGRAM_GROUP_ID = 'id телеграм канала для оповещения'
+DADATA_TOKEN = 'dadata токен'
+
+QIWI_PRIVATE_KEY = 'p2p qiwi ключ приватный'
+QIWI_PUBLIC_KEY = 'p2p qiwi ключ публичный'
+
+
 
