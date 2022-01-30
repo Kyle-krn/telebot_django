@@ -1,0 +1,35 @@
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+DEBUG = int(os.environ.get("DEBUG", default=0))
+
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+
+
+DATABASES = {
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
+    }
+}
+
+EMAIL_PASSWORD = 'пароль от почты'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "почта"
+EMAIL_HOST_PASSWORD = "пароль от почты"
+
+TELEGRAM_TOKEN = 'токен телеграм бота'
+TELEGRAM_GROUP_ID = 'id телеграм канала для оповещения'
+DADATA_TOKEN = 'dadata токен'
+
+QIWI_PRIVATE_KEY = 'p2p qiwi ключ приватный'
+QIWI_PUBLIC_KEY = 'p2p qiwi ключ публичный'
+
+
+

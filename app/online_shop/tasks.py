@@ -1,11 +1,11 @@
-import weasyprint
-from io import BytesIO
+# import weasyprint
+# from io import BytesIO
 from celery import task
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, EmailMessage
 from django.db.models import Q
 from django.conf import settings
-from bot.management.commands.handlers.handlers import bot
+# from bot.management.commands.handlers.handlers import bot
 from .models import OrderSiteProduct
 from .utils import check_bill_api_qiwi
 
@@ -44,20 +44,20 @@ def send_email_change_status_order(order_id):
               f'Статус вашего заказа сменился на {order.get_status_display()}. \n'
     if order.track_code:
         message +=  f'Track code is {order.track_code}.'
-    if order.status == 'Created':
-        email = EmailMessage(
-		subject,
-		message,
-		'santa.mail.little.helper@gmail.com',
-		[order.email])
-        html = render_to_string('pdf.html', {'order': order})
-        out = BytesIO()
-        stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
-        weasyprint.HTML(string=html).write_pdf(out,stylesheets=stylesheets)
-        email.attach(f'order_{order.id}.pdf',
-			out.getvalue(),
-			'application/pdf')
-        email.send()
+    # if order.status == 'Created':
+    #     email = EmailMessage(
+	# 	subject,
+	# 	message,
+	# 	'santa.mail.little.helper@gmail.com',
+	# 	[order.email])
+    #     html = render_to_string('pdf.html', {'order': order})
+    #     out = BytesIO()
+    #     stylesheets = [weasyprint.CSS(settings.STATIC_ROOT + '/css/pdf.css')]
+    #     weasyprint.HTML(string=html).write_pdf(out,stylesheets=stylesheets)
+    #     email.attach(f'order_{order.id}.pdf',
+	# 		out.getvalue(),
+	# 		'application/pdf')
+    #     email.send()
     else:
         mail_sent = send_mail(subject, message, settings.EMAIL_HOST_USER, [order.email])
         return mail_sent
@@ -91,7 +91,7 @@ def check_site_qiwi_payment():
             for item in order.soldproduct.all():
                 text_for_channel += f'<b><u>{item.product.title}</u></b> - {item.count} шт.\n'
             text_for_channel += f'\n<b>Номер телефона покупателя - {order.telephone}</b>'
-            bot.send_message(chat_id=settings.TELEGRAM_GROUP_ID, text=text_for_channel, parse_mode='HTML')
+            # bot.send_message(chat_id=settings.TELEGRAM_GROUP_ID, text=text_for_channel, parse_mode='HTML')
 
         elif res['status']['value'] == 'EXPIRED' or res['status']['value'] == 'REJECTED':
             send_email_delete_order.delay(order.id)

@@ -1,0 +1,11 @@
+Django==3.2.8
+django-debug-toolbar==3.2.2
+dadata==20.7.0
+celery==4.4.7
+gunicorn==20.1.0
+pytz==2021.3
+pytils==0.3
+requests==2.27.1
+pillow==9.0.0
+pytelegrambotapi==4.3.1
+psycopg2-binary==2.9.3
