@@ -87,7 +87,15 @@
 # Запуск на сервере
 ---
 Смотрите полное руководство по деплою проекта на сервер в файле ```DEPLOY_README.md```
-    
+ 
+# Запуск через Docker
+---
+В Докере настроен: Django + Postgres + Celery + RabbitMQ + Nginx/gunicorn
+
+Запустите контейнер командой: ```docker-compose up --build -d```
+
+Проверьте приложение командой: ```docker-compose logs -f```
+
 
 # Примеры
 ---
