@@ -5,7 +5,7 @@ import telebot
 
 
 class Command(BaseCommand):
-    help = 'Чистит базу'
+    help = 'Запускает бота по команде python manage.py bot'
 
     def handle(self, *args, **kwargs):
         logger = telebot.logger
